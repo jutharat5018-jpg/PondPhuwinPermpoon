@@ -71,6 +71,9 @@
     .detail-hero { height: 200px; }
     .cards-grid { grid-template-columns: 1fr !important; }
   }
+  @media (min-width: 641px) and (max-width: 900px) {
+    .cards-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
     #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
@@ -901,7 +904,7 @@ function renderHome() {
     const hdr = document.createElement('div'); hdr.className='month-group-header';
     hdr.innerHTML=`<span class="month-group-header-label">${label}</span><span class="month-group-header-count">${me.length} event${me.length!==1?'s':''}</span><span class="month-group-header-line"></span>`;
     gw.appendChild(hdr);
-    const cg = document.createElement('div'); cg.className='cards-grid'; cg.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;';
+    const cg = document.createElement('div'); cg.className='cards-grid'; cg.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;';
     me.forEach(ev => cg.appendChild(createCard(ev)));
     gw.appendChild(cg); grid.appendChild(gw);
   });
