@@ -39,6 +39,7 @@
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
   .modal-box { background: #fff; border-radius: 20px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); margin: auto; }
+  .modal-box-inner-pad { padding: 1.5rem; }
   .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.7rem 0.95rem; font-size: 1rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
   .form-input:focus { border-color: #111; }
   .form-label { font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 0.3rem; display: block; }
@@ -68,6 +69,7 @@
     .cal-event-dot { font-size: 0.68rem; padding: 2px 4px; }
     .cal-day { height: 80px; padding: 4px; }
     .detail-hero { height: 200px; }
+    .cards-grid { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
@@ -312,7 +314,8 @@
       <i data-lucide="x" style="width:16px;height:16px;color:#fff;stroke-width:2.5;"></i>
      </button>
     </div>
-    <div style="padding:1.5rem;">
+    <div style="padding:1.5rem 0 1.5rem 0;">
+     <div style="padding:0 1.5rem;">
      <div id="detail-artist-badge" style="margin-bottom:0.75rem;"></div>
      <h2 id="detail-title" style="font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;"></h2>
      <div id="detail-meta" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;"></div>
@@ -320,12 +323,13 @@
       <p style="font-size:0.78rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;margin-bottom:0.4rem;">DESCRIPTION</p>
       <p id="detail-desc" style="font-size:0.88rem;line-height:1.6;color:#374151;"></p>
      </div>
+     </div>
      <!-- MAP EMBED -->
      <div id="detail-map-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.78rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;margin-bottom:0.75rem;">MAP</p>
+      <p style="font-size:0.78rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;margin-bottom:0.75rem;padding:0 1.5rem;">MAP</p>
       <div id="detail-map" class="map-embed-wrap"></div>
      </div>
-     <div id="detail-links-wrap" style="display:none;">
+     <div id="detail-links-wrap" style="display:none;padding:0 1.5rem;">
       <p style="font-size:0.78rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;margin-bottom:0.75rem;">LINKS</p>
       <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
      </div>
@@ -897,7 +901,7 @@ function renderHome() {
     const hdr = document.createElement('div'); hdr.className='month-group-header';
     hdr.innerHTML=`<span class="month-group-header-label">${label}</span><span class="month-group-header-count">${me.length} event${me.length!==1?'s':''}</span><span class="month-group-header-line"></span>`;
     gw.appendChild(hdr);
-    const cg = document.createElement('div'); cg.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;';
+    const cg = document.createElement('div'); cg.className='cards-grid'; cg.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;';
     me.forEach(ev => cg.appendChild(createCard(ev)));
     gw.appendChild(cg); grid.appendChild(gw);
   });
