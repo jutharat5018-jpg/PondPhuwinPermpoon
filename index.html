@@ -936,6 +936,11 @@ function navigate(page) {
   if (navEl) navEl.classList.add('active');
   renderCurrentPage();
   if (typeof lucide !== 'undefined') lucide.createIcons();
+  if (page === 'map') {
+    [50, 200, 500, 1000].forEach(ms => {
+      setTimeout(() => { if (leafletMap) { leafletMap.invalidateSize(true); } }, ms);
+    });
+  }
 }
 
 function renderCurrentPage() {
@@ -1115,10 +1120,16 @@ function getFilteredMapEvents() {
 }
 
 async function renderMapPage() {
+  // Wait for container to be visible before init
+  await new Promise(r => setTimeout(r, 80));
   // Init Leaflet map once
   if (!leafletMap) {
     const container = document.getElementById('map-container');
     if (!container) return;
+    // Ensure container has actual dimensions
+    if (container.offsetWidth === 0) {
+      await new Promise(r => setTimeout(r, 200));
+    }
     leafletMap = L.map('map-container', { zoomControl: true, attributionControl: true }).setView([20, 100], 4);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
