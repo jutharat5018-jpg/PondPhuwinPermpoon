@@ -33,7 +33,7 @@
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   .cal-day { min-height: 0; height: auto; border: 1px solid #f0f0f0; padding: 6px 6px 20px; background: #fff; transition: background 0.15s; }
   .cal-day:hover { background: #f9f9f9; }
-.cal-event-dot { font-size: 0.75rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.4; }
+.cal-event-dot { font-size: 0.72rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.4; max-width: 100%; display: block; min-width: 0; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
   .modal-box { background: #fff; border-radius: 20px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); margin: auto; }
   .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.7rem 0.95rem; font-size: 1rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
@@ -60,7 +60,7 @@
   .detail-hero { width: 100%; height: 280px; object-fit: cover; background: #f3f4f6; }
   .link-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.82rem; font-weight: 600; color: #374151; text-decoration: none; transition: all 0.15s; }
   .link-btn:hover { background: #f9f9f9; border-color: #d1d5db; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; }
+ .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
   footer { background: #fff; border-top: 1px solid #f0f0f0; margin-top: auto; flex-shrink: 0; }
   @media (max-width: 640px) {
