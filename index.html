@@ -32,7 +32,6 @@
   .card-img-placeholder { width: 100%; height: 220px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
   .card-img { width: 100%; height: 220px; object-fit: cover; display: block; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
-  /* ── CALENDAR ── */
   .cal-day { min-height: 130px; border: 1px solid #f0f0f0; padding: 6px; background: #fff; transition: background 0.15s; box-sizing: border-box; }
   .cal-day:hover { background: #f9f9f9; }
   .cal-event-dot { font-size: 0.88rem; font-weight: 600; padding: 3px 8px; border-radius: 5px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.5; max-width: 100%; display: block; min-width: 0; }
@@ -88,9 +87,55 @@
   .month-group-header-label { font-size: 1.15rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
   .month-group-header-line { flex: 1; height: 1px; background: #e5e7eb; }
   .month-group-header-count { font-size: 0.75rem; font-weight: 600; color: #9ca3af; background: #f3f4f6; border-radius: 99px; padding: 2px 8px; }
-  /* Map embed */
   .map-embed-wrap { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
+
+  /* ── MAP PAGE ── */
+  #map-container { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1); position: relative; background: #dbeafe; }
+  #map-svg-wrap { width:100%; position:relative; display:block; }
+  #map-svg-wrap svg { width:100%; height:auto; display:block; }
+  .map-pin { cursor:pointer; transition: transform 0.15s; transform-origin: center; }
+  .map-pin:hover { transform: scale(1.5); }
+  .map-pin circle { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+  .map-tooltip { position:absolute; background:#fff; border-radius:10px; padding:8px 12px; font-size:0.78rem; box-shadow:0 4px 20px rgba(0,0,0,0.15); pointer-events:none; z-index:10; min-width:160px; transform:translate(-50%,-110%); white-space:nowrap; border:1px solid #f0f0f0; }
+  .map-tooltip-title { font-weight:700; color:#111; margin-bottom:2px; }
+  .map-tooltip-meta { color:#6b7280; font-size:0.72rem; }
+  .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important; border: none !important; }
+  .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
+  .leaflet-popup-tip-container { display: none; }
+  .map-popup { padding: 14px 16px; min-width: 220px; max-width: 280px; }
+  .map-popup-artist { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .map-popup-title { font-size: 0.95rem; font-weight: 700; color: #111; margin-bottom: 6px; line-height: 1.3; }
+  .map-popup-meta { font-size: 0.78rem; color: #6b7280; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+  .map-popup-btn { display: block; width: 100%; margin-top: 10px; background: #111; color: #fff; border: none; border-radius: 8px; padding: 7px 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.15s; }
+  .map-popup-btn:hover { background: #333; }
+  .map-filter-btn { padding: 5px 14px; border-radius: 99px; border: 1.5px solid #e5e7eb; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; background: #fff; }
+  .map-filter-btn.active { background: #111; color: #fff; border-color: #111; }
+  .map-stat-card { background: #fff; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
+  .map-stat-num { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; }
+  .map-stat-label { font-size: 0.72rem; font-weight: 600; color: #9ca3af; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+  .timeline-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .timeline-date { font-size: 0.72rem; font-weight: 700; color: #9ca3af; letter-spacing: 0.06em; text-transform: uppercase; }
+  .timeline-name { font-size: 0.88rem; font-weight: 700; color: #111; }
+  .timeline-loc { font-size: 0.75rem; color: #6b7280; margin-top: 1px; }
+  .geo-loading { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #6b7280; padding: 8px 0; }
+  .geo-progress { height: 4px; background: #f0f0f0; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .geo-progress-bar { height: 100%; background: #111; border-radius: 99px; transition: width 0.3s; }
+  /* MarkerCluster custom style */
+  .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-clip: padding-box; border-radius: 20px; }
+  .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font-size: 12px; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; }
+  .marker-cluster-small { background-color: rgba(17,17,17,0.15); width: 40px; height: 40px; }
+  .marker-cluster-small div { background-color: rgba(17,17,17,0.7); }
+  .marker-cluster-medium { background-color: rgba(168,85,247,0.2); width: 40px; height: 40px; }
+  .marker-cluster-medium div { background-color: rgba(168,85,247,0.8); }
+  .marker-cluster-large { background-color: rgba(236,72,153,0.2); width: 40px; height: 40px; }
+  .marker-cluster-large div { background-color: rgba(236,72,153,0.85); }
+  @media (max-width: 768px) {
+    #map-container { height: 360px; }
+    .map-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
   </style>
  </head>
  <body>
@@ -106,6 +151,7 @@
      <div style="display:flex;align-items:center;gap:4px;" id="nav-links">
       <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Home</span>
       <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Calendar</span>
+      <span class="nav-link" data-page="map" onclick="navigate('map')"><i data-lucide="map-pin" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Map</span>
       <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Admin</span>
      </div>
     </div>
@@ -163,7 +209,6 @@
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block;"></span>PondPermpoon</span>
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>PhuwinPermpoon</span>
      </div>
-     <!-- Calendar header row -->
      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));width:100%;">
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">SUN</div>
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">MON</div>
@@ -174,6 +219,134 @@
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">SAT</div>
      </div>
      <div id="cal-grid" class="cal-grid"></div>
+    </div>
+   </div>
+
+   <!-- ══════════════════════════════════════
+        MAP PAGE
+   ══════════════════════════════════════ -->
+   <div class="page" id="page-map" style="overflow-y:auto;">
+    <div style="max-width:1100px;margin:auto;padding:2rem 1rem;width:100%;">
+
+     <!-- Header -->
+     <div style="margin-bottom:1.5rem;">
+      <p style="font-size:0.78rem;font-weight:600;color:#a855f7;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.4rem;">Event Locations</p>
+      <h2 class="section-header">World Map</h2>
+      <p style="font-size:0.82rem;color:#9ca3af;margin-top:4px;">ปักหมุดทุกงานที่ผ่านมาและที่กำลังจะมาถึง — ดึงพิกัดจาก Google Maps embed หรือ city/country · คลิกหมุดเพื่อดูรายละเอียด</p>
+     </div>
+
+     <!-- Stats row -->
+     <div class="map-stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;" id="map-stats"></div>
+
+     <!-- Filters -->
+     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">
+      <span style="font-size:0.75rem;font-weight:600;color:#9ca3af;">ARTIST</span>
+      <button class="map-filter-btn active" data-mf-artist="all" onclick="setMapFilter('artist','all')">All</button>
+      <button class="map-filter-btn" data-mf-artist="Pond" onclick="setMapFilter('artist','Pond')" style="color:#f97316;border-color:#f97316;">Pond</button>
+      <button class="map-filter-btn" data-mf-artist="Phuwin" onclick="setMapFilter('artist','Phuwin')" style="color:#6b7280;border-color:#6b7280;">Phuwin</button>
+      <button class="map-filter-btn" data-mf-artist="Permpoon" onclick="setMapFilter('artist','Permpoon')" style="color:#22c55e;border-color:#22c55e;">Permpoon</button>
+      <button class="map-filter-btn" data-mf-artist="Pond,Phuwin" onclick="setMapFilter('artist','Pond,Phuwin')" style="color:#a855f7;border-color:#a855f7;">Pond·Phuwin</button>
+      <button class="map-filter-btn" data-mf-artist="Pond,Permpoon" onclick="setMapFilter('artist','Pond,Permpoon')" style="color:#3b82f6;border-color:#3b82f6;">Pond·Permpoon</button>
+      <button class="map-filter-btn" data-mf-artist="Phuwin,Permpoon" onclick="setMapFilter('artist','Phuwin,Permpoon')" style="color:#ef4444;border-color:#ef4444;">Phuwin·Permpoon</button>
+      <button class="map-filter-btn" data-mf-artist="Pond,Phuwin,Permpoon" onclick="setMapFilter('artist','Pond,Phuwin,Permpoon')" style="color:#ec4899;border-color:#ec4899;">All Three</button>
+      <span style="font-size:0.75rem;font-weight:600;color:#9ca3af;margin-left:8px;">TIME</span>
+      <button class="map-filter-btn active" data-mf-time="all" onclick="setMapFilter('time','all')">All</button>
+      <button class="map-filter-btn" data-mf-time="upcoming" onclick="setMapFilter('time','upcoming')">Upcoming</button>
+      <button class="map-filter-btn" data-mf-time="past" onclick="setMapFilter('time','past')">Past</button>
+     </div>
+
+     <!-- Geocoding progress -->
+     <div id="geo-status" style="display:none;margin-bottom:0.75rem;">
+      <div class="geo-loading">
+       <span class="spinner" style="border-top-color:#111;"></span>
+       <span id="geo-status-text">กำลังโหลดพิกัด...</span>
+      </div>
+      <div class="geo-progress"><div class="geo-progress-bar" id="geo-progress-bar" style="width:0%"></div></div>
+     </div>
+     <div id="geo-no-location" style="display:none;background:#fef9c3;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#854d0e;margin-bottom:0.75rem;">
+      <i data-lucide="alert-triangle" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:4px;"></i>
+      บางอีเวนท์ไม่มีข้อมูล city/country หรือ Google Maps embed จึงไม่แสดงบนแผนที่
+     </div>
+
+     <!-- Map -->
+     <div id="map-container">
+      <div id="map-svg-wrap">
+       <svg id="world-map-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="background:#bfdbfe;">
+        <!-- Simplified world map paths -->
+        <!-- North America -->
+        <path d="M 80 60 L 200 55 L 230 80 L 220 130 L 200 160 L 170 180 L 150 200 L 130 230 L 110 260 L 90 280 L 75 270 L 60 240 L 55 200 L 60 160 L 70 120 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Greenland -->
+        <path d="M 200 20 L 250 15 L 270 30 L 260 55 L 240 60 L 210 55 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Central America -->
+        <path d="M 130 230 L 160 240 L 155 270 L 140 280 L 125 260 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- South America -->
+        <path d="M 140 280 L 200 270 L 230 290 L 240 330 L 235 380 L 220 420 L 200 445 L 175 450 L 155 430 L 140 400 L 130 360 L 120 320 L 125 295 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Europe -->
+        <path d="M 440 55 L 490 50 L 510 60 L 500 80 L 490 100 L 470 110 L 450 105 L 440 90 L 435 70 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Scandinavia -->
+        <path d="M 460 30 L 490 25 L 500 40 L 490 55 L 470 60 L 455 50 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Africa -->
+        <path d="M 440 130 L 510 120 L 530 140 L 540 180 L 545 230 L 540 290 L 520 340 L 490 370 L 465 365 L 445 340 L 430 300 L 425 260 L 420 210 L 425 170 L 435 145 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Middle East -->
+        <path d="M 510 110 L 555 105 L 570 120 L 565 150 L 545 160 L 520 155 L 510 140 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Russia/Central Asia -->
+        <path d="M 510 40 L 700 30 L 760 50 L 770 80 L 740 100 L 680 110 L 620 105 L 570 100 L 540 90 L 520 75 L 510 60 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- South Asia -->
+        <path d="M 570 120 L 640 115 L 660 130 L 650 170 L 620 190 L 590 185 L 575 165 L 565 145 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Southeast Asia / Thailand area -->
+        <path d="M 660 140 L 720 135 L 740 155 L 730 180 L 710 195 L 685 200 L 668 185 L 658 165 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- China/East Asia -->
+        <path d="M 680 80 L 760 75 L 800 90 L 810 120 L 790 150 L 760 160 L 730 155 L 700 145 L 675 130 L 665 110 L 668 90 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Japan -->
+        <path d="M 810 90 L 830 85 L 840 100 L 835 120 L 820 125 L 810 110 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Korea -->
+        <path d="M 790 95 L 810 90 L 812 110 L 798 115 L 788 108 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Indonesia/Malaysia -->
+        <path d="M 690 210 L 760 205 L 790 215 L 800 230 L 780 240 L 740 238 L 700 235 L 688 225 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Australia -->
+        <path d="M 740 280 L 840 270 L 880 290 L 890 330 L 870 375 L 840 390 L 800 385 L 765 365 L 740 340 L 730 310 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- New Zealand -->
+        <path d="M 900 360 L 915 355 L 920 375 L 910 385 L 900 378 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- UK/Ireland -->
+        <path d="M 430 60 L 445 55 L 448 70 L 440 80 L 430 75 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Philippines -->
+        <path d="M 775 165 L 790 160 L 795 178 L 785 188 L 773 182 Z" fill="#a3c4a3" stroke="#fff" stroke-width="0.8"/>
+        <!-- Pins layer -->
+        <g id="map-pins-layer"></g>
+       </svg>
+       <div id="map-tooltip" class="map-tooltip" style="display:none;"></div>
+      </div>
+     </div>
+
+     <!-- Two columns: Timeline + Country stats -->
+     <div style="display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start;margin-top:1.5rem;" id="map-bottom-grid">
+
+      <!-- Timeline -->
+      <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #f0f0f0;">
+       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 style="font-weight:700;font-size:1rem;">
+         <i data-lucide="clock" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;"></i>
+         Event Timeline
+        </h3>
+        <div style="display:flex;gap:6px;">
+         <button class="map-filter-btn active" id="tl-btn-all" onclick="setTimelineFilter('all')" style="font-size:0.7rem;padding:3px 10px;">All</button>
+         <button class="map-filter-btn" id="tl-btn-upcoming" onclick="setTimelineFilter('upcoming')" style="font-size:0.7rem;padding:3px 10px;">Upcoming</button>
+         <button class="map-filter-btn" id="tl-btn-past" onclick="setTimelineFilter('past')" style="font-size:0.7rem;padding:3px 10px;">Past</button>
+        </div>
+       </div>
+       <div id="map-timeline" style="max-height:400px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- Country stats -->
+      <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #f0f0f0;">
+       <h3 style="font-weight:700;font-size:1rem;margin-bottom:1rem;">
+        <i data-lucide="globe" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;"></i>
+        By Country
+       </h3>
+       <div id="map-country-stats"></div>
+      </div>
+
+     </div>
     </div>
    </div>
 
@@ -413,7 +586,6 @@
         <label class="form-label" for="f-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="f-note" placeholder="e.g. live on YouTube, time not confirmed">
        </div>
-       <!-- MAP EMBED FIELD -->
        <div style="grid-column:1/-1;">
         <label class="form-label" for="f-map">
          <svg width="13" height="13" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:3px;" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -520,360 +692,282 @@ const ADMIN_PASS = 'ppp1257pondphuwinpp';
 const API_URL = 'https://script.google.com/macros/s/AKfycbzc5_sUbh_KX7VndMpR2E9TFX-YW1c-XEPie1e5lunCcUeKjxEmjMl3FLCp1DKT9LuY/exec';
 let apiLoaded = false;
 
-function getLiveIcon(url) {
-  if (!url) return null;
-  const u = url.toLowerCase();
-  if (u.includes('youtube.com') || u.includes('youtu.be')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
-  if (u.includes('facebook.com') || u.includes('fb.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="white" d="M16.671 15.469l.525-3.424h-3.284v-2.22c0-.937.459-1.849 1.932-1.849h1.495V5.023S15.918 4.8 14.6 4.8c-2.703 0-4.471 1.638-4.471 4.603v2.641H7.227v3.424h2.902V23.9a12.1 12.1 0 003.783 0v-8.431h2.759z"/></svg>`;
-  if (u.includes('tiktok.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M17.59 8.69a4.83 4.83 0 01-3.77-4.25V4h-3.45v11.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05A6.34 6.34 0 001.15 15.3a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V10.7a8.18 8.18 0 004.78 1.52V8.76a4.85 4.85 0 01-1.01-.07z"/></svg>`;
-  if (u.includes('instagram.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><defs><radialGradient id="ig-live-g" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect width="24" height="24" rx="6" fill="url(#ig-live-g)"/><path fill="white" d="M12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 7.4a2.9 2.9 0 110-5.8 2.9 2.9 0 010 5.8zm4.68-7.57a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1z"/></svg>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="11" fill="#EF4444"/><circle cx="12" cy="12" r="4" fill="white"/></svg>`;
+// ══════════════════════════════════════
+// MAP STATE (SVG-based, no external tiles)
+// ══════════════════════════════════════
+let mapFilterArtist = 'all';
+let mapFilterTime = 'all';
+let timelineFilter = 'all';
+const geoCache = {};
+
+// Known city→coordinates lookup (lat/lng → SVG x/y via equirectangular)
+const KNOWN_COORDS = {
+  'bangkok': [13.75, 100.52],
+  'thailand': [15.0, 101.0],
+  'tokyo': [35.68, 139.69],
+  'japan': [36.2, 138.25],
+  'seoul': [37.57, 126.98],
+  'korea': [36.5, 127.5],
+  'singapore': [1.35, 103.82],
+  'manila': [14.6, 120.98],
+  'philippines': [13.0, 122.0],
+  'jakarta': [-6.2, 106.82],
+  'indonesia': [-5.0, 120.0],
+  'kuala lumpur': [3.14, 101.69],
+  'malaysia': [4.2, 108.0],
+  'hong kong': [22.32, 114.17],
+  'taipei': [25.05, 121.56],
+  'taiwan': [23.7, 121.0],
+  'beijing': [39.9, 116.4],
+  'shanghai': [31.23, 121.47],
+  'china': [35.0, 104.0],
+  'london': [51.51, -0.13],
+  'uk': [54.0, -2.0],
+  'paris': [48.85, 2.35],
+  'france': [46.0, 2.0],
+  'new york': [40.71, -74.01],
+  'los angeles': [34.05, -118.24],
+  'usa': [38.0, -97.0],
+  'sydney': [-33.87, 151.21],
+  'australia': [-25.0, 134.0],
+  'dubai': [25.2, 55.27],
+  'uae': [24.0, 54.0],
+  'mumbai': [19.08, 72.88],
+  'india': [20.0, 77.0],
+};
+
+function latLngToSVG(lat, lng) {
+  // Equirectangular projection for viewBox 0 0 1000 500
+  const x = (lng + 180) / 360 * 1000;
+  const y = (90 - lat) / 180 * 500;
+  return [x, y];
 }
 
-function getLiveLabelFromUrl(url) {
-  if (!url) return 'Live Stream';
-  const u = url.toLowerCase();
-  if (u.includes('youtube.com') || u.includes('youtu.be')) return 'YouTube Live';
-  if (u.includes('facebook.com') || u.includes('fb.com')) return 'Facebook Live';
-  if (u.includes('tiktok.com')) return 'TikTok Live';
-  if (u.includes('instagram.com')) return 'Instagram Live';
-  return 'Live Stream';
-}
-
-const SPECIAL_WARN_DAYS = 7;
-
-function daysUntilDate(month, day) {
-  const now = new Date();
-  let d = new Date(now.getFullYear(), month - 1, day);
-  if (d - now < -86400000) d = new Date(now.getFullYear() + 1, month - 1, day);
-  return Math.ceil((d - now) / 86400000);
-}
-function isDateToday(month, day) {
-  const now = new Date();
-  return now.getMonth() + 1 === month && now.getDate() === day;
-}
-function getSpecialOnDate(month, day) {
-  const bdayMatches = allBirthdays.filter(b => b.birthday_month === month && b.birthday_day === day);
-  const annivMatches = allAnniversaries.filter(a => a.anniversary_month === month && a.anniversary_day === day);
-  return [
-    ...bdayMatches.map(b => ({ name: b.artist_name, month: b.birthday_month, day: b.birthday_day, color: b.color || '#6b7280', type: 'birthday', __backendId: b.__backendId })),
-    ...annivMatches.map(a => ({ label: a.anniversary_name, month: a.anniversary_month, day: a.anniversary_day, color: a.color || '#a855f7', type: 'anniversary', startYear: a.anniversary_year, __backendId: a.__backendId }))
-  ];
-}
-function getBirthdaysOnDate(month, day) { return getSpecialOnDate(month, day); }
-
-function makeBannerHtml(item, days) {
-  const isToday = days === 0 || isDateToday(item.month, item.day);
-  const isBday = item.type === 'birthday';
-  const icon = isToday ? '🎉' : (isBday ? '🎂' : '🥂');
-  const color = item.color || '#a855f7';
-  const label = isBday ? item.name + "'s Birthday" : item.label;
-  const todayMsg = isBday ? `Happy Birthday ${item.name}! 🎂` : `🥂 ${item.label} — Happy Anniversary!`;
-  const now = new Date();
-  let nextDate = new Date(now.getFullYear(), item.month - 1, item.day);
-  if (nextDate < now) nextDate = new Date(now.getFullYear() + 1, item.month - 1, item.day);
-  const dateLabel = nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-  let yearsHtml = '';
-  if (!isBday && item.startYear) {
-    const yrs = nextDate.getFullYear() - item.startYear;
-    if (yrs > 0) yearsHtml = ` <span style="font-size:0.7rem;background:${color}22;color:${color};padding:2px 7px;border-radius:99px;font-weight:700;margin-left:4px;">${yrs} yr${yrs!==1?'s':''}</span>`;
+function getCoordsForEvent(ev) {
+  const city = (ev.city || '').toLowerCase().trim();
+  const country = (ev.country || '').toLowerCase().trim();
+  if (city && KNOWN_COORDS[city]) return latLngToSVG(...KNOWN_COORDS[city]);
+  if (country && KNOWN_COORDS[country]) return latLngToSVG(...KNOWN_COORDS[country]);
+  // Try partial match
+  for (const [key, coords] of Object.entries(KNOWN_COORDS)) {
+    if (city && city.includes(key)) return latLngToSVG(...coords);
+    if (country && country.includes(key)) return latLngToSVG(...coords);
+    if (key.includes(city) && city.length > 3) return latLngToSVG(...coords);
   }
-  if (isToday) {
-    return `<div class="bday-banner bday-today" style="border-left:4px solid ${color};background:${color}15;">
-      <span class="bday-icon">${icon}</span>
-      <div><span style="font-weight:700;color:${color};">${todayMsg}</span>${yearsHtml}</div>
-    </div>`;
-  }
-  return `<div class="bday-banner" style="border-left:4px solid ${color};background:${color}0d;">
-    <span class="bday-icon">${icon}</span>
-    <div>
-      <span style="font-weight:700;color:${color};">${label}</span>${yearsHtml}
-      <span style="font-size:0.78rem;color:#6b7280;margin-left:6px;">in <strong>${days} day${days!==1?'s':''}</strong> · ${dateLabel}</span>
-    </div>
-    <div class="bday-countdown" style="background:${color};color:#fff;">${days}d</div>
-  </div>`;
+  return null;
 }
 
-function renderBirthdayBanners() {
-  const wrap = document.getElementById('bday-banners');
-  if (!wrap) return;
-  const allSpecial = [
-    ...allBirthdays.map(b => ({ name: b.artist_name, month: b.birthday_month, day: b.birthday_day, color: b.color || '#6b7280', type: 'birthday' })),
-    ...allAnniversaries.map(a => ({ label: a.anniversary_name, month: a.anniversary_month, day: a.anniversary_day, color: a.color || '#a855f7', type: 'anniversary', startYear: a.anniversary_year }))
-  ];
-  let bannerHtml = '';
-  allSpecial.forEach(item => {
-    const days = daysUntilDate(item.month, item.day);
-    const isToday = isDateToday(item.month, item.day);
-    if (isToday || days <= SPECIAL_WARN_DAYS) bannerHtml += makeBannerHtml(item, days);
+function getFilteredMapEvents() {
+  return allEvents.filter(ev => {
+    const hasLoc = ev.city || ev.country;
+    if (!hasLoc) return false;
+    if (mapFilterArtist !== 'all') {
+      const filterSet = mapFilterArtist.split(',').map(a=>a.trim()).sort().join(',');
+      const evSet = (ev.artists||'').split(',').map(a=>a.trim()).filter(Boolean).sort().join(',');
+      if (evSet !== filterSet) return false;
+    }
+    if (mapFilterTime === 'upcoming' && isEventPast(ev)) return false;
+    if (mapFilterTime === 'past' && !isEventPast(ev)) return false;
+    return true;
   });
-  wrap.innerHTML = bannerHtml;
-  wrap.style.display = bannerHtml ? 'flex' : 'none';
 }
 
-function renderAnniversaryAdmin() {
-  const list = document.getElementById('anniv-list');
-  if (!list) return;
-  const bdayListEl = document.getElementById('bday-admin-list');
-  if (bdayListEl) {
-    if (allBirthdays.length === 0) {
-      bdayListEl.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ยังไม่มีวันเกิด</p>';
-    } else {
-      const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      bdayListEl.innerHTML = allBirthdays.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
-        <span style="width:10px;height:10px;border-radius:50%;background:${b.color||'#6b7280'};flex-shrink:0;display:inline-block;"></span>
-        <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${b.artist_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[b.birthday_month-1]} ${b.birthday_day}</p></div>
-        <button onclick="deleteBirthday('${b.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">ลบ</button>
-      </div>`).join('');
-    }
-  }
-  if (allAnniversaries.length === 0) {
-    list.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ยังไม่มี Anniversary</p>';
-    return;
-  }
-  const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  list.innerHTML = allAnniversaries.map(a => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
-    <span style="width:10px;height:10px;border-radius:50%;background:${a.color||'#a855f7'};flex-shrink:0;display:inline-block;"></span>
-    <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${a.anniversary_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[a.anniversary_month-1]} ${a.anniversary_day}${a.anniversary_year?' (since '+a.anniversary_year+')':''}</p></div>
-    <button onclick="deleteAnniversary('${a.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">ลบ</button>
-  </div>`).join('');
-}
-
-async function deleteBirthday(id) {
-  try { await deleteBirthdayInSheets(id); showToast('Birthday deleted.'); await loadBirthdaysFromSheets(); }
-  catch(e) { showToast('Error: ' + (e.message||'delete failed')); }
-}
-async function deleteAnniversary(id) {
-  try { await deleteAnniversaryInSheets(id); showToast('Anniversary deleted.'); await loadAnniversariesFromSheets(); }
-  catch(e) { showToast('Error: ' + (e.message||'delete failed')); }
-}
-function openAnnivForm() { document.getElementById('anniv-form-wrap').style.display = 'block'; }
-function closeAnnivForm() {
-  document.getElementById('anniv-form-wrap').style.display = 'none';
-  ['anniv-label','anniv-month','anniv-day','anniv-year'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('anniv-color').value = '#a855f7';
-}
-async function saveAnniversary() {
-  const label = (document.getElementById('anniv-label').value||'').trim();
-  const month = parseInt(document.getElementById('anniv-month').value);
-  const day   = parseInt(document.getElementById('anniv-day').value);
-  const year  = document.getElementById('anniv-year').value.trim();
-  const color = document.getElementById('anniv-color').value||'#a855f7';
-  if (!label) { showToast('กรุณาใส่ชื่อ Anniversary'); return; }
-  if (!month||month<1||month>12) { showToast('เดือนไม่ถูกต้อง'); return; }
-  if (!day||day<1||day>31) { showToast('วันไม่ถูกต้อง'); return; }
-  try {
-    await createAnniversaryInSheets({ anniversary_name:label, anniversary_month:String(month), anniversary_day:String(day), anniversary_year:year||'', color });
-    closeAnnivForm(); showToast('Anniversary saved!'); await loadAnniversariesFromSheets();
-  } catch(e) { showToast('Error: '+(e.message||'save failed')); }
-}
-function openBdayForm() { document.getElementById('bday-form-wrap').style.display = 'block'; }
-function closeBdayForm() {
-  document.getElementById('bday-form-wrap').style.display = 'none';
-  ['bday-artist-name','bday-month','bday-day'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('bday-color').value = '#6b7280';
-}
-async function saveBirthday() {
-  const name  = (document.getElementById('bday-artist-name').value||'').trim();
-  const month = parseInt(document.getElementById('bday-month').value);
-  const day   = parseInt(document.getElementById('bday-day').value);
-  const color = document.getElementById('bday-color').value||'#6b7280';
-  if (!name) { showToast('กรุณาใส่ชื่อศิลปิน'); return; }
-  if (!month||month<1||month>12) { showToast('เดือนไม่ถูกต้อง'); return; }
-  if (!day||day<1||day>31) { showToast('วันไม่ถูกต้อง'); return; }
-  try {
-    await createBirthdayInSheets({ artist_name:name, birthday_month:String(month), birthday_day:String(day), color });
-    closeBdayForm(); showToast('Birthday saved!'); await loadBirthdaysFromSheets();
-  } catch(e) { showToast('Error: '+(e.message||'save failed')); }
-}
-
-async function apiRequest(payload) {
-  const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) });
-  if (!res.ok) throw new Error('API error '+res.status);
-  return await res.json();
-}
-
-async function loadEventsFromSheets() {
-  try {
-    const data = await apiRequest({ action:'getEvents' });
-    if (data.status === 'ok') {
-      allEvents = (data.events||[]).map(r => ({
-        __backendId: r.id||r.__backendId||'',
-        event_name: r.event_name||'', image_url: r.image_url||'',
-        artists: r.artists||'', date: r.date||'',
-        start_time: r.start_time||'', end_time: r.end_time||'',
-        location_name: r.location_name||'', city: r.city||'', country: r.country||'',
-        description: r.description||'', youtube_link: r.youtube_link||'',
-        instagram_link: r.instagram_link||'', facebook_link: r.facebook_link||'',
-        x_link: r.x_link||'', tiktok_link: r.tiktok_link||'',
-        whatsapp_link: r.whatsapp_link||'', shopee_link: r.shopee_link||'',
-        live_link: r.live_link||'', file_link: r.file_link||'',
-        event_type: r.event_type||'', note: r.note||'',
-        map_embed: r.map_embed||'',
-        date_end: r.date_end||''
-      }));
-      allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
-      apiLoaded = true;
-      renderCurrentPage();
-    }
-  } catch(e) { console.warn('Sheets API error:', e); showToast('Cannot connect to Google Sheets.'); }
-}
-
-async function createEventInSheets(data) {
-  const res = await apiRequest({ action:'createEvent', event:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
-  return res.id;
-}
-async function updateEventInSheets(id, data) {
-  const res = await apiRequest({ action:'updateEvent', id, event:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Update failed');
-}
-async function deleteEventInSheets(id) {
-  const res = await apiRequest({ action:'deleteEvent', id });
-  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
-}
-async function loadBirthdaysFromSheets() {
-  try {
-    const data = await apiRequest({ action:'getBirthdays' });
-    if (data.status === 'ok') {
-      allBirthdays = (data.birthdays||[]).map(r => ({ __backendId:r.id||'', artist_name:r.artist_name||'', birthday_month:parseInt(r.birthday_month)||0, birthday_day:parseInt(r.birthday_day)||0, color:r.color||'#6b7280' }));
-      renderBirthdayBanners(); renderAnniversaryAdmin();
-    }
-  } catch(e) { console.warn('Birthday load error:', e); }
-}
-async function createBirthdayInSheets(data) {
-  const res = await apiRequest({ action:'createBirthday', birthday:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
-}
-async function deleteBirthdayInSheets(id) {
-  const res = await apiRequest({ action:'deleteBirthday', id });
-  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
-}
-async function loadAnniversariesFromSheets() {
-  try {
-    const data = await apiRequest({ action:'getAnniversaries' });
-    if (data.status === 'ok') {
-      allAnniversaries = (data.anniversaries||[]).map(r => ({ __backendId:r.id||'', anniversary_name:r.anniversary_name||'', anniversary_month:parseInt(r.anniversary_month)||0, anniversary_day:parseInt(r.anniversary_day)||0, anniversary_year:r.anniversary_year?parseInt(r.anniversary_year):null, color:r.color||'#a855f7' }));
-      renderBirthdayBanners(); renderAnniversaryAdmin();
-    }
-  } catch(e) { console.warn('Anniversary load error:', e); }
-}
-async function createAnniversaryInSheets(data) {
-  const res = await apiRequest({ action:'createAnniversary', anniversary:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
-}
-async function deleteAnniversaryInSheets(id) {
-  const res = await apiRequest({ action:'deleteAnniversary', id });
-  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
-}
-
-(async () => {
-  await Promise.all([ loadEventsFromSheets(), loadBirthdaysFromSheets(), loadAnniversariesFromSheets() ]);
-})();
-
-try {
-  if (window.elementSdk) {
-    window.elementSdk.init({
-      defaultConfig: { site_title:'PondPhuwinPermpoon Schedule', site_tagline:'Pond · Phuwin · Permpoon' },
-      onConfigChange: async (config) => {
-        const t = config.site_title||'PondPhuwinPermpoon Schedule';
-        const tl = config.site_tagline||'Pond · Phuwin · Permpoon';
-        const navEl = document.getElementById('nav-site-title');
-        const titleEl = document.getElementById('home-title');
-        const taglineEl = document.getElementById('home-tagline');
-        if (navEl) navEl.textContent = t.replace(' 2026','');
-        if (titleEl) titleEl.textContent = t;
-        if (taglineEl) taglineEl.textContent = tl;
-      },
-      mapToCapabilities: () => ({ recolorables:[], borderables:[] }),
-      mapToEditPanelValues: (config) => new Map([['site_title', config.site_title||'PondPhuwinPermpoon Schedule'],['site_tagline', config.site_tagline||'Pond · Phuwin · Permpoon']])
-    });
-  }
-} catch(e) { console.warn('elementSdk not available:', e); }
-
-function navigate(page) {
-  currentPage = page;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  const pageEl = document.getElementById('page-'+page);
-  if (pageEl) pageEl.classList.add('active');
-  const navEl = document.querySelector(`.nav-link[data-page="${page}"]`);
-  if (navEl) navEl.classList.add('active');
-  renderCurrentPage();
+function renderMapPage() {
+  renderMapStats();
+  renderSVGPins();
+  renderMapTimeline();
+  renderMapCountryStats();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-function renderCurrentPage() {
-  if (currentPage === 'home') renderHome();
-  else if (currentPage === 'calendar') renderCalendar();
-  else if (currentPage === 'admin' && isAdmin) renderAdminList();
+function renderSVGPins() {
+  const pinsLayer = document.getElementById('map-pins-layer');
+  if (!pinsLayer) return;
+  pinsLayer.innerHTML = '';
+
+  const events = getFilteredMapEvents();
+  const noLocEl = document.getElementById('geo-no-location');
+  const noLocCount = allEvents.filter(ev => !ev.city && !ev.country).length;
+  if (noLocEl) noLocEl.style.display = noLocCount > 0 ? 'block' : 'none';
+
+  // Group by location to offset overlapping pins
+  const locMap = {};
+  events.forEach(ev => {
+    const coords = getCoordsForEvent(ev);
+    if (!coords) return;
+    const key = Math.round(coords[0]) + ',' + Math.round(coords[1]);
+    if (!locMap[key]) locMap[key] = { coords, evs: [] };
+    locMap[key].evs.push(ev);
+  });
+
+  Object.values(locMap).forEach(({ coords, evs }) => {
+    evs.forEach((ev, idx) => {
+      const color = getArtistColor(ev.artists);
+      const isPast = isEventPast(ev);
+      const r = isPast ? 6 : 8;
+      const opacity = isPast ? 0.55 : 1;
+      // Slight offset for stacked events at same location
+      const ox = evs.length > 1 ? (idx - (evs.length-1)/2) * 14 : 0;
+      const oy = evs.length > 1 ? (idx % 2 === 0 ? 0 : -10) : 0;
+      const cx = coords[0] + ox;
+      const cy = coords[1] + oy;
+
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', 'map-pin');
+      g.setAttribute('opacity', opacity);
+
+      // Outer ring
+      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      ring.setAttribute('cx', cx); ring.setAttribute('cy', cy);
+      ring.setAttribute('r', r + 3);
+      ring.setAttribute('fill', color); ring.setAttribute('fill-opacity', '0.2');
+      ring.setAttribute('stroke', color); ring.setAttribute('stroke-width', '1');
+
+      // Main dot
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+      dot.setAttribute('r', r);
+      dot.setAttribute('fill', color);
+      dot.setAttribute('stroke', '#fff'); dot.setAttribute('stroke-width', '2');
+
+      g.appendChild(ring);
+      g.appendChild(dot);
+
+      // Tooltip on hover
+      g.addEventListener('mouseenter', (e) => {
+        const tt = document.getElementById('map-tooltip');
+        if (!tt) return;
+        const wrap = document.getElementById('map-svg-wrap');
+        const rect = wrap.getBoundingClientRect();
+        const svgEl = document.getElementById('world-map-svg');
+        const svgRect = svgEl.getBoundingClientRect();
+        const scaleX = svgRect.width / 1000;
+        const scaleY = svgRect.height / 500;
+        const lp = [ev.location_name, ev.city, ev.country].filter(Boolean).join(', ');
+        const dateStr = ev.date ? new Date(ev.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'TBA';
+        tt.innerHTML = `<div class="map-tooltip-title">${escHtml(ev.event_name)}</div><div class="map-tooltip-meta">📅 ${dateStr}</div>${lp?`<div class="map-tooltip-meta">📍 ${escHtml(lp)}</div>`:''}`;
+        tt.style.display = 'block';
+        tt.style.left = (cx * scaleX) + 'px';
+        tt.style.top = (cy * scaleY) + 'px';
+      });
+      g.addEventListener('mouseleave', () => {
+        const tt = document.getElementById('map-tooltip');
+        if (tt) tt.style.display = 'none';
+      });
+      g.addEventListener('click', () => openDetailModal(ev.__backendId));
+
+      pinsLayer.appendChild(g);
+    });
+  });
 }
 
-function getArtistColor(artists) {
-  if (!artists) return '#64748b';
-  const arr = artists.split(',').map(a => a.trim());
-  const has = (x) => arr.includes(x);
-  if (has('Pond') && has('Phuwin') && has('Permpoon')) return '#ec4899';
-  if (has('Pond') && has('Phuwin')) return '#a855f7';
-  if (has('Pond') && has('Permpoon')) return '#3b82f6';
-  if (has('Phuwin') && has('Permpoon')) return '#ef4444';
-  if (has('Pond')) return '#f97316';
-  if (has('Phuwin')) return '#6b7280';
-  if (has('Permpoon')) return '#22c55e';
-  return '#64748b';
-}
-function getArtistLabel(artists) {
-  if (!artists) return '';
-  return artists.split(',').map(a => a.trim()).filter(Boolean).join(' · ');
-}
-function getMonthDisplay(dateStr) {
-  if (!dateStr) return '';
-  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'long', year:'numeric' });
-}
-function getFullDateDisplay(dateStr) {
-  if (!dateStr) return '';
-  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+function closeMapPopupAndOpenDetail(id) {
+  openDetailModal(id);
 }
 
-const AUTO_HIDE_MINUTES = 10;
-function isEventAutoHidden(ev) {
-  if (!ev.date || !ev.start_time) return false;
-  const startDt = new Date(ev.date+'T'+ev.start_time);
-  return new Date() > new Date(startDt.getTime() + AUTO_HIDE_MINUTES*60000);
-}
-function isEventPast(ev) {
-  if (!ev.date) return false;
-  const endTime = ev.end_time||ev.start_time||'23:59';
-  return new Date(ev.date+'T'+endTime) < new Date();
+function renderMapStats() {
+  const el = document.getElementById('map-stats');
+  if (!el) return;
+  const total = allEvents.length;
+  const past = allEvents.filter(isEventPast).length;
+  const upcoming = total - past;
+  const countries = new Set(allEvents.map(ev => ev.country).filter(Boolean)).size;
+  el.innerHTML = `
+    <div class="map-stat-card"><div class="map-stat-num">${total}</div><div class="map-stat-label">Total Events</div></div>
+    <div class="map-stat-card"><div class="map-stat-num" style="color:#16a34a;">${upcoming}</div><div class="map-stat-label">Upcoming</div></div>
+    <div class="map-stat-card"><div class="map-stat-num" style="color:#9ca3af;">${past}</div><div class="map-stat-label">Past</div></div>
+    <div class="map-stat-card"><div class="map-stat-num" style="color:#a855f7;">${countries}</div><div class="map-stat-label">Countries</div></div>`;
 }
 
-const SOCIAL_ICONS = {
-  youtube: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
-  instagram: `<svg viewBox="0 0 24 24" width="22" height="22"><defs><radialGradient id="ig2" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><path fill="url(#ig2)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`,
-  facebook: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
-  x: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.629L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
-  tiktok: `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>`,
-  whatsapp: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`,
-  shopee: `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#EE4D2D"/><path fill="white" d="M18.332 9.273h-1.457a4.875 4.875 0 10-9.75 0H5.668a1.667 1.667 0 00-1.66 1.82l.78 8.874A1.667 1.667 0 006.45 21.5h11.1a1.667 1.667 0 001.662-1.533l.78-8.874a1.667 1.667 0 00-1.66-1.82zM12 5.7a2.875 2.875 0 012.875 2.873v.3H9.125v-.3A2.875 2.875 0 0112 5.7zm2.354 7.97a.4.4 0 01-.566 0l-1.288-1.288v4.018a.4.4 0 01-.8 0v-4.018l-1.288 1.288a.4.4 0 01-.566-.566l2-2a.4.4 0 01.566 0l2 2a.4.4 0 010 .566z"/></svg>`,
-  download: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B7280" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
-};
+function setMapFilter(type, value) {
+  const MAP_COLORS = {
+    'all':'#111','Pond':'#f97316','Phuwin':'#6b7280','Permpoon':'#22c55e',
+    'Pond,Phuwin':'#a855f7','Pond,Permpoon':'#3b82f6','Phuwin,Permpoon':'#ef4444','Pond,Phuwin,Permpoon':'#ec4899'
+  };
+  if (type === 'artist') {
+    mapFilterArtist = value;
+    document.querySelectorAll('[data-mf-artist]').forEach(btn => {
+      const key = btn.dataset.mfArtist;
+      const c = MAP_COLORS[key] || '#111';
+      const isActive = key === value;
+      btn.classList.toggle('active', isActive);
+      if (isActive) { btn.style.background = c; btn.style.color = '#fff'; btn.style.borderColor = c; }
+      else { btn.style.background = '#fff'; btn.style.color = c; btn.style.borderColor = c; }
+    });
+  } else {
+    mapFilterTime = value;
+    document.querySelectorAll('[data-mf-time]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mfTime === value);
+    });
+  }
+  renderSVGPins();
+  renderMapTimeline();
+  renderMapCountryStats();
+}
 
-function makeSocialBtn(href, iconSvg, label) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);text-decoration:none;flex-shrink:0;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;" title="${label}" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">${iconSvg}</a>`;
+function setTimelineFilter(f) {
+  timelineFilter = f;
+  ['all','upcoming','past'].forEach(v => {
+    const btn = document.getElementById('tl-btn-'+v);
+    if (btn) btn.classList.toggle('active', v === f);
+  });
+  renderMapTimeline();
 }
-function buildSocialIcons(ev) {
-  let html = '';
-  if (ev.youtube_link) html += makeSocialBtn(ev.youtube_link, SOCIAL_ICONS.youtube, 'YouTube');
-  if (ev.instagram_link) html += makeSocialBtn(ev.instagram_link, SOCIAL_ICONS.instagram, 'Instagram');
-  if (ev.facebook_link) html += makeSocialBtn(ev.facebook_link, SOCIAL_ICONS.facebook, 'Facebook');
-  if (ev.x_link) html += makeSocialBtn(ev.x_link, SOCIAL_ICONS.x, 'X (Twitter)');
-  if (ev.tiktok_link) html += makeSocialBtn(ev.tiktok_link, SOCIAL_ICONS.tiktok, 'TikTok');
-  if (ev.whatsapp_link) html += makeSocialBtn(ev.whatsapp_link, SOCIAL_ICONS.whatsapp, 'WhatsApp');
-  if (ev.shopee_link) html += makeSocialBtn(ev.shopee_link, SOCIAL_ICONS.shopee, 'Shopee');
-  if (ev.live_link) html += makeSocialBtn(ev.live_link, getLiveIcon(ev.live_link), getLiveLabelFromUrl(ev.live_link));
-  if (ev.file_link) html += makeSocialBtn(ev.file_link, SOCIAL_ICONS.download, 'Download');
-  return html;
+
+function renderMapTimeline() {
+  const el = document.getElementById('map-timeline');
+  if (!el) return;
+  let evs = [...allEvents];
+  if (timelineFilter === 'upcoming') evs = evs.filter(ev => !isEventPast(ev));
+  else if (timelineFilter === 'past') evs = evs.filter(isEventPast);
+  if (timelineFilter === 'past') evs.sort((a,b) => b.date.localeCompare(a.date));
+  else evs.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
+  if (evs.length === 0) { el.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ไม่มีอีเวนท์</p>'; return; }
+  el.innerHTML = evs.map(ev => {
+    const color = getArtistColor(ev.artists);
+    const isPast = isEventPast(ev);
+    const lp = [ev.city, ev.country].filter(Boolean).join(', ');
+    const dateStr = ev.date ? new Date(ev.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'TBA';
+    return `<div class="timeline-item" style="cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
+      <div class="timeline-dot" style="background:${color};${isPast?'opacity:0.5':''}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="timeline-date">${dateStr}${isPast?' · Past':' · Upcoming'}</div>
+        <div class="timeline-name" style="${isPast?'color:#9ca3af;':''}">${escHtml(ev.event_name)}</div>
+        ${lp?`<div class="timeline-loc">📍 ${escHtml(lp)}</div>`:''}
+        ${ev.event_type?`<div class="timeline-loc">🎪 ${escHtml(ev.event_type)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
+
+function renderMapCountryStats() {
+  const el = document.getElementById('map-country-stats');
+  if (!el) return;
+  const countryMap = {};
+  allEvents.forEach(ev => {
+    if (!ev.country) return;
+    if (!countryMap[ev.country]) countryMap[ev.country] = { total: 0, past: 0 };
+    countryMap[ev.country].total++;
+    if (isEventPast(ev)) countryMap[ev.country].past++;
+  });
+  const sorted = Object.entries(countryMap).sort((a,b) => b[1].total - a[1].total);
+  if (sorted.length === 0) { el.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;">ยังไม่มีข้อมูล country</p>'; return; }
+  const maxVal = sorted[0][1].total;
+  el.innerHTML = sorted.map(([country, stats]) => `
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+        <span style="font-size:0.82rem;font-weight:600;">${escHtml(country)}</span>
+        <span style="font-size:0.72rem;color:#9ca3af;">${stats.total} event${stats.total!==1?'s':''}</span>
+      </div>
+      <div style="height:6px;background:#f0f0f0;border-radius:99px;overflow:hidden;">
+        <div style="height:100%;background:#111;border-radius:99px;width:${Math.round(stats.total/maxVal*100)}%;"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// HOME & CARD RENDERING
+// ══════════════════════════════════════
 
 function renderHome() {
   renderBirthdayBanners();
@@ -1194,7 +1288,6 @@ async function handleEventFormSubmit(e) {
   const date=document.getElementById('f-date').value;
   if(!name){showToast('Event name is required.');return;}
   if(!date){showToast('Date is required.');return;}
-  // Clear incomplete time values to avoid browser validation error
   const startEl = document.getElementById('f-start');
   const endEl = document.getElementById('f-end');
   if (startEl && !startEl.checkValidity()) startEl.value = '';
