@@ -26,14 +26,14 @@
   nav { background: #fff; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
   .nav-link { cursor: pointer; transition: color 0.2s; font-size: 1rem; font-weight: 500; padding: 0.5rem 0.75rem; border-radius: 6px; color: #6b7280; }
   .nav-link:hover, .nav-link.active { color: #111; background: #f5f5f5; }
-  .event-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+  .event-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column; }
   .event-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
   .card-img-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   /* ── CALENDAR ── */
-  .cal-day { height: 100px; border: 1px solid #f0f0f0; padding: 6px; background: #fff; transition: background 0.15s; overflow: hidden; box-sizing: border-box; }
+  .cal-day { min-height: 120px; border: 1px solid #f0f0f0; padding: 8px; background: #fff; transition: background 0.15s; overflow: hidden; box-sizing: border-box; }
   .cal-day:hover { background: #f9f9f9; }
-  .cal-event-dot { font-size: 0.72rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.4; max-width: 100%; display: block; min-width: 0; }
+  .cal-event-dot { font-size: 0.88rem; font-weight: 600; padding: 3px 8px; border-radius: 5px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.5; max-width: 100%; display: block; min-width: 0; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
@@ -59,7 +59,7 @@
   .artist-check { display: none; }
   .artist-check-label { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 99px; border: 1.5px solid #e5e7eb; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; color: #6b7280; }
   .artist-check:checked + .artist-check-label { border-color: #111; color: #111; background: #f8f8f8; }
-  .detail-hero { width: 100%; height: 280px; object-fit: cover; background: #f3f4f6; }
+  .detail-hero { width: 100%; max-height: 500px; object-fit: contain; background: #f3f4f6; }
   .link-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.82rem; font-weight: 600; color: #374151; text-decoration: none; transition: all 0.15s; }
   .link-btn:hover { background: #f9f9f9; border-color: #d1d5db; }
   footer { background: #fff; border-top: 1px solid #f0f0f0; margin-top: auto; flex-shrink: 0; }
@@ -366,8 +366,12 @@
         </div>
        </div>
        <div>
-        <label class="form-label" for="f-date">Date *</label>
+        <label class="form-label" for="f-date">Date Start *</label>
         <input class="form-input" id="f-date" type="date" required>
+       </div>
+       <div>
+        <label class="form-label" for="f-date-end">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
+        <input class="form-input" id="f-date-end" type="date">
        </div>
        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div>
@@ -699,7 +703,8 @@ async function loadEventsFromSheets() {
         whatsapp_link: r.whatsapp_link||'', shopee_link: r.shopee_link||'',
         live_link: r.live_link||'', file_link: r.file_link||'',
         event_type: r.event_type||'', note: r.note||'',
-        map_embed: r.map_embed||''
+        map_embed: r.map_embed||'',
+        date_end: r.date_end||''
       }));
       allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
       apiLoaded = true;
@@ -911,10 +916,16 @@ function createCard(ev) {
   if (ev.date) {
     const d = new Date(ev.date+'T00:00:00');
     const dow = d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
-    dateBadgeHtml = `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.5rem 0.75rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.7rem;font-weight:700;letter-spacing:0.05em;">${dow}</div><div style="font-size:1.3rem;font-weight:700;line-height:1;">${d.getDate()}</div></div>`;
+    if (ev.date_end && ev.date_end !== ev.date) {
+      const d2 = new Date(ev.date_end+'T00:00:00');
+      const dow2 = d2.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+      dateBadgeHtml = `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.4rem 0.6rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.62rem;font-weight:700;letter-spacing:0.04em;">${dow} ${d.getDate()} – ${dow2} ${d2.getDate()}</div></div>`;
+    } else {
+      dateBadgeHtml = `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.5rem 0.75rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.7rem;font-weight:700;letter-spacing:0.05em;">${dow}</div><div style="font-size:1.3rem;font-weight:700;line-height:1;">${d.getDate()}</div></div>`;
+    }
   }
   const metaItems = [];
-  if (ev.date) metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>`);
+  if (ev.date) metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : ''}</div>`);
   if (ev.start_time) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}</span></div>`);
   const lp = [ev.location_name,ev.city,ev.country].filter(x=>x);
   if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
@@ -925,12 +936,13 @@ function createCard(ev) {
   if (ev.note) allMeta.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
   card.innerHTML = `
     <div style="position:relative;">${imgHtml}${dateBadgeHtml}</div>
-    <div style="padding:1rem;">
+    <div style="padding:1rem;display:flex;flex-direction:column;flex:1;">
       ${ev.artists?`<span class="artist-badge" style="background:${color}18;color:${color};margin-bottom:0.6rem;"><i data-lucide="user" style="width:10px;height:10px;stroke-width:2.5;"></i>${getArtistLabel(ev.artists)}</span>`:''}
       <h3 style="font-weight:700;font-size:1.1rem;letter-spacing:-0.01em;margin-bottom:0.4rem;line-height:1.3;">${escHtml(ev.event_name)}</h3>
       ${allMeta.length?`<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:0.75rem;">${allMeta.join('')}</div>`:''}
       ${socialHtml?`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:0.8rem;" onclick="event.stopPropagation()">${socialHtml}</div>`:''}
-      <button style="width:100%;border:1.5px solid #111;background:#fff;border-radius:8px;padding:8px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s;" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='#fff'">View Details</button>
+      <div style="flex:1;"></div>
+      <button style="width:100%;border:1.5px solid #111;background:#fff;border-radius:8px;padding:8px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s;margin-top:0.75rem;" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='#fff'">View Details</button>
     </div>`;
   return card;
 }
@@ -964,7 +976,7 @@ function openDetailModal(id) {
   const lp = [ev.location_name,ev.city,ev.country].filter(x=>x);
   document.getElementById('detail-meta').innerHTML = `
     <div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}</span></div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – ' + getFullDateDisplay(ev.date_end) : ''}</span></div>
     ${ev.start_time?`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}</span></div>`:''}
     ${lp.length?`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`:''}
     ${ev.event_type?`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.event_type}</span></div>`:''}
@@ -1017,7 +1029,13 @@ function renderCalendar() {
   }
   for (let d=1;d<=daysInMonth;d++) {
     const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayEvents = allEvents.filter(ev => ev.date===dateStr);
+    const dayEvents = allEvents.filter(ev => {
+      if (!ev.date) return false;
+      if (ev.date_end && ev.date_end > ev.date) {
+        return dateStr >= ev.date && dateStr <= ev.date_end;
+      }
+      return ev.date === dateStr;
+    });
     const bdays = getBirthdaysOnDate(month+1, d);
     const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
     const cell = document.createElement('div'); cell.className='cal-day';
@@ -1139,7 +1157,7 @@ function fillForm(ev) {
   set('f-yt',ev.youtube_link);set('f-ig',ev.instagram_link);set('f-fb',ev.facebook_link);
   set('f-x',ev.x_link);set('f-tiktok',ev.tiktok_link);set('f-whatsapp',ev.whatsapp_link);
   set('f-shopee',ev.shopee_link);set('f-live',ev.live_link);set('f-file',ev.file_link);
-  set('f-note',ev.note);set('f-type',ev.event_type);set('f-map',ev.map_embed);
+  set('f-note',ev.note);set('f-type',ev.event_type);set('f-map',ev.map_embed);set('f-date-end',ev.date_end);
   const arr=ev.artists?(ev.artists.split(',').map(a=>a.trim())):[];
   document.querySelectorAll('.artist-check').forEach(c=>{c.checked=arr.includes(c.value);});
 }
@@ -1147,7 +1165,7 @@ function fillForm(ev) {
 function getFormPreviewData() {
   const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
   const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
-  return { __backendId:'__preview__', event_name:gv('f-name')||'Event Name', image_url:gv('f-image'), artists:ca.join(','), date:gv('f-date'), start_time:gv('f-start'), end_time:gv('f-end'), country:gv('f-country'), city:gv('f-city'), location_name:gv('f-location'), description:gv('f-desc'), youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'), x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'), shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'), event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map') };
+  return { __backendId:'__preview__', event_name:gv('f-name')||'Event Name', image_url:gv('f-image'), artists:ca.join(','), date:gv('f-date'), date_end:gv('f-date-end'), start_time:gv('f-start'), end_time:gv('f-end'), country:gv('f-country'), city:gv('f-city'), location_name:gv('f-location'), description:gv('f-desc'), youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'), x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'), shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'), event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map') };
 }
 function openPreviewPopup() {
   const popup=document.getElementById('preview-popup'); if(!popup)return;
@@ -1179,7 +1197,7 @@ async function handleEventFormSubmit(e) {
     youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'),
     x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'),
     shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'),
-    event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), weibo_link:''
+    event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), weibo_link:''
   };
   const btn=document.getElementById('form-submit-btn');
   const txt=document.getElementById('form-submit-text');
