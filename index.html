@@ -18,42 +18,42 @@
     --color-pondpermpoon: #3b82f6;
     --color-phuwinpermpoon: #ef4444;
   }
-  * { font-family: 'DM Sans', sans-serif; }
+  * { font-family: 'DM Sans', sans-serif; font-size: 105%; }
   html { height: 100%; }
   body { height: 100%; background: #fafafa; color: #111; margin: 0; padding: 0; }
   #app { display: flex; flex-direction: column; height: 100%; overflow-x: hidden; }
   .page { display: none; flex: 1; overflow-y: auto; }
   .page.active { display: flex; flex-direction: column; }
   nav { background: #fff; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
-  .nav-link { cursor: pointer; transition: color 0.2s; font-size: 0.875rem; font-weight: 500; padding: 0.5rem 0.75rem; border-radius: 6px; color: #6b7280; }
+  .nav-link { cursor: pointer; transition: color 0.2s; font-size: 1rem; font-weight: 500; padding: 0.5rem 0.75rem; border-radius: 6px; color: #6b7280; }
   .nav-link:hover, .nav-link.active { color: #111; background: #f5f5f5; }
   .event-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
   .event-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
   .card-img-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
-  .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
-  .cal-day { min-height: 80px; border: 1px solid #f0f0f0; padding: 4px; background: #fff; transition: background 0.15s; }
+  .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+  .cal-day { min-height: 160px; border: 1px solid #f0f0f0; padding: 8px; background: #fff; transition: background 0.15s; }
   .cal-day:hover { background: #fafafa; }
-  .cal-event-dot { font-size: 0.65rem; font-weight: 600; padding: 1px 5px; border-radius: 4px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  .cal-event-dot { font-size: 0.92rem; font-weight: 600; padding: 4px 9px; border-radius: 5px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
   .modal-box { background: #fff; border-radius: 20px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); margin: auto; }
-  .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.875rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
+  .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.7rem 0.95rem; font-size: 1rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
   .form-input:focus { border-color: #111; }
-  .form-label { font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.3rem; display: block; }
-  .btn-primary { background: #111; color: #fff; border: none; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .form-label { font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 0.3rem; display: block; }
+  .btn-primary { background: #111; color: #fff; border: none; border-radius: 8px; padding: 0.7rem 1.35rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
   .btn-primary:hover:not(:disabled) { background: #333; }
   .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-  .btn-secondary { background: #f3f4f6; color: #374151; border: none; border-radius: 8px; padding: 0.6rem 1.25rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .btn-secondary { background: #f3f4f6; color: #374151; border: none; border-radius: 8px; padding: 0.7rem 1.35rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
   .btn-secondary:hover { background: #e5e7eb; }
   .btn-danger { background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
   .btn-danger:hover { background: #fecaca; }
-  #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #111; color: #fff; padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.875rem; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #111; color: #fff; padding: 0.85rem 1.6rem; border-radius: 10px; font-size: 1rem; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   #toast.show { opacity: 1; pointer-events: auto; }
   .spinner { width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; margin-right: 4px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
-  .section-header { font-size: 1.3rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
+  .section-header { font-size: 1.5rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
   .artist-check { display: none; }
   .artist-check-label { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 99px; border: 1.5px solid #e5e7eb; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; color: #6b7280; }
   .artist-check:checked + .artist-check-label { border-color: #111; color: #111; background: #f8f8f8; }
@@ -64,10 +64,11 @@
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
   footer { background: #fff; border-top: 1px solid #f0f0f0; margin-top: auto; flex-shrink: 0; }
   @media (max-width: 640px) {
-    .cal-event-dot { font-size: 0.55rem; padding: 1px 3px; }
-    .cal-day { min-height: 55px; padding: 2px; }
+    .cal-event-dot { font-size: 0.8rem; padding: 3px 6px; }
+    .cal-day { min-height: 110px; padding: 5px; }
     .detail-hero { height: 200px; }
   }
+
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
     #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
@@ -80,7 +81,7 @@
   .bday-countdown { font-size:0.7rem;font-weight:800;padding:3px 8px;border-radius:99px;margin-left:auto;flex-shrink:0;letter-spacing:0.05em; }
   .month-group { margin-bottom: 2.5rem; }
   .month-group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
-  .month-group-header-label { font-size: 1rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
+  .month-group-header-label { font-size: 1.15rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
   .month-group-header-line { flex: 1; height: 1px; background: #e5e7eb; }
   .month-group-header-count { font-size: 0.75rem; font-weight: 600; color: #9ca3af; background: #f3f4f6; border-radius: 99px; padding: 2px 8px; }
   </style>
@@ -98,7 +99,7 @@
      <div style="display:flex;align-items:center;gap:4px;" id="nav-links">
       <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Home</span>
       <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Calendar</span>
-      <span class="nav-link" data-page="admin" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Admin</span>
+      <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Admin</span>
      </div>
     </div>
    </nav>
@@ -108,7 +109,7 @@
     <div style="max-width:1100px;margin:auto;padding:2rem 1rem;width:100%;">
      <div style="margin-bottom:2.5rem;">
       <p id="home-tagline" style="font-size:0.8rem;font-weight:600;color:#a855f7;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem;">Pond · Phuwin · Permpoon</p>
-      <h1 id="home-title" style="font-size:2rem;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:0.5rem;">pondphuwinpermpoon schedule</h1>
+      <h1 id="home-title" style="font-size:2.3rem;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:0.5rem;">pondphuwinpermpoon schedule</h1>
       <p style="color:#6b7280;font-size:0.9rem;">Track upcoming concerts, fan meets, and events.</p>
      </div>
      <!-- Birthday banners -->
@@ -157,13 +158,13 @@
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>PhuwinPermpoon</span>
      </div>
      <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:0;">
-      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0;letter-spacing:0.07em;">SUN</div>
-      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0;letter-spacing:0.07em;">MON</div>
-      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0;letter-spacing:0.07em;">TUE</div>
-      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0;letter-spacing:0.07em;">WED</div>
-      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0;letter-spacing:0.07em;">THU</div>
-      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0;letter-spacing:0.07em;">FRI</div>
-      <div style="text-align:center;font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0;letter-spacing:0.07em;">SAT</div>
+      <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">SUN</div>
+      <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">MON</div>
+      <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">TUE</div>
+      <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">WED</div>
+      <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">THU</div>
+      <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">FRI</div>
+      <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">SAT</div>
      </div>
      <div id="cal-grid" class="cal-grid"></div>
     </div>
@@ -320,7 +321,7 @@
     </div>
     <div style="padding:1.5rem;">
      <div id="detail-artist-badge" style="margin-bottom:0.75rem;"></div>
-     <h2 id="detail-title" style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;"></h2>
+     <h2 id="detail-title" style="font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;"></h2>
      <div id="detail-meta" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;"></div>
      <div id="detail-desc-wrap" style="display:none;margin-bottom:1.25rem;">
       <p style="font-size:0.78rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;margin-bottom:0.4rem;">DESCRIPTION</p>
@@ -542,7 +543,7 @@ const ADMIN_PASS = 'ppp1257pondphuwinpp';
 
 // ── Google Apps Script API ──
 // Replace this URL with your deployed Apps Script Web App URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbzc5_sUbh_KX7VndMpR2E9TFX-YW1c-XEPie1e5lunCcUeKjxEmjMl3FLCp1DKT9LuY/exec';
+const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
 let apiLoaded = false; // true once events loaded from Sheets
 
 // ---- LIVE STREAM ICON HELPER ----
@@ -849,8 +850,10 @@ async function loadEventsFromSheets() {
   } catch(e) {
     console.warn('Sheets API error:', e);
     showToast('Cannot connect to Google Sheets. Check API URL.');
+    hideLoadingOverlay();
   }
 }
+
 
 // CREATE event in Google Sheets
 async function createEventInSheets(data) {
@@ -1187,7 +1190,7 @@ function createCard(ev) {
       ${ev.artists ? `<span class="artist-badge" style="background:${color}18;color:${color};margin-bottom:0.6rem;">
         <i data-lucide="user" style="width:10px;height:10px;stroke-width:2.5;"></i>${getArtistLabel(ev.artists)}
       </span>` : ''}
-      <h3 style="font-weight:700;font-size:1rem;letter-spacing:-0.01em;margin-bottom:0.4rem;line-height:1.3;">${escHtml(ev.event_name)}</h3>
+      <h3 style="font-weight:700;font-size:1.1rem;letter-spacing:-0.01em;margin-bottom:0.4rem;line-height:1.3;">${escHtml(ev.event_name)}</h3>
       ${metaItems.length || ev.event_type || ev.note ? (() => {
         const allItems = [...metaItems];
         if (ev.event_type) allItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;">
@@ -1247,23 +1250,23 @@ function openDetailModal(id) {
   const locationParts = [ev.location_name, ev.city, ev.country].filter(x => x);
   document.getElementById('detail-meta').innerHTML = `
     <div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:#374151;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;">
       <i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i>
       <span>${getFullDateDisplay(ev.date)}</span>
     </div>
-    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:#374151;">
+    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;">
       <i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i>
       <span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}</span>
     </div>` : ''}
-    ${locationParts.length ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:#374151;">
+    ${locationParts.length ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;">
       <i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i>
       <span>${locationParts.join(', ')}</span>
     </div>` : ''}
-    ${ev.event_type ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:#374151;">
+    ${ev.event_type ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;">
       <i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i>
       <span>${ev.event_type}</span>
     </div>` : ''}
-    ${ev.note ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:#374151;">
+    ${ev.note ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;">
       <i data-lucide="file-text" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i>
       <span>${escHtml(ev.note)}</span>
     </div>` : ''}`;
@@ -1328,8 +1331,8 @@ function renderCalendar() {
     const cell = document.createElement('div');
     cell.className = 'cal-day';
     const dayNumHtml = isToday
-      ? `<div style="font-size:0.75rem;font-weight:800;background:#111;color:#fff;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${d}</div>`
-      : `<div style="font-size:0.75rem;font-weight:500;color:#374151;">${d}</div>`;
+      ? `<div style="font-size:1.05rem;font-weight:800;background:#111;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">${d}</div>`
+      : `<div style="font-size:1.05rem;font-weight:500;color:#374151;padding:2px 3px;">${d}</div>`;
     const bdayHtml = bdays.map(b => {
       const isAnniv = b.type === 'anniversary';
       const dotLabel = isAnniv ? b.label + ' 🥂' : b.name + ' 🎂';
@@ -1383,6 +1386,10 @@ function adminLogout() {
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('admin-pw-input').value = '';
   document.getElementById('admin-login-err').style.display = 'none';
+  // Hide admin nav link on logout
+  const navAdmin = document.getElementById('nav-admin-link');
+  if (navAdmin) navAdmin.style.display = 'none';
+  navigate('home');
 }
 
 function renderAdminList() {
@@ -1422,7 +1429,7 @@ function updateAdminRow(row, ev) {
   row.innerHTML = `
     <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
     <div style="flex:1;min-width:150px;">
-      <p style="font-weight:700;font-size:0.9rem;${past?'color:#9ca3af;':''}">${escHtml(ev.event_name)}
+      <p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.event_name)}
         ${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}
       </p>
       <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.date)} · ${getArtistLabel(ev.artists)}</p>
@@ -1684,9 +1691,26 @@ function showToast(msg) {
 
 // ---- INIT ----
 document.addEventListener('DOMContentLoaded', () => {
+  // ── Secret admin access via URL hash ──
+  // Visit: yoursite.com/#admin-ppp to reveal admin menu
+  const SECRET_HASH = 'admin-ppp';
+  function checkAdminHash() {
+    if (window.location.hash === '#' + SECRET_HASH) {
+      const navAdmin = document.getElementById('nav-admin-link');
+      if (navAdmin) navAdmin.style.display = 'inline-flex';
+      navigate('admin');
+      // Clean hash from URL so it's not visible
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }
+  checkAdminHash();
+  window.addEventListener('hashchange', checkAdminHash);
+
   try {
     if (localStorage.getItem('adminLoggedIn') === 'true') {
       isAdmin = true;
+      const navAdmin = document.getElementById('nav-admin-link');
+      if (navAdmin) navAdmin.style.display = 'inline-flex';
       document.getElementById('admin-login').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'flex';
       renderAnniversaryAdmin();
