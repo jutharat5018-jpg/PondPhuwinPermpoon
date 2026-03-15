@@ -965,6 +965,79 @@ function renderMapCountryStats() {
     </div>`).join('');
 }
 
+
+// ══════════════════════════════════════
+// NAVIGATION & CORE
+// ══════════════════════════════════════
+
+function navigate(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const pageEl = document.getElementById('page-'+page);
+  if (pageEl) pageEl.classList.add('active');
+  const navEl = document.querySelector(`.nav-link[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
+  renderCurrentPage();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function renderCurrentPage() {
+  if (currentPage === 'home') renderHome();
+  else if (currentPage === 'calendar') renderCalendar();
+  else if (currentPage === 'map') renderMapPage();
+  else if (currentPage === 'admin' && isAdmin) renderAdminList();
+}
+
+function getArtistColor(artists) {
+  if (!artists) return '#64748b';
+  const arr = artists.split(',').map(a => a.trim());
+  const has = (x) => arr.includes(x);
+  if (has('Pond') && has('Phuwin') && has('Permpoon')) return '#ec4899';
+  if (has('Pond') && has('Phuwin')) return '#a855f7';
+  if (has('Pond') && has('Permpoon')) return '#3b82f6';
+  if (has('Phuwin') && has('Permpoon')) return '#ef4444';
+  if (has('Pond')) return '#f97316';
+  if (has('Phuwin')) return '#6b7280';
+  if (has('Permpoon')) return '#22c55e';
+  return '#64748b';
+}
+function getArtistLabel(artists) {
+  if (!artists) return '';
+  return artists.split(',').map(a => a.trim()).filter(Boolean).join(' · ');
+}
+function getMonthDisplay(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'long', year:'numeric' });
+}
+function getFullDateDisplay(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+}
+const AUTO_HIDE_MINUTES = 10;
+function isEventAutoHidden(ev) {
+  if (!ev.date || !ev.start_time) return false;
+  const startDt = new Date(ev.date+'T'+ev.start_time);
+  return new Date() > new Date(startDt.getTime() + AUTO_HIDE_MINUTES*60000);
+}
+function isEventPast(ev) {
+  if (!ev.date) return false;
+  const endTime = ev.end_time||ev.start_time||'23:59';
+  return new Date(ev.date+'T'+endTime) < new Date();
+}
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function filterHome(artist) {
+  homeFilter = artist;
+  document.querySelectorAll('.artist-filter-btn').forEach(btn => {
+    if (btn.dataset.artist === artist) { btn.style.background='#111'; btn.style.color='#fff'; btn.style.borderColor='#111'; }
+    else { const c=btn.dataset.artist==='Pond'?'#f97316':btn.dataset.artist==='Phuwin'?'#6b7280':btn.dataset.artist==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
+  });
+  renderHome();
+}
+
 // ══════════════════════════════════════
 // HOME & CARD RENDERING
 // ══════════════════════════════════════
