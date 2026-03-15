@@ -311,8 +311,8 @@
 
   <!-- DETAIL MODAL -->
   <div class="modal-backdrop" id="detail-modal" style="display:none;" onclick="closeDetailModalBackdrop(event)">
-   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:680px;width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
-    <div style="position:relative;">
+   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:680px;width:100%;background:#fff;border-radius:20px;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="position:relative;line-height:0;">
      <div id="detail-img-wrap"></div>
      <button onclick="closeDetailModal()" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);border:none;border-radius:99px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
       <i data-lucide="x" style="width:16px;height:16px;color:#fff;stroke-width:2.5;"></i>
@@ -974,7 +974,7 @@ function openDetailModal(id) {
 
   const imgWrap = document.getElementById('detail-img-wrap');
   if (ev.image_url) {
-    imgWrap.innerHTML = `<img src="${escHtml(ev.image_url)}" style="width:100%;height:auto;max-height:400px;object-fit:cover;display:block;" alt="${escHtml(ev.event_name)}" loading="lazy">`;
+    imgWrap.innerHTML = `<img src="${escHtml(ev.image_url)}" style="width:100%;height:auto;display:block;" alt="${escHtml(ev.event_name)}" loading="lazy">`;
   } else {
     imgWrap.innerHTML = `<div style="width:100%;height:220px;background:linear-gradient(135deg,#f3f4f6,#e5e7eb);display:flex;align-items:center;justify-content:center;"><i data-lucide="image" style="width:48px;height:48px;color:#d1d5db;stroke-width:1.5;"></i></div>`;
   }
