@@ -8,6 +8,11 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WLEg=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <style>
   :root {
     --color-pond: #f97316;
@@ -32,7 +37,6 @@
   .card-img-placeholder { width: 100%; height: 220px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
   .card-img { width: 100%; height: 220px; object-fit: cover; display: block; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
-  /* ── CALENDAR ── */
   .cal-day { min-height: 130px; border: 1px solid #f0f0f0; padding: 6px; background: #fff; transition: background 0.15s; box-sizing: border-box; }
   .cal-day:hover { background: #f9f9f9; }
   .cal-event-dot { font-size: 0.88rem; font-weight: 600; padding: 3px 8px; border-radius: 5px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.5; max-width: 100%; display: block; min-width: 0; }
@@ -88,9 +92,47 @@
   .month-group-header-label { font-size: 1.15rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
   .month-group-header-line { flex: 1; height: 1px; background: #e5e7eb; }
   .month-group-header-count { font-size: 0.75rem; font-weight: 600; color: #9ca3af; background: #f3f4f6; border-radius: 99px; padding: 2px 8px; }
-  /* Map embed */
   .map-embed-wrap { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
+
+  /* ── MAP PAGE ── */
+  #map-container { width: 100%; height: 520px; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1); z-index: 1; }
+  .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important; border: none !important; }
+  .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
+  .leaflet-popup-tip-container { display: none; }
+  .map-popup { padding: 14px 16px; min-width: 220px; max-width: 280px; }
+  .map-popup-artist { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .map-popup-title { font-size: 0.95rem; font-weight: 700; color: #111; margin-bottom: 6px; line-height: 1.3; }
+  .map-popup-meta { font-size: 0.78rem; color: #6b7280; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+  .map-popup-btn { display: block; width: 100%; margin-top: 10px; background: #111; color: #fff; border: none; border-radius: 8px; padding: 7px 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.15s; }
+  .map-popup-btn:hover { background: #333; }
+  .map-filter-btn { padding: 5px 14px; border-radius: 99px; border: 1.5px solid #e5e7eb; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; background: #fff; }
+  .map-filter-btn.active { background: #111; color: #fff; border-color: #111; }
+  .map-stat-card { background: #fff; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
+  .map-stat-num { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; }
+  .map-stat-label { font-size: 0.72rem; font-weight: 600; color: #9ca3af; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+  .timeline-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .timeline-date { font-size: 0.72rem; font-weight: 700; color: #9ca3af; letter-spacing: 0.06em; text-transform: uppercase; }
+  .timeline-name { font-size: 0.88rem; font-weight: 700; color: #111; }
+  .timeline-loc { font-size: 0.75rem; color: #6b7280; margin-top: 1px; }
+  .geo-loading { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #6b7280; padding: 8px 0; }
+  .geo-progress { height: 4px; background: #f0f0f0; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .geo-progress-bar { height: 100%; background: #111; border-radius: 99px; transition: width 0.3s; }
+  /* MarkerCluster custom style */
+  .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-clip: padding-box; border-radius: 20px; }
+  .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font-size: 12px; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; }
+  .marker-cluster-small { background-color: rgba(17,17,17,0.15); width: 40px; height: 40px; }
+  .marker-cluster-small div { background-color: rgba(17,17,17,0.7); }
+  .marker-cluster-medium { background-color: rgba(168,85,247,0.2); width: 40px; height: 40px; }
+  .marker-cluster-medium div { background-color: rgba(168,85,247,0.8); }
+  .marker-cluster-large { background-color: rgba(236,72,153,0.2); width: 40px; height: 40px; }
+  .marker-cluster-large div { background-color: rgba(236,72,153,0.85); }
+  @media (max-width: 768px) {
+    #map-container { height: 360px; }
+    .map-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
   </style>
  </head>
  <body>
@@ -106,6 +148,7 @@
      <div style="display:flex;align-items:center;gap:4px;" id="nav-links">
       <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Home</span>
       <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Calendar</span>
+      <span class="nav-link" data-page="map" onclick="navigate('map')"><i data-lucide="map-pin" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Map</span>
       <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Admin</span>
      </div>
     </div>
@@ -163,7 +206,6 @@
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block;"></span>PondPermpoon</span>
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>PhuwinPermpoon</span>
      </div>
-     <!-- Calendar header row -->
      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));width:100%;">
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">SUN</div>
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">MON</div>
@@ -174,6 +216,87 @@
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">SAT</div>
      </div>
      <div id="cal-grid" class="cal-grid"></div>
+    </div>
+   </div>
+
+   <!-- ══════════════════════════════════════
+        MAP PAGE
+   ══════════════════════════════════════ -->
+   <div class="page" id="page-map">
+    <div style="max-width:1100px;margin:auto;padding:2rem 1rem;width:100%;">
+
+     <!-- Header -->
+     <div style="margin-bottom:1.5rem;">
+      <p style="font-size:0.78rem;font-weight:600;color:#a855f7;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.4rem;">Event Locations</p>
+      <h2 class="section-header">World Map</h2>
+      <p style="font-size:0.82rem;color:#9ca3af;margin-top:4px;">ปักหมุดทุกงานที่ผ่านมาและที่กำลังจะมาถึง — ดึงพิกัดจาก Google Maps embed หรือ city/country · คลิกหมุดเพื่อดูรายละเอียด</p>
+     </div>
+
+     <!-- Stats row -->
+     <div class="map-stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;" id="map-stats"></div>
+
+     <!-- Filters -->
+     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">
+      <span style="font-size:0.75rem;font-weight:600;color:#9ca3af;">ARTIST</span>
+      <button class="map-filter-btn active" data-mf-artist="all" onclick="setMapFilter('artist','all')">All</button>
+      <button class="map-filter-btn" data-mf-artist="Pond" onclick="setMapFilter('artist','Pond')" style="color:#f97316;border-color:#f97316;">Pond</button>
+      <button class="map-filter-btn" data-mf-artist="Phuwin" onclick="setMapFilter('artist','Phuwin')" style="color:#6b7280;border-color:#6b7280;">Phuwin</button>
+      <button class="map-filter-btn" data-mf-artist="Permpoon" onclick="setMapFilter('artist','Permpoon')" style="color:#22c55e;border-color:#22c55e;">Permpoon</button>
+      <button class="map-filter-btn" data-mf-artist="Pond,Phuwin" onclick="setMapFilter('artist','Pond,Phuwin')" style="color:#a855f7;border-color:#a855f7;">Pond·Phuwin</button>
+      <button class="map-filter-btn" data-mf-artist="Pond,Permpoon" onclick="setMapFilter('artist','Pond,Permpoon')" style="color:#3b82f6;border-color:#3b82f6;">Pond·Permpoon</button>
+      <button class="map-filter-btn" data-mf-artist="Phuwin,Permpoon" onclick="setMapFilter('artist','Phuwin,Permpoon')" style="color:#ef4444;border-color:#ef4444;">Phuwin·Permpoon</button>
+      <button class="map-filter-btn" data-mf-artist="Pond,Phuwin,Permpoon" onclick="setMapFilter('artist','Pond,Phuwin,Permpoon')" style="color:#ec4899;border-color:#ec4899;">All Three</button>
+      <span style="font-size:0.75rem;font-weight:600;color:#9ca3af;margin-left:8px;">TIME</span>
+      <button class="map-filter-btn active" data-mf-time="all" onclick="setMapFilter('time','all')">All</button>
+      <button class="map-filter-btn" data-mf-time="upcoming" onclick="setMapFilter('time','upcoming')">Upcoming</button>
+      <button class="map-filter-btn" data-mf-time="past" onclick="setMapFilter('time','past')">Past</button>
+     </div>
+
+     <!-- Geocoding progress -->
+     <div id="geo-status" style="display:none;margin-bottom:0.75rem;">
+      <div class="geo-loading">
+       <span class="spinner" style="border-top-color:#111;"></span>
+       <span id="geo-status-text">กำลังโหลดพิกัด...</span>
+      </div>
+      <div class="geo-progress"><div class="geo-progress-bar" id="geo-progress-bar" style="width:0%"></div></div>
+     </div>
+     <div id="geo-no-location" style="display:none;background:#fef9c3;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#854d0e;margin-bottom:0.75rem;">
+      <i data-lucide="alert-triangle" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:4px;"></i>
+      บางอีเวนท์ไม่มีข้อมูล city/country หรือ Google Maps embed จึงไม่แสดงบนแผนที่
+     </div>
+
+     <!-- Map -->
+     <div id="map-container"></div>
+
+     <!-- Two columns: Timeline + Country stats -->
+     <div style="display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start;margin-top:1.5rem;" id="map-bottom-grid">
+
+      <!-- Timeline -->
+      <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #f0f0f0;">
+       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 style="font-weight:700;font-size:1rem;">
+         <i data-lucide="clock" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;"></i>
+         Event Timeline
+        </h3>
+        <div style="display:flex;gap:6px;">
+         <button class="map-filter-btn active" id="tl-btn-all" onclick="setTimelineFilter('all')" style="font-size:0.7rem;padding:3px 10px;">All</button>
+         <button class="map-filter-btn" id="tl-btn-upcoming" onclick="setTimelineFilter('upcoming')" style="font-size:0.7rem;padding:3px 10px;">Upcoming</button>
+         <button class="map-filter-btn" id="tl-btn-past" onclick="setTimelineFilter('past')" style="font-size:0.7rem;padding:3px 10px;">Past</button>
+        </div>
+       </div>
+       <div id="map-timeline" style="max-height:400px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- Country stats -->
+      <div style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #f0f0f0;">
+       <h3 style="font-weight:700;font-size:1rem;margin-bottom:1rem;">
+        <i data-lucide="globe" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;"></i>
+        By Country
+       </h3>
+       <div id="map-country-stats"></div>
+      </div>
+
+     </div>
     </div>
    </div>
 
@@ -413,7 +536,6 @@
         <label class="form-label" for="f-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="f-note" placeholder="e.g. live on YouTube, time not confirmed">
        </div>
-       <!-- MAP EMBED FIELD -->
        <div style="grid-column:1/-1;">
         <label class="form-label" for="f-map">
          <svg width="13" height="13" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:3px;" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -519,6 +641,19 @@ const ADMIN_PASS = 'ppp1257pondphuwinpp';
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbzc5_sUbh_KX7VndMpR2E9TFX-YW1c-XEPie1e5lunCcUeKjxEmjMl3FLCp1DKT9LuY/exec';
 let apiLoaded = false;
+
+// ══════════════════════════════════════
+// MAP STATE
+// ══════════════════════════════════════
+let leafletMap = null;
+let mapMarkers = [];
+let clusterGroup = null;
+let mapFilterArtist = 'all';
+let mapFilterTime = 'all';
+let timelineFilter = 'all';
+// geocache: key = "city,country" → {lat, lng}
+const geoCache = {};
+let geocodingInProgress = false;
 
 function getLiveIcon(url) {
   if (!url) return null;
@@ -806,6 +941,7 @@ function navigate(page) {
 function renderCurrentPage() {
   if (currentPage === 'home') renderHome();
   else if (currentPage === 'calendar') renderCalendar();
+  else if (currentPage === 'map') renderMapPage();
   else if (currentPage === 'admin' && isAdmin) renderAdminList();
 }
 
@@ -874,6 +1010,384 @@ function buildSocialIcons(ev) {
   if (ev.file_link) html += makeSocialBtn(ev.file_link, SOCIAL_ICONS.download, 'Download');
   return html;
 }
+
+// ══════════════════════════════════════
+// MAP PAGE FUNCTIONS
+// ══════════════════════════════════════
+
+/**
+ * Extract lat/lng from a Google Maps embed iframe src.
+ * Supports several URL formats Google Maps uses:
+ *  - /maps/embed?pb=...!2d<lng>!3d<lat>...
+ *  - /maps/@<lat>,<lng>,<zoom>z
+ *  - q=<lat>,<lng>
+ */
+function extractCoordsFromMapEmbed(mapEmbed) {
+  if (!mapEmbed) return null;
+  // Extract src from iframe
+  const srcMatch = mapEmbed.match(/src=["']([^"']+)["']/i);
+  const url = srcMatch ? srcMatch[1] : mapEmbed;
+
+  // Pattern 1: !2d<lng>!3d<lat> — most common in embed pb= URLs
+  const pbMatch = url.match(/!2d([-\d.]+)!3d([-\d.]+)/);
+  if (pbMatch) return { lat: parseFloat(pbMatch[2]), lng: parseFloat(pbMatch[1]) };
+
+  // Pattern 2: @<lat>,<lng>,<zoom>
+  const atMatch = url.match(/@([-\d.]+),([-\d.]+),[\d.]+z/);
+  if (atMatch) return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+
+  // Pattern 3: q=<lat>,<lng>
+  const qMatch = url.match(/[?&]q=([-\d.]+),([-\d.]+)/);
+  if (qMatch) return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+
+  // Pattern 4: ll=<lat>,<lng>
+  const llMatch = url.match(/[?&]ll=([-\d.]+),([-\d.]+)/);
+  if (llMatch) return { lat: parseFloat(llMatch[1]), lng: parseFloat(llMatch[2]) };
+
+  return null;
+}
+
+/**
+ * Get coords for an event:
+ * 1. Try Google Maps embed (most accurate)
+ * 2. Fall back to Nominatim with city+country (async, slow, rate-limited)
+ * Cache result in geoCache by event ID.
+ */
+async function getEventCoords(ev) {
+  const cacheKey = ev.__backendId || [ev.city, ev.country].filter(Boolean).join(',').toLowerCase();
+  if (geoCache[cacheKey]) return geoCache[cacheKey];
+
+  // Try embed first (instant, no API call)
+  if (ev.map_embed) {
+    const coords = extractCoordsFromMapEmbed(ev.map_embed);
+    if (coords) { geoCache[cacheKey] = coords; return coords; }
+  }
+
+  // Fall back to Nominatim if city/country exists
+  if (!ev.city && !ev.country) return null;
+  const locKey = [ev.city, ev.country].filter(Boolean).join(',').toLowerCase();
+  if (geoCache[locKey]) { geoCache[cacheKey] = geoCache[locKey]; return geoCache[locKey]; }
+  const q = encodeURIComponent([ev.city, ev.country].filter(Boolean).join(', '));
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
+      headers: { 'Accept-Language': 'en', 'User-Agent': 'PPPSchedule/1.0' }
+    });
+    const data = await res.json();
+    if (data && data[0]) {
+      const coords = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      geoCache[locKey] = coords; geoCache[cacheKey] = coords;
+      return coords;
+    }
+  } catch(e) { console.warn('Geocode fallback error:', e); }
+  return null;
+}
+
+function makeCustomMarker(color, isPast) {
+  const opacity = isPast ? 0.55 : 1;
+  const size = isPast ? 28 : 34;
+  const svg = `<svg width="${size}" height="${size}" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="17" cy="17" r="14" fill="${color}" fill-opacity="${opacity}" stroke="#fff" stroke-width="3"/>
+    <circle cx="17" cy="17" r="6" fill="#fff" fill-opacity="${opacity}"/>
+  </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    popupAnchor: [0, -size/2]
+  });
+}
+
+function getFilteredMapEvents() {
+  return allEvents.filter(ev => {
+    // Must have at least city/country OR a parseable map_embed
+    const hasLocation = ev.city || ev.country || (ev.map_embed && extractCoordsFromMapEmbed(ev.map_embed));
+    if (!hasLocation) return false;
+    if (mapFilterArtist !== 'all') {
+      const filterSet = mapFilterArtist.split(',').map(a=>a.trim()).sort().join(',');
+      const evSet = (ev.artists||'').split(',').map(a=>a.trim()).filter(Boolean).sort().join(',');
+      if (evSet !== filterSet) return false;
+    }
+    if (mapFilterTime === 'upcoming' && isEventPast(ev)) return false;
+    if (mapFilterTime === 'past' && !isEventPast(ev)) return false;
+    return true;
+  });
+}
+
+async function renderMapPage() {
+  // Init Leaflet map once
+  if (!leafletMap) {
+    const container = document.getElementById('map-container');
+    if (!container) return;
+    leafletMap = L.map('map-container', { zoomControl: true, attributionControl: true }).setView([20, 100], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18
+    }).addTo(leafletMap);
+    // Init cluster group once
+    clusterGroup = L.markerClusterGroup({
+      maxClusterRadius: 50,
+      iconCreateFunction: function(cluster) {
+        const count = cluster.getChildCount();
+        const size = count < 10 ? 'small' : count < 20 ? 'medium' : 'large';
+        return new L.DivIcon({
+          html: `<div><span>${count}</span></div>`,
+          className: `marker-cluster marker-cluster-${size}`,
+          iconSize: new L.Point(40, 40)
+        });
+      }
+    });
+    leafletMap.addLayer(clusterGroup);
+  }
+
+  renderMapStats();
+  await geocodeAndRenderMarkers();
+  renderMapTimeline();
+  renderMapCountryStats();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+async function geocodeAndRenderMarkers() {
+  if (!leafletMap || !clusterGroup) return;
+
+  // Clear existing markers from cluster
+  clusterGroup.clearLayers();
+  mapMarkers = [];
+
+  const events = getFilteredMapEvents();
+
+  // Separate events with embed coords (instant) vs those needing Nominatim (slow)
+  const embedCoordEvents = events.filter(ev => ev.map_embed && extractCoordsFromMapEmbed(ev.map_embed));
+  const nominatimEvents = events.filter(ev => !(ev.map_embed && extractCoordsFromMapEmbed(ev.map_embed)) && (ev.city || ev.country));
+
+  // Pre-cache embed coords instantly (no API call needed)
+  embedCoordEvents.forEach(ev => {
+    const key = ev.__backendId;
+    if (!geoCache[key]) geoCache[key] = extractCoordsFromMapEmbed(ev.map_embed);
+  });
+
+  // Show geocoding progress only for Nominatim events not yet cached
+  const toNominatim = nominatimEvents.filter(ev => {
+    const locKey = [ev.city, ev.country].filter(Boolean).join(',').toLowerCase();
+    return locKey && !geoCache[locKey] && !geoCache[ev.__backendId];
+  });
+  const uniqueNominatimKeys = [...new Set(toNominatim.map(ev => [ev.city, ev.country].filter(Boolean).join(',').toLowerCase()))];
+
+  if (uniqueNominatimKeys.length > 0 && !geocodingInProgress) {
+    geocodingInProgress = true;
+    const statusEl = document.getElementById('geo-status');
+    const progressBar = document.getElementById('geo-progress-bar');
+    const statusText = document.getElementById('geo-status-text');
+    if (statusEl) statusEl.style.display = 'block';
+    let done = 0;
+    for (const key of uniqueNominatimKeys) {
+      const parts = key.split(',');
+      const city = parts[0] || ''; const country = parts[1] || '';
+      const q = encodeURIComponent([city, country].filter(Boolean).join(', '));
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
+          headers: { 'Accept-Language': 'en', 'User-Agent': 'PPPSchedule/1.0' }
+        });
+        const data = await res.json();
+        if (data && data[0]) geoCache[key] = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      } catch(e) {}
+      done++;
+      if (progressBar) progressBar.style.width = Math.round(done/uniqueNominatimKeys.length*100)+'%';
+      if (statusText) statusText.textContent = `กำลังโหลดพิกัด ${done}/${uniqueNominatimKeys.length}...`;
+      await new Promise(r => setTimeout(r, 1100));
+    }
+    if (statusEl) statusEl.style.display = 'none';
+    geocodingInProgress = false;
+  }
+
+  // Count events with no coords at all
+  let noLocCount = 0;
+
+  // Add markers via clusterGroup
+  for (const ev of events) {
+    let coords = null;
+    // 1. embed coords
+    if (ev.map_embed) coords = extractCoordsFromMapEmbed(ev.map_embed);
+    // 2. cached by id
+    if (!coords) coords = geoCache[ev.__backendId];
+    // 3. cached by city,country
+    if (!coords) {
+      const locKey = [ev.city, ev.country].filter(Boolean).join(',').toLowerCase();
+      if (locKey) coords = geoCache[locKey];
+    }
+    if (!coords) { noLocCount++; continue; }
+
+    const color = getArtistColor(ev.artists);
+    const isPast = isEventPast(ev);
+    const marker = L.marker([coords.lat, coords.lng], { icon: makeCustomMarker(color, isPast) });
+
+    const lp = [ev.location_name, ev.city, ev.country].filter(Boolean).join(', ');
+    const dateStr = ev.date ? new Date(ev.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Date TBA';
+    const pastBadge = isPast
+      ? `<span style="font-size:0.65rem;background:#f3f4f6;color:#9ca3af;padding:1px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>`
+      : `<span style="font-size:0.65rem;background:#dcfce7;color:#16a34a;padding:1px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Upcoming</span>`;
+    const embedSource = ev.map_embed && extractCoordsFromMapEmbed(ev.map_embed)
+      ? `<div class="map-popup-meta" style="color:#16a34a;font-size:0.68rem;">📌 พิกัดจาก Google Maps</div>` : '';
+
+    marker.bindPopup(`<div class="map-popup">
+      <div class="map-popup-artist" style="color:${color};">${getArtistLabel(ev.artists)||'Event'}</div>
+      <div class="map-popup-title">${escHtml(ev.event_name)} ${pastBadge}</div>
+      <div class="map-popup-meta">📅 ${dateStr}${ev.start_time?' · '+ev.start_time:''}</div>
+      ${lp?`<div class="map-popup-meta">📍 ${escHtml(lp)}</div>`:''}
+      ${ev.event_type?`<div class="map-popup-meta">🎪 ${escHtml(ev.event_type)}</div>`:''}
+      ${embedSource}
+      <button class="map-popup-btn" onclick="closeMapPopupAndOpenDetail('${ev.__backendId}')">View Details →</button>
+    </div>`, { maxWidth: 300, minWidth: 220 });
+
+    clusterGroup.addLayer(marker);
+    mapMarkers.push(marker);
+  }
+
+  // Warn about missing location events
+  const noLocEl = document.getElementById('geo-no-location');
+  if (noLocEl) noLocEl.style.display = noLocCount > 0 ? 'block' : 'none';
+
+  // Auto-fit bounds if markers exist
+  if (mapMarkers.length > 0) {
+    try { leafletMap.fitBounds(clusterGroup.getBounds().pad(0.2)); } catch(e) {}
+  }
+}
+
+function closeMapPopupAndOpenDetail(id) {
+  if (leafletMap) leafletMap.closePopup();
+  openDetailModal(id);
+}
+
+function renderMapStats() {
+  const el = document.getElementById('map-stats');
+  if (!el) return;
+  const total = allEvents.length;
+  const past = allEvents.filter(isEventPast).length;
+  const upcoming = total - past;
+  const countries = new Set(allEvents.map(ev => ev.country).filter(Boolean)).size;
+  el.innerHTML = `
+    <div class="map-stat-card">
+      <div class="map-stat-num">${total}</div>
+      <div class="map-stat-label">Total Events</div>
+    </div>
+    <div class="map-stat-card">
+      <div class="map-stat-num" style="color:#16a34a;">${upcoming}</div>
+      <div class="map-stat-label">Upcoming</div>
+    </div>
+    <div class="map-stat-card">
+      <div class="map-stat-num" style="color:#9ca3af;">${past}</div>
+      <div class="map-stat-label">Past</div>
+    </div>
+    <div class="map-stat-card">
+      <div class="map-stat-num" style="color:#a855f7;">${countries}</div>
+      <div class="map-stat-label">Countries</div>
+    </div>`;
+}
+
+function setMapFilter(type, value) {
+  const MAP_COLORS = {
+    'all': '#111',
+    'Pond': '#f97316',
+    'Phuwin': '#6b7280',
+    'Permpoon': '#22c55e',
+    'Pond,Phuwin': '#a855f7',
+    'Pond,Permpoon': '#3b82f6',
+    'Phuwin,Permpoon': '#ef4444',
+    'Pond,Phuwin,Permpoon': '#ec4899'
+  };
+  if (type === 'artist') {
+    mapFilterArtist = value;
+    document.querySelectorAll('[data-mf-artist]').forEach(btn => {
+      const key = btn.dataset.mfArtist;
+      const c = MAP_COLORS[key] || '#111';
+      const isActive = key === value;
+      btn.classList.toggle('active', isActive);
+      if (isActive) { btn.style.background = c; btn.style.color = '#fff'; btn.style.borderColor = c; }
+      else { btn.style.background = '#fff'; btn.style.color = c; btn.style.borderColor = c; }
+    });
+  } else {
+    mapFilterTime = value;
+    document.querySelectorAll('[data-mf-time]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mfTime === value);
+    });
+  }
+  geocodeAndRenderMarkers();
+  renderMapTimeline();
+  renderMapCountryStats();
+}
+
+function setTimelineFilter(f) {
+  timelineFilter = f;
+  ['all','upcoming','past'].forEach(v => {
+    const btn = document.getElementById('tl-btn-'+v);
+    if (btn) btn.classList.toggle('active', v === f);
+  });
+  renderMapTimeline();
+}
+
+function renderMapTimeline() {
+  const el = document.getElementById('map-timeline');
+  if (!el) return;
+  let evs = [...allEvents];
+  if (timelineFilter === 'upcoming') evs = evs.filter(ev => !isEventPast(ev));
+  else if (timelineFilter === 'past') evs = evs.filter(isEventPast);
+  // Sort: past DESC, upcoming ASC
+  if (timelineFilter === 'past') evs.sort((a,b) => b.date.localeCompare(a.date));
+  else evs.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
+
+  if (evs.length === 0) {
+    el.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ไม่มีอีเวนท์</p>';
+    return;
+  }
+
+  el.innerHTML = evs.map(ev => {
+    const color = getArtistColor(ev.artists);
+    const isPast = isEventPast(ev);
+    const lp = [ev.city, ev.country].filter(Boolean).join(', ');
+    const dateStr = ev.date ? new Date(ev.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'TBA';
+    return `<div class="timeline-item" style="cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
+      <div class="timeline-dot" style="background:${color};${isPast?'opacity:0.5':''}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="timeline-date">${dateStr}${isPast?' · Past':' · Upcoming'}</div>
+        <div class="timeline-name" style="${isPast?'color:#9ca3af;':''}">${escHtml(ev.event_name)}</div>
+        ${lp?`<div class="timeline-loc">📍 ${escHtml(lp)}</div>`:''}
+        ${ev.event_type?`<div class="timeline-loc">🎪 ${escHtml(ev.event_type)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMapCountryStats() {
+  const el = document.getElementById('map-country-stats');
+  if (!el) return;
+  const countryMap = {};
+  allEvents.forEach(ev => {
+    if (!ev.country) return;
+    if (!countryMap[ev.country]) countryMap[ev.country] = { total: 0, past: 0 };
+    countryMap[ev.country].total++;
+    if (isEventPast(ev)) countryMap[ev.country].past++;
+  });
+  const sorted = Object.entries(countryMap).sort((a,b) => b[1].total - a[1].total);
+  if (sorted.length === 0) {
+    el.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;">ยังไม่มีข้อมูล country</p>';
+    return;
+  }
+  const maxVal = sorted[0][1].total;
+  el.innerHTML = sorted.map(([country, stats]) => `
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+        <span style="font-size:0.82rem;font-weight:600;">${escHtml(country)}</span>
+        <span style="font-size:0.72rem;color:#9ca3af;">${stats.total} event${stats.total!==1?'s':''}</span>
+      </div>
+      <div style="height:6px;background:#f0f0f0;border-radius:99px;overflow:hidden;">
+        <div style="height:100%;background:#111;border-radius:99px;width:${Math.round(stats.total/maxVal*100)}%;"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// HOME & CARD RENDERING
+// ══════════════════════════════════════
 
 function renderHome() {
   renderBirthdayBanners();
@@ -1194,7 +1708,6 @@ async function handleEventFormSubmit(e) {
   const date=document.getElementById('f-date').value;
   if(!name){showToast('Event name is required.');return;}
   if(!date){showToast('Date is required.');return;}
-  // Clear incomplete time values to avoid browser validation error
   const startEl = document.getElementById('f-start');
   const endEl = document.getElementById('f-end');
   if (startEl && !startEl.checkValidity()) startEl.value = '';
