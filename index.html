@@ -96,7 +96,7 @@
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
 
   /* ── MAP PAGE ── */
-  #map-container { width: 100%; height: 520px; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1); z-index: 1; }
+  #map-container { width: 100%; height: 520px; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1); z-index: 1; display: block; position: relative; background: #e8f4f8; }
   .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important; border: none !important; }
   .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
   .leaflet-popup-tip-container { display: none; }
@@ -222,7 +222,7 @@
    <!-- ══════════════════════════════════════
         MAP PAGE
    ══════════════════════════════════════ -->
-   <div class="page" id="page-map">
+   <div class="page" id="page-map" style="overflow-y:auto;">
     <div style="max-width:1100px;margin:auto;padding:2rem 1rem;width:100%;">
 
      <!-- Header -->
@@ -266,7 +266,12 @@
      </div>
 
      <!-- Map -->
-     <div id="map-container"></div>
+     <div id="map-container">
+      <div id="map-loading" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f1f5f9;border-radius:16px;z-index:2;">
+       <div style="width:36px;height:36px;border:3px solid #e2e8f0;border-top-color:#111;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:12px;"></div>
+       <p style="font-size:0.82rem;font-weight:600;color:#64748b;">กำลังโหลดแผนที่...</p>
+      </div>
+     </div>
 
      <!-- Two columns: Timeline + Country stats -->
      <div style="display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start;margin-top:1.5rem;" id="map-bottom-grid">
@@ -1130,11 +1135,27 @@ async function renderMapPage() {
     if (container.offsetWidth === 0) {
       await new Promise(r => setTimeout(r, 200));
     }
-    leafletMap = L.map('map-container', { zoomControl: true, attributionControl: true }).setView([20, 100], 4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    leafletMap = L.map('map-container', {
+      zoomControl: true,
+      attributionControl: true,
+      preferCanvas: true
+    }).setView([20, 100], 3);
+
+    // Try multiple tile providers for reliability
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const tileLayer = L.tileLayer(tileUrl, {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 18
-    }).addTo(leafletMap);
+      maxZoom: 18,
+      crossOrigin: true
+    });
+    tileLayer.addTo(leafletMap);
+    tileLayer.on('tileerror', function() {
+      // Fallback to CartoDB light tiles
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap © CARTO',
+        maxZoom: 19
+      }).addTo(leafletMap);
+    });
     // Init cluster group once
     clusterGroup = L.markerClusterGroup({
       maxClusterRadius: 50,
@@ -1149,12 +1170,21 @@ async function renderMapPage() {
       }
     });
     leafletMap.addLayer(clusterGroup);
+    // Hide loading overlay once map is ready
+    leafletMap.whenReady(() => {
+      const loading = document.getElementById('map-loading');
+      if (loading) loading.style.display = 'none';
+    });
+    setTimeout(() => {
+      const loading = document.getElementById('map-loading');
+      if (loading) loading.style.display = 'none';
+    }, 2000);
   }
 
   // Force map to recalculate size after container becomes visible
-  setTimeout(() => {
-    if (leafletMap) leafletMap.invalidateSize();
-  }, 100);
+  [100, 300, 600].forEach(ms => setTimeout(() => {
+    if (leafletMap) leafletMap.invalidateSize(true);
+  }, ms));
 
   renderMapStats();
   await geocodeAndRenderMarkers();
