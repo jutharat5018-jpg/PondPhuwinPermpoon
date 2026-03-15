@@ -1140,6 +1140,11 @@ async function renderMapPage() {
     leafletMap.addLayer(clusterGroup);
   }
 
+  // Force map to recalculate size after container becomes visible
+  setTimeout(() => {
+    if (leafletMap) leafletMap.invalidateSize();
+  }, 100);
+
   renderMapStats();
   await geocodeAndRenderMarkers();
   renderMapTimeline();
