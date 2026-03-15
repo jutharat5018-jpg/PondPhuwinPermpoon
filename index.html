@@ -971,7 +971,7 @@ function openDetailModal(id) {
 
   const imgWrap = document.getElementById('detail-img-wrap');
   if (ev.image_url) {
-    imgWrap.innerHTML = `<img src="${escHtml(ev.image_url)}" style="width:100%;display:block;object-fit:contain;" alt="${escHtml(ev.event_name)}" loading="lazy">`;
+    imgWrap.innerHTML = `<img src="${escHtml(ev.image_url)}" style="width:100%;height:auto;display:block;" alt="${escHtml(ev.event_name)}" loading="lazy">`;
   } else {
     imgWrap.innerHTML = `<div style="width:100%;height:280px;background:linear-gradient(135deg,#f3f4f6,#e5e7eb);display:flex;align-items:center;justify-content:center;"><i data-lucide="image" style="width:48px;height:48px;color:#d1d5db;stroke-width:1.5;"></i></div>`;
   }
