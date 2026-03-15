@@ -16,6 +16,7 @@
     --color-pondphuwin: #a855f7;
     --color-pondpermpoon: #3b82f6;
     --color-phuwinpermpoon: #ef4444;
+    --color-pondphuwinpermpoon: #ec4899;
   }
   * { font-family: 'DM Sans', sans-serif; font-size: 105%; }
   html { height: 100%; }
@@ -155,6 +156,7 @@
       </div>
      </div>
      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;">
+      <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#ec4899;display:inline-block;"></span>PondPhuwinPermpoon</span>
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#a855f7;display:inline-block;"></span>PondPhuwin</span>
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#f97316;display:inline-block;"></span>Pond</span>
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#6b7280;display:inline-block;"></span>Phuwin</span>
@@ -815,7 +817,7 @@ function getArtistColor(artists) {
   if (!artists) return '#64748b';
   const arr = artists.split(',').map(a => a.trim());
   const has = (x) => arr.includes(x);
-  if (has('Pond') && has('Phuwin') && has('Permpoon')) return '#a855f7';
+  if (has('Pond') && has('Phuwin') && has('Permpoon')) return '#ec4899';
   if (has('Pond') && has('Phuwin')) return '#a855f7';
   if (has('Pond') && has('Permpoon')) return '#3b82f6';
   if (has('Phuwin') && has('Permpoon')) return '#ef4444';
