@@ -664,6 +664,92 @@ const ADMIN_PASS = 'ppp1257pondphuwinpp';
 const API_URL = 'https://script.google.com/macros/s/AKfycbzc5_sUbh_KX7VndMpR2E9TFX-YW1c-XEPie1e5lunCcUeKjxEmjMl3FLCp1DKT9LuY/exec';
 let apiLoaded = false;
 
+async function apiRequest(payload) {
+  const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) });
+  if (!res.ok) throw new Error('API error '+res.status);
+  return await res.json();
+}
+
+async function loadEventsFromSheets() {
+  try {
+    const data = await apiRequest({ action:'getEvents' });
+    if (data.status === 'ok') {
+      allEvents = (data.events||[]).map(r => ({
+        __backendId: r.id||r.__backendId||'',
+        event_name: r.event_name||'', image_url: r.image_url||'',
+        artists: r.artists||'', date: r.date||'',
+        start_time: r.start_time||'', end_time: r.end_time||'',
+        location_name: r.location_name||'', city: r.city||'', country: r.country||'',
+        description: r.description||'', youtube_link: r.youtube_link||'',
+        instagram_link: r.instagram_link||'', facebook_link: r.facebook_link||'',
+        x_link: r.x_link||'', tiktok_link: r.tiktok_link||'',
+        whatsapp_link: r.whatsapp_link||'', shopee_link: r.shopee_link||'',
+        live_link: r.live_link||'', file_link: r.file_link||'',
+        event_type: r.event_type||'', note: r.note||'',
+        map_embed: r.map_embed||'', date_end: r.date_end||''
+      }));
+      allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
+      apiLoaded = true;
+      renderCurrentPage();
+    }
+  } catch(e) { console.warn('Sheets API error:', e); showToast('Cannot connect to Google Sheets.'); }
+}
+
+async function createEventInSheets(data) {
+  const res = await apiRequest({ action:'createEvent', event:data });
+  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
+  return res.id;
+}
+async function updateEventInSheets(id, data) {
+  const res = await apiRequest({ action:'updateEvent', id, event:data });
+  if (res.status !== 'ok') throw new Error(res.message||'Update failed');
+}
+async function deleteEventInSheets(id) {
+  const res = await apiRequest({ action:'deleteEvent', id });
+  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
+}
+
+async function loadBirthdaysFromSheets() {
+  try {
+    const data = await apiRequest({ action:'getBirthdays' });
+    if (data.status === 'ok') {
+      allBirthdays = (data.birthdays||[]).map(r => ({ __backendId:r.id||'', artist_name:r.artist_name||'', birthday_month:parseInt(r.birthday_month)||0, birthday_day:parseInt(r.birthday_day)||0, color:r.color||'#6b7280' }));
+      renderBirthdayBanners(); renderAnniversaryAdmin();
+    }
+  } catch(e) { console.warn('Birthday load error:', e); }
+}
+async function createBirthdayInSheets(data) {
+  const res = await apiRequest({ action:'createBirthday', birthday:data });
+  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
+}
+async function deleteBirthdayInSheets(id) {
+  const res = await apiRequest({ action:'deleteBirthday', id });
+  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
+}
+
+async function loadAnniversariesFromSheets() {
+  try {
+    const data = await apiRequest({ action:'getAnniversaries' });
+    if (data.status === 'ok') {
+      allAnniversaries = (data.anniversaries||[]).map(r => ({ __backendId:r.id||'', anniversary_name:r.anniversary_name||'', anniversary_month:parseInt(r.anniversary_month)||0, anniversary_day:parseInt(r.anniversary_day)||0, anniversary_year:r.anniversary_year?parseInt(r.anniversary_year):null, color:r.color||'#a855f7' }));
+      renderBirthdayBanners(); renderAnniversaryAdmin();
+    }
+  } catch(e) { console.warn('Anniversary load error:', e); }
+}
+async function createAnniversaryInSheets(data) {
+  const res = await apiRequest({ action:'createAnniversary', anniversary:data });
+  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
+}
+async function deleteAnniversaryInSheets(id) {
+  const res = await apiRequest({ action:'deleteAnniversary', id });
+  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
+}
+
+(async () => {
+  await Promise.all([ loadEventsFromSheets(), loadBirthdaysFromSheets(), loadAnniversariesFromSheets() ]);
+})();
+
+
 // ══════════════════════════════════════
 // MAP PAGE — embedded Leaflet dark
 // ══════════════════════════════════════
