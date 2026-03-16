@@ -387,12 +387,12 @@
      <form id="event-form" onsubmit="handleEventFormSubmit(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="f-name">Event Name</label>
-        <input class="form-input" id="f-name" placeholder="e.g. Pond Concert Night">
+        <label class="form-label" for="ev-title">Event Name</label>
+        <input class="form-input" id="ev-title" name="title" placeholder="e.g. Pond Concert Night">
        </div>
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="f-image">Image URL</label>
-        <input class="form-input" id="f-image" placeholder="https://...jpg">
+        <label class="form-label" for="ev-image">Image URL</label>
+        <input class="form-input" id="ev-image" name="image" placeholder="https://...jpg">
        </div>
        <div style="grid-column:1/-1;">
         <label class="form-label" style="margin-bottom:0.5rem;">Artist(s) (optional)</label>
@@ -406,141 +406,127 @@
         </div>
        </div>
        <div>
-        <label class="form-label" for="f-date">Date Start</label>
-        <input class="form-input" id="f-date" type="date">
+        <label class="form-label" for="ev-dateStart">Date Start</label>
+        <input class="form-input" id="ev-dateStart" name="dateStart" type="date">
        </div>
        <div>
-        <label class="form-label" for="f-date-end">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
-        <input class="form-input" id="f-date-end" type="date">
+        <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
+        <input class="form-input" id="ev-dateEnd" name="dateEnd" type="date">
        </div>
-       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;grid-column:1/-1;">
         <div>
-         <label class="form-label" for="f-start">Start Time</label>
-         <input class="form-input" id="f-start" type="time">
+         <label class="form-label" for="ev-startTime">Start Time</label>
+         <input class="form-input" id="ev-startTime" name="startTime" type="time">
         </div>
         <div>
-         <label class="form-label" for="f-end">End Time</label>
-         <input class="form-input" id="f-end" type="time">
+         <label class="form-label" for="ev-endTime">End Time</label>
+         <input class="form-input" id="ev-endTime" name="endTime" type="time">
         </div>
         <div>
-         <label class="form-label" for="f-timezone" style="display:flex;align-items:center;gap:4px;">
+         <label class="form-label" for="ev-timezone" style="display:flex;align-items:center;gap:4px;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           Time Zone
          </label>
-         <select class="form-input" id="f-timezone" style="appearance:auto;">
+         <select class="form-input" id="ev-timezone" name="timezone" style="appearance:auto;">
           <option value="">— not set —</option>
-          <option value="GMT-12">GMT-12</option>
-          <option value="GMT-11">GMT-11</option>
-          <option value="GMT-10">GMT-10</option>
-          <option value="GMT-9">GMT-9</option>
-          <option value="GMT-8">GMT-8</option>
-          <option value="GMT-7">GMT-7</option>
-          <option value="GMT-6">GMT-6</option>
-          <option value="GMT-5">GMT-5</option>
-          <option value="GMT-4">GMT-4</option>
-          <option value="GMT-3">GMT-3</option>
-          <option value="GMT-2">GMT-2</option>
-          <option value="GMT-1">GMT-1</option>
-          <option value="GMT+0">GMT+0</option>
-          <option value="GMT+1">GMT+1</option>
-          <option value="GMT+2">GMT+2</option>
-          <option value="GMT+3">GMT+3</option>
-          <option value="GMT+4">GMT+4</option>
-          <option value="GMT+5">GMT+5</option>
-          <option value="GMT+6">GMT+6</option>
-          <option value="GMT+7">GMT+7</option>
-          <option value="GMT+8">GMT+8</option>
-          <option value="GMT+9">GMT+9</option>
-          <option value="GMT+10">GMT+10</option>
-          <option value="GMT+11">GMT+11</option>
-          <option value="GMT+12">GMT+12</option>
-          <option value="GMT+13">GMT+13</option>
+          <option value="GMT-12">GMT-12</option><option value="GMT-11">GMT-11</option>
+          <option value="GMT-10">GMT-10</option><option value="GMT-9">GMT-9</option>
+          <option value="GMT-8">GMT-8</option><option value="GMT-7">GMT-7</option>
+          <option value="GMT-6">GMT-6</option><option value="GMT-5">GMT-5</option>
+          <option value="GMT-4">GMT-4</option><option value="GMT-3">GMT-3</option>
+          <option value="GMT-2">GMT-2</option><option value="GMT-1">GMT-1</option>
+          <option value="GMT+0">GMT+0</option><option value="GMT+1">GMT+1</option>
+          <option value="GMT+2">GMT+2</option><option value="GMT+3">GMT+3</option>
+          <option value="GMT+4">GMT+4</option><option value="GMT+5">GMT+5</option>
+          <option value="GMT+6">GMT+6</option><option value="GMT+7">GMT+7</option>
+          <option value="GMT+8">GMT+8</option><option value="GMT+9">GMT+9</option>
+          <option value="GMT+10">GMT+10</option><option value="GMT+11">GMT+11</option>
+          <option value="GMT+12">GMT+12</option><option value="GMT+13">GMT+13</option>
           <option value="GMT+14">GMT+14</option>
          </select>
         </div>
        </div>
        <div>
-        <label class="form-label" for="f-country">Country</label>
-        <input class="form-input" id="f-country" placeholder="e.g. Thailand">
+        <label class="form-label" for="ev-country">Country</label>
+        <input class="form-input" id="ev-country" name="country" placeholder="e.g. Thailand">
        </div>
        <div>
-        <label class="form-label" for="f-city">City</label>
-        <input class="form-input" id="f-city" placeholder="e.g. Bangkok">
+        <label class="form-label" for="ev-city">City</label>
+        <input class="form-input" id="ev-city" name="city" placeholder="e.g. Bangkok">
        </div>
        <div>
-        <label class="form-label" for="f-location">Location Name</label>
-        <input class="form-input" id="f-location" placeholder="e.g. Impact Arena">
+        <label class="form-label" for="ev-location">Location Name</label>
+        <input class="form-input" id="ev-location" name="location" placeholder="e.g. Impact Arena">
        </div>
        <div>
-        <label class="form-label" for="f-desc">Description</label>
-        <textarea class="form-input" id="f-desc" rows="3" placeholder="Event details..."></textarea>
-       </div>
-       <div>
-        <label class="form-label" for="f-type">Event Type</label>
-        <input class="form-input" id="f-type" placeholder="e.g. Fanmeet, Concert, Live, Online">
+        <label class="form-label" for="ev-type">Event Type</label>
+        <input class="form-input" id="ev-type" name="type" placeholder="e.g. Fanmeet, Concert, Live, Online">
        </div>
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="f-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
-        <input class="form-input" id="f-note" placeholder="e.g. live on YouTube, time not confirmed">
+        <label class="form-label" for="ev-description">Description</label>
+        <textarea class="form-input" id="ev-description" name="description" rows="3" placeholder="Event details..."></textarea>
        </div>
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="f-tv" style="display:flex;align-items:center;gap:5px;">
+        <label class="form-label" for="ev-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-note" name="note" placeholder="e.g. live on YouTube, time not confirmed">
+       </div>
+       <div style="grid-column:1/-1;">
+        <label class="form-label" for="ev-tv" style="display:flex;align-items:center;gap:5px;">
          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:#6b7280;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
          TV Channel <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
-        <input class="form-input" id="f-tv" name="tv" placeholder="e.g. GMM25, ONE31, PPTV, NHK, Netflix...">
+        <input class="form-input" id="ev-tv" name="tv" placeholder="e.g. GMM25, ONE31, PPTV, NHK, Netflix...">
        </div>
-       <!-- MAP EMBED FIELD -->
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="f-map">
+        <label class="form-label" for="ev-map">
          <svg width="13" height="13" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:3px;" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-         Google Maps Embed <span style="font-weight:400;color:#9ca3af;">(optional — วาง iframe จาก Google Maps)</span>
+         Google Maps Embed <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
-        <textarea class="form-input" id="f-map" rows="2" placeholder='วาง iframe embed จาก Google Maps เช่น &lt;iframe src="https://www.google.com/maps/embed?..."&gt;&lt;/iframe&gt;'></textarea>
+        <textarea class="form-input" id="ev-map" name="map" rows="2" placeholder='วาง iframe embed จาก Google Maps'></textarea>
        </div>
       </div>
 
       <p style="font-size:0.8rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;margin-bottom:0.75rem;">LINKS (optional)</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
        <div>
-        <label class="form-label" for="f-yt">YouTube</label>
-        <input class="form-input" id="f-yt" name="youtube" placeholder="https://youtube.com/...">
+        <label class="form-label" for="ev-youtube">YouTube</label>
+        <input class="form-input" id="ev-youtube" name="youtube" placeholder="https://youtube.com/...">
        </div>
        <div>
-        <label class="form-label" for="f-ig">Instagram</label>
-        <input class="form-input" id="f-ig" name="instagram" placeholder="https://instagram.com/...">
+        <label class="form-label" for="ev-instagram">Instagram</label>
+        <input class="form-input" id="ev-instagram" name="instagram" placeholder="https://instagram.com/...">
        </div>
        <div>
-        <label class="form-label" for="f-fb">Facebook</label>
-        <input class="form-input" id="f-fb" name="facebook" placeholder="https://facebook.com/...">
+        <label class="form-label" for="ev-facebook">Facebook</label>
+        <input class="form-input" id="ev-facebook" name="facebook" placeholder="https://facebook.com/...">
        </div>
        <div>
-        <label class="form-label" for="f-x">X (Twitter)</label>
-        <input class="form-input" id="f-x" name="x" placeholder="https://x.com/...">
+        <label class="form-label" for="ev-x">X (Twitter)</label>
+        <input class="form-input" id="ev-x" name="x" placeholder="https://x.com/...">
        </div>
        <div>
-        <label class="form-label" for="f-tiktok">TikTok</label>
-        <input class="form-input" id="f-tiktok" name="tiktok" placeholder="https://tiktok.com/...">
+        <label class="form-label" for="ev-tiktok">TikTok</label>
+        <input class="form-input" id="ev-tiktok" name="tiktok" placeholder="https://tiktok.com/...">
        </div>
        <div>
-        <label class="form-label" for="f-website">Website</label>
-        <input class="form-input" id="f-website" name="website" placeholder="https://...">
+        <label class="form-label" for="ev-website">Website</label>
+        <input class="form-input" id="ev-website" name="website" placeholder="https://...">
        </div>
        <div>
-        <label class="form-label" for="f-whatsapp">WhatsApp</label>
-        <input class="form-input" id="f-whatsapp" name="whatsapp" placeholder="https://wa.me/...">
+        <label class="form-label" for="ev-whatsapp">WhatsApp</label>
+        <input class="form-input" id="ev-whatsapp" name="whatsapp" placeholder="https://wa.me/...">
        </div>
        <div>
-        <label class="form-label" for="f-shopee">Shopee</label>
-        <input class="form-input" id="f-shopee" name="shopee" placeholder="https://shopee.com/...">
+        <label class="form-label" for="ev-shopee">Shopee</label>
+        <input class="form-input" id="ev-shopee" name="shopee" placeholder="https://shopee.com/...">
        </div>
        <div>
-        <label class="form-label" for="f-live">Live Stream</label>
-        <input class="form-input" id="f-live" name="live" placeholder="YouTube/FB/TikTok/IG Live URL">
+        <label class="form-label" for="ev-live">Live Stream</label>
+        <input class="form-input" id="ev-live" name="live" placeholder="YouTube/FB/TikTok/IG Live URL">
        </div>
        <div>
-        <label class="form-label" for="f-file">Download</label>
-        <input class="form-input" id="f-file" name="download" placeholder="https://...">
+        <label class="form-label" for="ev-download">Download</label>
+        <input class="form-input" id="ev-download" name="download" placeholder="https://...">
        </div>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;">
@@ -829,39 +815,42 @@ async function loadEventsFromSheets(isRetry) {
   try {
     const data = await apiRequest({ action:'getEvents' });
     if (data.status === 'ok') {
-      allEvents = (data.events||[]).map(r => ({
-        __backendId: r.id||r.__backendId||'',
-        // title: accept new 'title' OR old 'event_name'
-        title:       r.title||r.event_name||'',
-        image:       r.image||r.image_url||'',
-        artists:     r.artists||'',
-        date:        r.date||'',
-        start_time:  r.start_time||'',
-        end_time:    r.end_time||'',
-        timezone:    r.timezone||'',
-        location:    r.location||r.location_name||'',
-        city:        r.city||'',
-        country:     r.country||'',
-        description: r.description||'',
-        type:        r.type||r.event_type||'',
-        note:        r.note||'',
-        tv:          r.tv||r.tv_channel||'',
-        youtube:     r.youtube||r.youtube_link||'',
-        instagram:   r.instagram||r.instagram_link||'',
-        facebook:    r.facebook||r.facebook_link||'',
-        x:           r.x||r.x_link||'',
-        tiktok:      r.tiktok||r.tiktok_link||'',
-        website:     r.website||'',
-        whatsapp:    r.whatsapp||r.whatsapp_link||'',
-        shopee:      r.shopee||r.shopee_link||'',
-        live:        r.live||r.live_link||'',
-        download:    r.download||r.file_link||'',
-        map_embed:   r.map_embed||'',
-        date_end:    r.date_end||''
-      }));
-      // Filter: must have a title
-      allEvents = allEvents.filter(e => e.title && e.title.trim());
-      allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
+      allEvents = (data.events||[]).map(r => {
+        // Support old Sheets column names as fallbacks during migration
+        const title     = r.title     || r.event_name    || '';
+        const image     = r.image     || r.image_url     || '';
+        const dateStart = r.dateStart || r.date          || '';
+        const dateEnd   = r.dateEnd   || r.date_end      || '';
+        const startTime = r.startTime || r.start_time    || '';
+        const endTime   = r.endTime   || r.end_time      || '';
+        const location  = r.location  || r.location_name || '';
+        const type      = r.type      || r.event_type    || '';
+        const tv        = r.tv        || r.tv_channel    || '';
+        const map       = r.map       || r.map_embed     || '';
+        const youtube   = r.youtube   || r.youtube_link  || '';
+        const instagram = r.instagram || r.instagram_link|| '';
+        const facebook  = r.facebook  || r.facebook_link || '';
+        const x         = r.x         || r.x_link        || '';
+        const tiktok    = r.tiktok    || r.tiktok_link   || '';
+        const whatsapp  = r.whatsapp  || r.whatsapp_link || '';
+        const shopee    = r.shopee    || r.shopee_link   || '';
+        const live      = r.live      || r.live_link     || '';
+        const download  = r.download  || r.file_link     || '';
+        return {
+          __backendId: r.id || r.__backendId || '',
+          title, image, artists: r.artists || '',
+          dateStart, dateEnd, startTime, endTime,
+          timezone:    r.timezone    || '',
+          country:     r.country     || '',
+          city:        r.city        || '',
+          location, description: r.description || '',
+          type, note: r.note || '', tv, map,
+          website:  r.website  || '',
+          youtube, instagram, facebook, tiktok, x,
+          whatsapp, shopee, live, download
+        };
+      }).filter(e => e.title && e.title.trim());
+      allEvents.sort((a,b) => (a.dateStart+a.startTime).localeCompare(b.dateStart+b.startTime));
       apiLoaded = true;
       hideConnectionError();
       renderCurrentPage();
@@ -869,7 +858,6 @@ async function loadEventsFromSheets(isRetry) {
   } catch(e) {
     console.warn('Sheets API error:', e);
     if (!isRetry) {
-      console.log('Retrying...');
       setTimeout(() => loadEventsFromSheets(true), 3000);
     } else {
       showConnectionError();
@@ -1034,9 +1022,9 @@ function getFullDateDisplay(dateStr) {
 // Auto-hide disabled — all events show on public page regardless of time
 function isEventAutoHidden(ev) { return false; }
 function isEventPast(ev) {
-  if (!ev.date) return false;
-  const endTime = ev.end_time||ev.start_time||'23:59';
-  return new Date(ev.date+'T'+endTime) < new Date();
+  if (!ev.dateStart) return false;
+  const endTime = ev.endTime || ev.startTime || '23:59';
+  return new Date(ev.dateStart+'T'+endTime) < new Date();
 }
 
 const SOCIAL_ICONS = {
@@ -1087,8 +1075,8 @@ function renderHome() {
   grid.innerHTML = '';
   const monthMap = new Map();
   events.forEach(ev => {
-    if (!ev.date) { const k='no-date'; if(!monthMap.has(k))monthMap.set(k,{label:'Date TBA',events:[]}); monthMap.get(k).events.push(ev); return; }
-    const d = new Date(ev.date+'T00:00:00');
+    if (!ev.dateStart) { const k='no-date'; if(!monthMap.has(k))monthMap.set(k,{label:'Date TBA',events:[]}); monthMap.get(k).events.push(ev); return; }
+    const d = new Date(ev.dateStart+'T00:00:00');
     const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     if (!monthMap.has(k)) monthMap.set(k, { label:d.toLocaleDateString('en-US',{month:'long',year:'numeric'}), events:[] });
     monthMap.get(k).events.push(ev);
@@ -1097,8 +1085,7 @@ function renderHome() {
     const gw = document.createElement('div'); gw.className='month-group';
     const hdr = document.createElement('div'); hdr.className='month-group-header';
     hdr.innerHTML=`<span class="month-group-header-label">${label}</span><span class="month-group-header-count">${me.length} event${me.length!==1?'s':''}</span><span class="month-group-header-line"></span>`;
-    gw.appendChild(hdr);
-    const cg = document.createElement('div'); cg.className='cards-grid'; cg.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;';
+    gw.appendChild(hdr);    const cg = document.createElement('div'); cg.className='cards-grid'; cg.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;';
     me.forEach(ev => {
       const card = createCard(ev);
       if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) cg.appendChild(card);
@@ -1121,7 +1108,7 @@ function createCard(ev) {
   // Rule 2: image only if url exists — no placeholder, no empty space
   const imgHtml = ev.image
     ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" onerror="this.parentElement.remove();" loading="lazy">${buildDateBadge(ev, color)}</div>`
-    : (ev.date ? `<div style="position:relative;height:0;">${buildDateBadge(ev, color)}</div>` : '');
+    : (ev.dateStart ? `<div style="position:relative;height:0;">${buildDateBadge(ev, color)}</div>` : '');
 
   // Rule 3-4: date row only if date exists; time+timezone only if time exists
   const rawTz = (ev.timezone||'').trim();
@@ -1129,13 +1116,13 @@ function createCard(ev) {
   const tzText = validTz ? ` (${validTz})` : '';
 
   const metaItems = [];
-  if (ev.date) {
-    const dateStr = getMonthDisplay(ev.date) + (ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : '');
+  if (ev.dateStart) {
+    const dateStr = getMonthDisplay(ev.dateStart) + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – '+getMonthDisplay(ev.dateEnd) : '');
     metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateStr}</div>`);
   }
   // Rule 5: timezone only after time, never alone
-  if (ev.start_time) {
-    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
+  if (ev.startTime) {
+    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.startTime}${ev.endTime?' – '+ev.endTime:''}${tzText}</span></div>`);
   }
   // Rule 6: location only if exists — filter out any GMT values accidentally stored in location fields
   const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
@@ -1168,11 +1155,11 @@ function createCard(ev) {
 }
 
 function buildDateBadge(ev, color) {
-  if (!ev.date) return '';
-  const d = new Date(ev.date+'T00:00:00');
+  if (!ev.dateStart) return '';
+  const d = new Date(ev.dateStart+'T00:00:00');
   const dow = d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
-  if (ev.date_end && ev.date_end !== ev.date) {
-    const d2 = new Date(ev.date_end+'T00:00:00');
+  if (ev.dateEnd && ev.dateEnd !== ev.dateStart) {
+    const d2 = new Date(ev.dateEnd+'T00:00:00');
     const dow2 = d2.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
     return `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.4rem 0.6rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.62rem;font-weight:700;letter-spacing:0.04em;">${dow} ${d.getDate()} – ${dow2} ${d2.getDate()}</div></div>`;
   }
@@ -1218,10 +1205,10 @@ function openDetailModal(id) {
   const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
 
   const metaRows = [];
-  if (ev.date) metaRows.push(`<div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>`);
-  if (ev.date) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – ' + getFullDateDisplay(ev.date_end) : ''}</span></div>`);
+  if (ev.dateStart) metaRows.push(`<div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.dateStart)}</div>`);
+  if (ev.dateStart) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.dateStart)}${ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + getFullDateDisplay(ev.dateEnd) : ''}</span></div>`);
   // Time+timezone: only if time exists; timezone never alone
-  if (ev.start_time) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzInline}</span></div>`);
+  if (ev.startTime) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.startTime}${ev.endTime ? ' – ' + ev.endTime : ''}${tzInline}</span></div>`);
   if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
   if (ev.type) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.type}</span></div>`);
   if (ev.tv) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv)}</span></div>`);
@@ -1240,9 +1227,9 @@ function openDetailModal(id) {
 
   // Map: only if embed code exists
   const mapWrap = document.getElementById('detail-map-wrap');
-  if (ev.map_embed && ev.map_embed.trim()) {
+  if (ev.map && ev.map.trim()) {
     mapWrap.style.display = 'block';
-    document.getElementById('detail-map').innerHTML = ev.map_embed.replace(/width="[^"]*"/g, 'width="100%"').replace(/height="[^"]*"/g, 'height="300"');
+    document.getElementById('detail-map').innerHTML = ev.map.replace(/width="[^"]*"/g, 'width="100%"').replace(/height="[^"]*"/g, 'height="300"');
   } else {
     mapWrap.style.display = 'none';
   }
@@ -1286,11 +1273,11 @@ function renderCalendar() {
   for (let d=1;d<=daysInMonth;d++) {
     const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dayEvents = allEvents.filter(ev => {
-      if (!ev.date) return false;
-      if (ev.date_end && ev.date_end > ev.date) {
-        return dateStr >= ev.date && dateStr <= ev.date_end;
+      if (!ev.dateStart) return false;
+      if (ev.dateEnd && ev.dateEnd > ev.dateStart) {
+        return dateStr >= ev.dateStart && dateStr <= ev.dateEnd;
       }
-      return ev.date === dateStr;
+      return ev.dateStart === dateStr;
     });
     const bdays = getBirthdaysOnDate(month+1, d);
     const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
@@ -1380,7 +1367,7 @@ function createAdminRow(ev) {
 function updateAdminRow(row,ev) {
   const color=getArtistColor(ev.artists); const past=isEventPast(ev); const isConfirming=deleteConfirmIds.has(ev.__backendId);
   row.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-    <div style="flex:1;min-width:150px;"><p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}</p><p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.date)} · ${getArtistLabel(ev.artists)}</p></div>
+    <div style="flex:1;min-width:150px;"><p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}</p><p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.dateStart)} · ${getArtistLabel(ev.artists)}</p></div>
     <div style="display:flex;gap:6px;align-items:center;">${isConfirming
       ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">Delete?</span><button class="btn-danger" onclick="confirmDelete('${ev.__backendId}')">Yes</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${ev.__backendId}')">Cancel</button>`
       :`<button class="btn-secondary" style="font-size:0.8rem;padding:6px 10px;" onclick="openEditModal('${ev.__backendId}')"><i data-lucide="edit-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Edit</button><button class="btn-danger" onclick="startDelete('${ev.__backendId}')"><i data-lucide="trash-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:2px;"></i>Delete</button>`
@@ -1429,23 +1416,104 @@ function closeEventFormModal(){document.getElementById('event-form-modal').style
 function closeEventFormModalBackdrop(e){if(e.target===document.getElementById('event-form-modal'))closeEventFormModal();}
 function clearForm(){const f=document.getElementById('event-form');if(f)f.reset();document.querySelectorAll('.artist-check').forEach(c=>{c.checked=false;});}
 function fillForm(ev) {
-  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
-  set('f-name',ev.title);set('f-image',ev.image);set('f-date',ev.date);
-  set('f-start',ev.start_time);set('f-end',ev.end_time);set('f-timezone',ev.timezone||'');
-  set('f-country',ev.country);
-  set('f-city',ev.city);set('f-location',ev.location);set('f-desc',ev.description);
-  set('f-yt',ev.youtube);set('f-ig',ev.instagram);set('f-fb',ev.facebook);
-  set('f-x',ev.x);set('f-tiktok',ev.tiktok);set('f-website',ev.website);set('f-whatsapp',ev.whatsapp);
-  set('f-shopee',ev.shopee);set('f-live',ev.live);set('f-file',ev.download);
-  set('f-note',ev.note);set('f-type',ev.type);set('f-map',ev.map_embed);set('f-date-end',ev.date_end);set('f-tv',ev.tv||'');
-  const arr=ev.artists?(ev.artists.split(',').map(a=>a.trim())):[];
-  document.querySelectorAll('.artist-check').forEach(c=>{c.checked=arr.includes(c.value);});
+  // Strict schema: input id = 'ev-' + schemaKey
+  const set = (key, val) => { const el = document.getElementById('ev-' + key); if (el) el.value = val || ''; };
+  set('title',       ev.title);
+  set('image',       ev.image);
+  set('dateStart',   ev.dateStart);
+  set('dateEnd',     ev.dateEnd);
+  set('startTime',   ev.startTime);
+  set('endTime',     ev.endTime);
+  set('timezone',    ev.timezone);
+  set('country',     ev.country);
+  set('city',        ev.city);
+  set('location',    ev.location);
+  set('description', ev.description);
+  set('type',        ev.type);
+  set('note',        ev.note);
+  set('tv',          ev.tv);
+  set('map',         ev.map);
+  set('youtube',     ev.youtube);
+  set('instagram',   ev.instagram);
+  set('facebook',    ev.facebook);
+  set('x',           ev.x);
+  set('tiktok',      ev.tiktok);
+  set('website',     ev.website);
+  set('whatsapp',    ev.whatsapp);
+  set('shopee',      ev.shopee);
+  set('live',        ev.live);
+  set('download',    ev.download);
+  const arr = ev.artists ? ev.artists.split(',').map(a => a.trim()) : [];
+  document.querySelectorAll('.artist-check').forEach(c => { c.checked = arr.includes(c.value); });
+}
+
+// Read a form field by schema key (id = 'ev-' + key)
+function fv(key) { const el = document.getElementById('ev-' + key); return el ? el.value.trim() : ''; }
+
+// Build strict schema object from form
+function readFormSchema() {
+  const artists = [...document.querySelectorAll('.artist-check:checked')].map(c => c.value);
+  return {
+    title:       fv('title'),
+    image:       fv('image'),
+    artists:     artists.join(','),
+    dateStart:   fv('dateStart'),
+    dateEnd:     fv('dateEnd'),
+    startTime:   fv('startTime'),
+    endTime:     fv('endTime'),
+    timezone:    fv('timezone'),
+    country:     fv('country'),
+    city:        fv('city'),
+    location:    fv('location'),
+    description: fv('description'),
+    type:        fv('type'),
+    note:        fv('note'),
+    tv:          fv('tv'),
+    map:         fv('map'),
+    youtube:     fv('youtube'),
+    instagram:   fv('instagram'),
+    facebook:    fv('facebook'),
+    x:           fv('x'),
+    tiktok:      fv('tiktok'),
+    website:     fv('website'),
+    whatsapp:    fv('whatsapp'),
+    shopee:      fv('shopee'),
+    live:        fv('live'),
+    download:    fv('download')
+  };
 }
 
 function getFormPreviewData() {
-  const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
-  const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
-  return { __backendId:'__preview__', title:gv('f-name')||'Event Name', image:gv('f-image'), artists:ca.join(','), date:gv('f-date'), date_end:gv('f-date-end'), start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'), country:gv('f-country'), city:gv('f-city'), location:gv('f-location'), description:gv('f-desc'), youtube:gv('f-yt'), instagram:gv('f-ig'), facebook:gv('f-fb'), x:gv('f-x'), tiktok:gv('f-tiktok'), website:gv('f-website'), whatsapp:gv('f-whatsapp'), shopee:gv('f-shopee'), live:gv('f-live'), download:gv('f-file'), type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), tv:gv('f-tv') };
+  const d = readFormSchema();
+  return {
+    __backendId: '__preview__',
+    title:       d.title || 'Event Name',
+    image:       d.image,
+    artists:     d.artists,
+    dateStart:   d.dateStart,
+    dateEnd:     d.dateEnd,
+    startTime:   d.startTime,
+    endTime:     d.endTime,
+    timezone:    d.timezone,
+    country:     d.country,
+    city:        d.city,
+    location:    d.location,
+    description: d.description,
+    type:        d.type,
+    note:        d.note,
+    tv:          d.tv,
+    map:         d.map,
+    youtube:     d.youtube,
+    instagram:   d.instagram,
+    facebook:    d.facebook,
+    x:           d.x,
+    tiktok:      d.tiktok,
+    website:     d.website,
+    whatsapp:    d.whatsapp,
+    shopee:      d.shopee,
+    live:        d.live,
+    download:    d.download
+  };
 }
 function openPreviewPopup() {
   const popup=document.getElementById('preview-popup'); if(!popup)return;
@@ -1464,41 +1532,53 @@ setInterval(()=>{ if(currentPage==='home')renderHome(); else if(currentPage==='c
 
 async function handleEventFormSubmit(e) {
   e.preventDefault();
-  const name=(document.getElementById('f-name').value||'').trim();
-  const date=document.getElementById('f-date').value;
-  const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
-  const gv=id=>(document.getElementById(id)?document.getElementById(id).value.trim():'');
-  const data = {
-    // New strict field names
-    title:name, image:gv('f-image'), artists:ca.join(','), date,
-    start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'),
-    country:gv('f-country'),
-    city:gv('f-city'), location:gv('f-location'), description:gv('f-desc'),
-    youtube:gv('f-yt'), instagram:gv('f-ig'), facebook:gv('f-fb'),
-    x:gv('f-x'), tiktok:gv('f-tiktok'), website:gv('f-website'), whatsapp:gv('f-whatsapp'),
-    shopee:gv('f-shopee'), live:gv('f-live'), download:gv('f-file'),
-    type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), tv:gv('f-tv'),
-    // Backward-compatible aliases for existing Sheets that still have old column headers
-    event_name:name, image_url:gv('f-image'), location_name:gv('f-location'),
-    event_type:gv('f-type'), tv_channel:gv('f-tv'),
-    youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'),
-    x_link:gv('f-x'), tiktok_link:gv('f-tiktok'),
-    whatsapp_link:gv('f-whatsapp'), shopee_link:gv('f-shopee'),
-    live_link:gv('f-live'), file_link:gv('f-file')
+  const schema = readFormSchema();
+
+  // Build Sheets payload — strict schema keys only
+  const payload = {
+    title:       schema.title,
+    image:       schema.image,
+    artists:     schema.artists,
+    dateStart:   schema.dateStart,
+    dateEnd:     schema.dateEnd,
+    startTime:   schema.startTime,
+    endTime:     schema.endTime,
+    timezone:    schema.timezone,
+    country:     schema.country,
+    city:        schema.city,
+    location:    schema.location,
+    description: schema.description,
+    type:        schema.type,
+    note:        schema.note,
+    tv:          schema.tv,
+    map:         schema.map,
+    youtube:     schema.youtube,
+    instagram:   schema.instagram,
+    facebook:    schema.facebook,
+    x:           schema.x,
+    tiktok:      schema.tiktok,
+    website:     schema.website,
+    whatsapp:    schema.whatsapp,
+    shopee:      schema.shopee,
+    live:        schema.live,
+    download:    schema.download
   };
-  const btn=document.getElementById('form-submit-btn');
-  const txt=document.getElementById('form-submit-text');
-  const spin=document.getElementById('form-submit-spinner');
-  btn.disabled=true; txt.style.display='none'; spin.style.display='inline';
+
+  const btn  = document.getElementById('form-submit-btn');
+  const txt  = document.getElementById('form-submit-text');
+  const spin = document.getElementById('form-submit-spinner');
+  btn.disabled = true; txt.style.display = 'none'; spin.style.display = 'inline';
   try {
-    if(editingEventId) await updateEventInSheets(editingEventId,data);
-    else await createEventInSheets(data);
-    btn.disabled=false; txt.style.display='inline'; spin.style.display='none';
-    closeEventFormModal(); showToast(editingEventId?'Event updated!':'Event added!');
-    clearForm(); await loadEventsFromSheets();
+    if (editingEventId) await updateEventInSheets(editingEventId, payload);
+    else await createEventInSheets(payload);
+    btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
+    closeEventFormModal();
+    showToast(editingEventId ? 'Event updated!' : 'Event added!');
+    clearForm();
+    await loadEventsFromSheets();
   } catch(err) {
-    btn.disabled=false; txt.style.display='inline'; spin.style.display='none';
-    showToast('Error: '+(err.message||'Failed to save'));
+    btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
+    showToast('Error: ' + (err.message || 'Failed to save'));
   }
 }
 
