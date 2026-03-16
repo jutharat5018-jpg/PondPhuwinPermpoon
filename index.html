@@ -1836,10 +1836,10 @@ function buildCountdownImgBadge(ev) {
   const days = daysUntilEvent(ev.dateStart);
   if (days === null) return '';
   if (days === 0) {
-    return `<div style="position:absolute;bottom:10px;left:10px;background:#ef4444;color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 8px rgba(0,0,0,0.25);">TODAY</div>`;
+    return `<div style="position:absolute;bottom:10px;left:10px;background:#ef4444;color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;box-shadow:0 2px 8px rgba(0,0,0,0.25);">TODAY</div>`;
   }
   if (days > 0 && days <= 7) {
-    return `<div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.52);color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 8px rgba(0,0,0,0.2);">in ${days} day${days !== 1 ? 's' : ''}</div>`;
+    return `<div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.52);color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;">in ${days} day${days !== 1 ? 's' : ''}</div>`;
   }
   return '';
 }
