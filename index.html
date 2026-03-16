@@ -373,7 +373,7 @@
   </div>
 
   <!-- EVENT FORM MODAL -->
-  <div class="modal-backdrop" id="event-form-modal" style="display:none;" onclick="closeEventFormModalBackdrop(event)">
+  <div class="modal-backdrop" id="event-form-modal" style="display:none;">
    <div class="modal-box" onclick="event.stopPropagation()" style="max-width:720px;">
     <div style="padding:1.5rem 1.5rem 0;">
      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
@@ -384,7 +384,7 @@
      </div>
     </div>
     <div style="padding:0 1.5rem 1.5rem;">
-     <form id="event-form" onsubmit="handleEventFormSubmit(event)">
+     <form id="event-form" novalidate>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-title">Event Name</label>
@@ -535,7 +535,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         Preview
        </button>
-       <button type="submit" class="btn-primary" id="form-submit-btn">
+       <button type="button" class="btn-primary" id="form-submit-btn" onclick="handleEventFormSubmit()">
         <span id="form-submit-text">Save Event</span>
         <span id="form-submit-spinner" style="display:none;"><span class="spinner"></span></span>
        </button>
@@ -559,7 +559,7 @@
     </div>
     <div style="padding:0 1.25rem 1.25rem;display:flex;justify-content:flex-end;gap:8px;">
      <button class="btn-secondary" onclick="closePreviewPopup()">แก้ไขต่อ</button>
-     <button class="btn-primary" onclick="closePreviewPopup();document.getElementById('event-form').requestSubmit()">Save Event</button>
+     <button class="btn-primary" onclick="closePreviewPopup();handleEventFormSubmit()">Save Event</button>
     </div>
    </div>
   </div>
@@ -868,55 +868,115 @@ async function loadEventsFromSheets(isRetry) {
   try {
     const data = await apiGet('getEvents');
     if (data.status === 'ok') {
-      // Helper: strip Sheets empty-date sentinel (both Date-converted string and raw)
-      const cleanDate = v => (!v || v === '1899-12-30' || String(v).startsWith('1899-12-30')) ? '' : v;
-      // Helper: strip any HTML/iframe from text fields that should be plain text
-      const safeText  = v => (!v || /<[a-z][\s\S]*>/i.test(v)) ? '' : v;
+      const raw = data.events || [];
 
-      allEvents = (data.events||[]).map(r => {
-        // Support old Sheets column names as fallbacks during migration
-        const title     = safeText(r.title     || r.event_name    || '');
-        const image     = safeText(r.image     || r.image_url     || '');
-        const dateStart = cleanDate(r.dateStart || r.date          || '');
-        const dateEnd   = cleanDate(r.dateEnd   || r.date_end      || '');
-        const startTime = r.startTime || r.start_time    || '';
-        const endTime   = r.endTime   || r.end_time      || '';
-        const location  = safeText(r.location  || r.location_name || '');
-        const type      = safeText(r.type      || r.event_type    || '');
-        const tv        = safeText(r.tv        || r.tv_channel    || '');
-        const map       = r.map       || r.map_embed     || '';  // map is allowed to have HTML
-        const youtube   = r.youtube   || r.youtube_link  || '';
-        const instagram = r.instagram || r.instagram_link|| '';
-        const facebook  = r.facebook  || r.facebook_link || '';
-        const x         = r.x         || r.x_link        || '';
-        const tiktok    = r.tiktok    || r.tiktok_link   || '';
-        const whatsapp  = r.whatsapp  || r.whatsapp_link || '';
-        const shopee    = r.shopee    || r.shopee_link   || '';
-        const live      = r.live      || r.live_link     || '';
-        const download  = r.download  || r.file_link     || '';
-        return {
-          __backendId: r.id || r.__backendId || '',
-          title, image, artists: r.artists || '',
-          dateStart, dateEnd, startTime, endTime,
-          timezone:    safeText(r.timezone    || ''),
-          country:     safeText(r.country     || ''),
-          city:        safeText(r.city        || ''),
-          location, description: r.description || '',
-          type, note: safeText(r.note || ''), tv, map,
-          website:  r.website  || '',
-          youtube, instagram, facebook, tiktok, x,
+      // ── DEBUG: log everything received from Sheet ──────────────────────
+      console.log('ALL DATA — raw rows from Sheet:', raw);
+      console.log('Total rows received:', raw.length);
+
+      // ── Helpers ────────────────────────────────────────────────────────
+      // Strip Sheets empty-date sentinel 1899-12-30
+      const cleanDate = v => (!v || String(v).startsWith('1899-12-30')) ? '' : String(v).trim();
+      // Strip HTML/iframe from plain-text fields
+      const safeText  = v => (!v || /<[a-z][\s\S]*>/i.test(String(v))) ? '' : String(v).trim();
+
+      // ── Map each row — support BOTH simple schema and full PPP schema ──
+      // Simple schema (current Sheet): date, title, type, location,
+      //                                description, image, map, status
+      // Full schema (PPP): dateStart, startTime, artists, etc.
+      const mapped = raw.map((r, i) => {
+        // Normalise status — trim + lowercase so "Upcoming" == "upcoming"
+        const status    = safeText(r.status || '').toLowerCase();
+
+        // Date — Sheet column "date" maps to dateStart
+        const dateStart = cleanDate(r.date || r.dateStart || r.date_start || '');
+        const dateEnd   = cleanDate(r.dateEnd || r.date_end || '');
+
+        // Title
+        const title     = safeText(r.title || r.event_name || '');
+
+        // Type — allow ANY string, never filtered
+        const type      = safeText(r.type || r.event_type || '');
+
+        // Location
+        const location  = safeText(r.location || r.location_name || '');
+
+        // Description
+        const description = safeText(r.description || '');
+
+        // Image — URL, keep as-is
+        const image     = safeText(r.image || r.image_url || '');
+
+        // Map embed — allowed to have HTML (iframe)
+        const map       = r.map || r.map_embed || '';
+
+        // Time fields (full schema support)
+        const startTime = safeText(r.startTime || r.start_time || '');
+        const endTime   = safeText(r.endTime   || r.end_time   || '');
+        const timezone  = safeText(r.timezone  || '');
+
+        // Artist fields (full schema support)
+        const artists   = safeText(r.artists || '');
+
+        // Social links
+        const youtube   = safeText(r.youtube   || r.youtube_link   || '');
+        const instagram = safeText(r.instagram || r.instagram_link || '');
+        const facebook  = safeText(r.facebook  || r.facebook_link  || '');
+        const x         = safeText(r.x         || r.x_link         || '');
+        const tiktok    = safeText(r.tiktok    || r.tiktok_link    || '');
+        const website   = safeText(r.website   || '');
+        const whatsapp  = safeText(r.whatsapp  || r.whatsapp_link  || '');
+        const shopee    = safeText(r.shopee    || r.shopee_link    || '');
+        const live      = safeText(r.live      || r.live_link      || '');
+        const download  = safeText(r.download  || r.file_link      || '');
+
+        const note      = safeText(r.note || '');
+        const tv        = safeText(r.tv   || r.tv_channel || '');
+        const country   = safeText(r.country || '');
+        const city      = safeText(r.city    || '');
+
+        const ev = {
+          __backendId: r.id || r.__backendId || String(i),
+          status,
+          title, image, artists,
+          dateStart, dateEnd, startTime, endTime, timezone,
+          country, city, location, description,
+          type, note, tv, map,
+          website, youtube, instagram, facebook, tiktok, x,
           whatsapp, shopee, live, download
         };
-      }).filter(e => e.title && e.title.trim());
-      allEvents.sort((a,b) => (a.dateStart+a.startTime).localeCompare(b.dateStart+b.startTime));
+
+        console.log(`Row ${i}:`, { title, dateStart, status, type });
+        return ev;
+      });
+
+      // ── Filter: status must be "upcoming" (case-insensitive) ──────────
+      // Also include rows with no status set if they have a title (backward compat)
+      allEvents = mapped.filter(e => {
+        if (!e.title) return false;                          // must have title
+        if (!e.status) return true;                          // no status → show (old data)
+        return e.status === 'upcoming';                      // status = upcoming
+      });
+
+      console.log('Filtered upcoming events:', allEvents.length, allEvents.map(e => e.title));
+
+      // ── Sort by date ascending, no-date events go last ────────────────
+      allEvents.sort((a, b) => {
+        if (!a.dateStart && !b.dateStart) return 0;
+        if (!a.dateStart) return 1;   // TBA → end
+        if (!b.dateStart) return -1;  // TBA → end
+        const cmp = a.dateStart.localeCompare(b.dateStart);
+        if (cmp !== 0) return cmp;
+        return (a.startTime || '').localeCompare(b.startTime || '');
+      });
+
       apiLoaded = true;
       hideConnectionError();
-      // Always render home (public view) + current page
       renderHome();
       if (currentPage !== 'home') renderCurrentPage();
     }
   } catch(e) {
-    console.warn('Sheets API error:', e);
+    console.error('Sheets API error:', e);
     if (!isRetry) {
       setTimeout(() => loadEventsFromSheets(true), 3000);
     } else {
@@ -1123,36 +1183,77 @@ function buildSocialIcons(ev) {
 
 function renderHome() {
   renderBirthdayBanners();
-  // Rule 1: only events with a title
-  const events = allEvents.filter(ev => !isEventAutoHidden(ev) && ev.title && ev.title.trim());
+
+  // Show ALL events in allEvents — already filtered to upcoming by loadEventsFromSheets
+  const events = allEvents.filter(ev => ev.title && ev.title.trim());
+
+  console.log('renderHome — events to render:', events.length, events.map(e => e.title));
+
   const grid = document.getElementById('events-grid');
   const noEv = document.getElementById('no-events');
   const count = document.getElementById('events-count');
   if (!grid) return;
-  count.textContent = events.length + ' event' + (events.length!==1?'s':'');
-  if (events.length === 0) { grid.innerHTML=''; noEv.style.display='block'; if(typeof lucide!=='undefined')lucide.createIcons(); return; }
+
+  count.textContent = events.length + ' event' + (events.length !== 1 ? 's' : '');
+
+  if (events.length === 0) {
+    grid.innerHTML = '';
+    noEv.style.display = 'block';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
+
   noEv.style.display = 'none';
   grid.innerHTML = '';
-  const monthMap = new Map();
+
+  // ── Group by date (YYYY-MM-DD) — empty date → "Date TBA" ──────────────
+  const dateMap = new Map();
+
   events.forEach(ev => {
-    if (!ev.dateStart) { const k='no-date'; if(!monthMap.has(k))monthMap.set(k,{label:'Date TBA',events:[]}); monthMap.get(k).events.push(ev); return; }
-    const d = new Date(ev.dateStart+'T00:00:00');
-    const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    if (!monthMap.has(k)) monthMap.set(k, { label:d.toLocaleDateString('en-US',{month:'long',year:'numeric'}), events:[] });
-    monthMap.get(k).events.push(ev);
+    let key, label;
+    if (!ev.dateStart) {
+      // No date — group under TBA, sorted to end
+      key   = 'zzz-no-date';
+      label = 'Date TBA';
+    } else {
+      // Group by exact date string YYYY-MM-DD
+      key   = ev.dateStart;
+      const d = new Date(ev.dateStart + 'T00:00:00');
+      label = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    }
+
+    if (!dateMap.has(key)) dateMap.set(key, { label, events: [] });
+    dateMap.get(key).events.push(ev);
   });
-  monthMap.forEach(({label, events:me}) => {
-    const gw = document.createElement('div'); gw.className='month-group';
-    const hdr = document.createElement('div'); hdr.className='month-group-header';
-    hdr.innerHTML=`<span class="month-group-header-label">${label}</span><span class="month-group-header-count">${me.length} event${me.length!==1?'s':''}</span><span class="month-group-header-line"></span>`;
-    gw.appendChild(hdr);    const cg = document.createElement('div'); cg.className='cards-grid'; cg.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;';
-    me.forEach(ev => {
+
+  // Render each date group
+  dateMap.forEach(({ label, events: group }) => {
+    const gw  = document.createElement('div');
+    gw.className = 'month-group';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'month-group-header';
+    hdr.innerHTML = `
+      <span class="month-group-header-label">${label}</span>
+      <span class="month-group-header-count">${group.length} event${group.length !== 1 ? 's' : ''}</span>
+      <span class="month-group-header-line"></span>`;
+    gw.appendChild(hdr);
+
+    const cg = document.createElement('div');
+    cg.className = 'cards-grid';
+    cg.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;';
+
+    // Render ALL cards in this group — no break, no early return
+    group.forEach(ev => {
       const card = createCard(ev);
       if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) cg.appendChild(card);
     });
-    gw.appendChild(cg); grid.appendChild(gw);
+
+    gw.appendChild(cg);
+    grid.appendChild(gw);
   });
-  if (typeof lucide!=='undefined') lucide.createIcons();
+
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function createCard(ev) {
@@ -1473,8 +1574,12 @@ function openEditModal(id) {
   document.body.style.overflow='hidden';
   if(typeof lucide!=='undefined')lucide.createIcons();
 }
-function closeEventFormModal(){document.getElementById('event-form-modal').style.display='none';document.body.style.overflow='';}
-function closeEventFormModalBackdrop(e){if(e.target===document.getElementById('event-form-modal'))closeEventFormModal();}
+function closeEventFormModal() {
+  document.getElementById('event-form-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+// Backdrop click is DISABLED — modal only closes via Cancel button or save success
+function closeEventFormModalBackdrop(e) { /* intentionally disabled */ }
 function clearForm(){const f=document.getElementById('event-form');if(f)f.reset();document.querySelectorAll('.artist-check').forEach(c=>{c.checked=false;});}
 function fillForm(ev) {
   // Strict schema: input id = 'ev-' + schemaKey
@@ -1591,18 +1696,19 @@ function attachPreviewListeners(){}
 
 setInterval(()=>{ if(currentPage==='home')renderHome(); else if(currentPage==='calendar')renderCalendar(); renderBirthdayBanners(); },60000);
 
-async function handleEventFormSubmit(e) {
-  e.preventDefault();
+async function handleEventFormSubmit() {
+  // ── Never auto-submit, never close unless save succeeds ──────────────
+
   const schema = readFormSchema();
 
-  // Validate required fields
+  // Validate required field
   if (!schema.title || !schema.title.trim()) {
     showToast('❌ กรุณาใส่ชื่อ Event ก่อน');
     document.getElementById('ev-title').focus();
-    return;
+    return; // stay open — do NOT close
   }
 
-  // Build Sheets payload — strict schema keys only
+  // Build strict payload
   const payload = {
     title:       schema.title,
     image:       schema.image,
@@ -1635,21 +1741,38 @@ async function handleEventFormSubmit(e) {
   const btn  = document.getElementById('form-submit-btn');
   const txt  = document.getElementById('form-submit-text');
   const spin = document.getElementById('form-submit-spinner');
-  btn.disabled = true; txt.style.display = 'none'; spin.style.display = 'inline';
+
+  // Lock button while saving
+  btn.disabled = true;
+  txt.style.display = 'none';
+  spin.style.display = 'inline';
+
+  let success = false;
   try {
-    if (editingEventId) await updateEventInSheets(editingEventId, payload);
-    else await createEventInSheets(payload);
-    btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
-    closeEventFormModal();
+    if (editingEventId) {
+      await updateEventInSheets(editingEventId, payload);
+    } else {
+      await createEventInSheets(payload);
+    }
+    success = true;
+  } catch(err) {
+    console.error('Save error:', err);
+    showToast('❌ Error: ' + (err.message || 'Failed to save'));
+    // Stay open — let user retry or fix
+  }
+
+  // Restore button regardless
+  btn.disabled = false;
+  txt.style.display = 'inline';
+  spin.style.display = 'none';
+
+  // ── Only close and reload if save actually succeeded ─────────────────
+  if (success) {
+    closeEventFormModal();                                       // close AFTER save
     showToast(editingEventId ? 'Event updated! ✓' : 'Event added! ✓');
     clearForm();
     await loadEventsFromSheets();
-    // Always re-render admin list after save
     if (isAdmin) renderAdminList();
-  } catch(err) {
-    btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
-    showToast('❌ Error: ' + (err.message || 'Failed to save'));
-    console.error('Save error:', err);
   }
 }
 
@@ -1679,6 +1802,31 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Login form keyboard shortcut
   const pwField = document.getElementById('login-pw-field');
   if (pwField) pwField.addEventListener('keydown', e => { if(e.key === 'Enter') doAdminLogin(); });
+
+  // ── Block ESC from closing event form modal ───────────────────────────
+  document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('event-form-modal');
+    if (!modal || modal.style.display === 'none') return;
+    if (e.key === 'Escape') {
+      // ESC is blocked while event form is open — user must use Cancel button
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+
+  // ── Block Enter key from submitting form inside text inputs ───────────
+  // (Pressing Enter in any input must NOT submit — only the Save button does)
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const modal = document.getElementById('event-form-modal');
+    if (!modal || modal.style.display === 'none') return;
+    const tag = e.target.tagName;
+    // Allow Enter in textarea (normal line break), block it everywhere else in the form
+    if (tag !== 'TEXTAREA') {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
   // ── NAVIGATE via URL ───────────────────────
   // If ?panel=pppsecret → go to admin login (page still shows admin page which handles internally)
