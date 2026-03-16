@@ -54,6 +54,10 @@
   #toast.show { opacity: 1; pointer-events: auto; }
   .spinner { width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; margin-right: 4px; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
@@ -854,16 +858,12 @@ async function apiPost(body) {
 
 async function loadEventsFromSheets(isRetry) {
   try {
-    // Clear server-side cache first so we always get fresh data from Sheet
-    try { await apiGet('clearCache'); } catch(e) { /* non-fatal */ }
-
     const data = await apiGet('getEvents');
     if (data.status === 'ok') {
       const raw = data.events || [];
 
-      // ── DEBUG: log everything received from Sheet ──────────────────────
-      console.log('ALL DATA — raw rows from Sheet:', raw);
-      console.log('Total rows received:', raw.length);
+      // DEBUG logs reduced — only log summary, not full raw data (improves perf on large sheets)
+      console.log('Total rows received from Sheet:', raw.length);
 
       // ── Helpers ────────────────────────────────────────────────────────
       // Strip Sheets empty-date sentinel 1899-12-30
@@ -940,7 +940,6 @@ async function loadEventsFromSheets(isRetry) {
           website, whatsapp, shopee, live, download
         };
 
-        console.log(`Row ${i}:`, { title, dateStart, startTime, endTime, status, id: ev.__backendId, rowNumber: ev.__rowNumber });
         return ev;
       });
 
@@ -952,7 +951,7 @@ async function loadEventsFromSheets(isRetry) {
         return e.status === 'upcoming';                      // status = upcoming
       });
 
-      console.log('Filtered upcoming events:', allEvents.length, allEvents.map(e => e.title));
+
 
       // ── Sort by date ascending, no-date events go last ────────────────
       allEvents.sort((a, b) => {
@@ -1203,7 +1202,7 @@ function renderHome() {
   // Show ALL events in allEvents — already filtered to upcoming by loadEventsFromSheets
   const events = allEvents.filter(ev => ev.title && ev.title.trim());
 
-  console.log('renderHome — events to render:', events.length, events.map(e => e.title));
+
 
   const grid = document.getElementById('events-grid');
   const noEv = document.getElementById('no-events');
@@ -1211,6 +1210,20 @@ function renderHome() {
   if (!grid) return;
 
   count.textContent = events.length + ' event' + (events.length !== 1 ? 's' : '');
+
+  if (events.length === 0 && !apiLoaded) {
+    // Show skeleton while loading
+    grid.innerHTML = [1,2,3].map(() => `<div style="background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.07);overflow:hidden;margin-bottom:1.25rem;">
+      <div style="width:100%;height:220px;background:linear-gradient(90deg,#f3f4f6 25%,#e9eaec 50%,#f3f4f6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+      <div style="padding:0.85rem;">
+        <div style="height:12px;width:40%;background:#f3f4f6;border-radius:6px;margin-bottom:10px;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:18px;width:70%;background:#f3f4f6;border-radius:6px;margin-bottom:8px;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:12px;width:55%;background:#f3f4f6;border-radius:6px;animation:shimmer 1.4s infinite;"></div>
+      </div>
+    </div>`).join('');
+    noEv.style.display = 'none';
+    return;
+  }
 
   if (events.length === 0) {
     grid.innerHTML = '';
@@ -1222,7 +1235,7 @@ function renderHome() {
   noEv.style.display = 'none';
   grid.innerHTML = '';
 
-  // ── Group by date (YYYY-MM-DD) — empty date → "Date TBA" ──────────────
+  // ── Group by month (YYYY-MM) — empty date → "Date TBA" ────────────────
   const dateMap = new Map();
 
   events.forEach(ev => {
@@ -1232,10 +1245,10 @@ function renderHome() {
       key   = 'zzz-no-date';
       label = 'Date TBA';
     } else {
-      // Group by exact date string YYYY-MM-DD
-      key   = ev.dateStart;
+      // Group by month YYYY-MM
+      key   = ev.dateStart.slice(0, 7); // e.g. "2026-03"
       const d = new Date(ev.dateStart + 'T00:00:00');
-      label = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+      label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
 
     if (!dateMap.has(key)) dateMap.set(key, { label, events: [] });
@@ -1771,7 +1784,20 @@ function closePreviewPopup(){const p=document.getElementById('preview-popup');if
 function updatePreview(){}
 function attachPreviewListeners(){}
 
-setInterval(()=>{ if(currentPage==='home')renderHome(); else if(currentPage==='calendar')renderCalendar(); renderBirthdayBanners(); },60000);
+// ── Soft background refresh every 5 minutes ─────────────────────────────────
+// Only re-renders if data actually changed — no unnecessary DOM thrashing
+setInterval(async () => {
+  try {
+    const data = await apiGet('getEvents');
+    if (!data || data.status !== 'ok') return;
+    // If server returned cached data, skip re-render entirely
+    if (data.cached) return;
+    // Data may have changed — do a quiet reload
+    await loadEventsFromSheets();
+  } catch(e) { /* silent — user not affected */ }
+  // Also refresh birthday banners (cheap, local-only)
+  renderBirthdayBanners();
+}, 5 * 60 * 1000); // every 5 minutes, not 60 seconds
 
 async function handleEventFormSubmit() {
   // ── Never auto-submit, never close unless save succeeds ──────────────
