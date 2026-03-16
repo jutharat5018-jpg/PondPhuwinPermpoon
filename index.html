@@ -710,7 +710,7 @@ async function apiRequest(payload) {
   });
 }
 
-async function loadEventsFromSheets() {
+async function loadEventsFromSheets(isRetry) {
   try {
     const data = await apiRequest({ action:'getEvents' });
     if (data.status === 'ok') {
@@ -731,9 +731,53 @@ async function loadEventsFromSheets() {
       }));
       allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
       apiLoaded = true;
+      hideConnectionError();
       renderCurrentPage();
     }
-  } catch(e) { console.warn('Sheets API error:', e); showToast('Cannot connect to Google Sheets.'); }
+  } catch(e) {
+    console.warn('Sheets API error:', e);
+    if (!isRetry) {
+      console.log('Retrying...');
+      setTimeout(() => loadEventsFromSheets(true), 3000);
+    } else {
+      showConnectionError();
+    }
+  }
+}
+
+function showConnectionError() {
+  const grid = document.getElementById('events-grid');
+  const noEv = document.getElementById('no-events');
+  if (noEv) noEv.style.display = 'none';
+  if (grid) {
+    grid.innerHTML = `<div style="text-align:center;padding:4rem 1rem;color:#9ca3af;">
+      <div style="width:48px;height:48px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <p style="font-weight:700;color:#374151;margin-bottom:0.35rem;">ไม่สามารถเชื่อมต่อ Google Sheets ได้</p>
+      <p style="font-size:0.82rem;margin-bottom:1.25rem;">กรุณาตรวจสอบว่า Apps Script ถูก Deploy แล้ว และลองใหม่อีกครั้ง</p>
+      <button onclick="retryConnection()" style="background:#111;color:#fff;border:none;border-radius:8px;padding:0.6rem 1.25rem;font-size:0.88rem;font-weight:600;cursor:pointer;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-2px;margin-right:5px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        ลองใหม่
+      </button>
+    </div>`;
+  }
+}
+
+function hideConnectionError() {
+  const grid = document.getElementById('events-grid');
+  if (grid && grid.querySelector('button[onclick="retryConnection()"]')) {
+    grid.innerHTML = '';
+  }
+}
+
+async function retryConnection() {
+  const grid = document.getElementById('events-grid');
+  if (grid) grid.innerHTML = `<div style="text-align:center;padding:3rem;color:#9ca3af;font-size:0.88rem;">
+    <div style="width:20px;height:20px;border:2px solid #e5e7eb;border-top-color:#111;border-radius:50%;animation:spin 0.6s linear infinite;margin:0 auto 0.75rem;"></div>
+    กำลังเชื่อมต่อ...
+  </div>`;
+  await Promise.all([ loadEventsFromSheets(true), loadBirthdaysFromSheets(), loadAnniversariesFromSheets() ]);
 }
 
 async function createEventInSheets(data) {
