@@ -1883,7 +1883,7 @@ function createCard(ev) {
 
   const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()) && !hasHtml(x));
   const locRow = lp.length
-    ? `<div style="display:flex;align-items:center;gap:4px;font-size:0.7rem;color:#6b7280;margin-bottom:5px;"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${lp.join(', ')}</div>`
+    ? `<div style="margin-bottom:5px;"><span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:600;color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;padding:3px 9px;border-radius:6px;"><svg width="10" height="10" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${lp.join(', ')}</span></div>`
     : '';
 
   const typePill = buildTypePill(ev.type, 'sm');
