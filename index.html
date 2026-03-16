@@ -54,6 +54,14 @@
   .cal-list-time { font-size:0.88rem;font-weight:600;color:#9ca3af;flex-shrink:0; }
   #cal-event-list::-webkit-scrollbar { width:4px; }
   #cal-event-list::-webkit-scrollbar-thumb { background:#e5e7eb;border-radius:99px; }
+  /* mobile: stack cal top, list bottom */
+  @media (max-width: 700px) {
+    #cal-layout { grid-template-columns: 1fr !important; }
+    #cal-left { width: 100% !important; }
+    #cal-grid { grid-template-columns: repeat(7,1fr) !important; width:100% !important; }
+    .cal-day { width:100% !important; height:40px !important; }
+    #cal-event-list { max-height: none !important; }
+  }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
@@ -241,10 +249,10 @@
      </div>
 
      <!-- Layout: mini cal ซ้าย + list ขวา -->
-     <div style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;">
+     <div id="cal-layout" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;">
 
       <!-- LEFT: Mini calendar -->
-      <div style="width:420px;flex-shrink:0;">
+      <div id="cal-left" style="width:420px;flex-shrink:0;">
        <!-- day headers -->
        <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
         <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">S</div>
@@ -1632,7 +1640,9 @@ function renderCalendar() {
   if (!grid) return;
   grid.innerHTML = '';
   grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = 'repeat(7,56px)';
+  const isMobile = window.innerWidth <= 700;
+  const cellSize = isMobile ? Math.floor((window.innerWidth - 48) / 7) + 'px' : '56px';
+  grid.style.gridTemplateColumns = 'repeat(7,' + cellSize + ')';
   grid.style.gap = '3px';
   grid.style.border = 'none';
 
@@ -1684,11 +1694,12 @@ function renderCalendar() {
     const cell = document.createElement('div');
     cell.className = 'cal-day' + (hasEvent ? ' cal-day-has-event' : '') + (isSelected ? ' cal-day-selected' : '');
 
+    const fs = isMobile ? '0.82rem' : '1rem';
     const numStyle = isSelected
-      ? 'font-size:0.78rem;font-weight:800;color:#fff;'
+      ? 'font-size:'+fs+';font-weight:800;color:#fff;'
       : isToday
-        ? 'font-size:0.78rem;font-weight:800;color:#111;'
-        : 'font-size:0.78rem;font-weight:500;color:#9ca3af;';
+        ? 'font-size:'+fs+';font-weight:800;color:#111;'
+        : 'font-size:'+fs+';font-weight:500;color:#9ca3af;';
 
     cell.innerHTML = `<span style="${numStyle}">${d}</span>`;
     cell.onclick = () => { calSelectedDate = dateStr; renderCalendar(); };
@@ -2092,6 +2103,17 @@ function openPreviewPopup() {
 function closePreviewPopup(){const p=document.getElementById('preview-popup');if(p)p.style.display='none';}
 function updatePreview(){}
 function attachPreviewListeners(){}
+
+// ── Re-render calendar on resize (mobile rotate) ───────────────────────────
+let _resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    if (document.getElementById('page-calendar') && document.getElementById('page-calendar').classList.contains('active')) {
+      renderCalendar();
+    }
+  }, 200);
+});
 
 // ── Soft background refresh every 5 minutes ─────────────────────────────────
 // Only re-renders if data actually changed — no unnecessary DOM thrashing
