@@ -815,18 +815,23 @@ async function loadEventsFromSheets(isRetry) {
   try {
     const data = await apiRequest({ action:'getEvents' });
     if (data.status === 'ok') {
+      // Helper: strip Sheets empty-date sentinel (both Date-converted string and raw)
+      const cleanDate = v => (!v || v === '1899-12-30' || String(v).startsWith('1899-12-30')) ? '' : v;
+      // Helper: strip any HTML/iframe from text fields that should be plain text
+      const safeText  = v => (!v || /<[a-z][\s\S]*>/i.test(v)) ? '' : v;
+
       allEvents = (data.events||[]).map(r => {
         // Support old Sheets column names as fallbacks during migration
-        const title     = r.title     || r.event_name    || '';
-        const image     = r.image     || r.image_url     || '';
-        const dateStart = r.dateStart || r.date          || '';
-        const dateEnd   = r.dateEnd   || r.date_end      || '';
+        const title     = safeText(r.title     || r.event_name    || '');
+        const image     = safeText(r.image     || r.image_url     || '');
+        const dateStart = cleanDate(r.dateStart || r.date          || '');
+        const dateEnd   = cleanDate(r.dateEnd   || r.date_end      || '');
         const startTime = r.startTime || r.start_time    || '';
         const endTime   = r.endTime   || r.end_time      || '';
-        const location  = r.location  || r.location_name || '';
-        const type      = r.type      || r.event_type    || '';
-        const tv        = r.tv        || r.tv_channel    || '';
-        const map       = r.map       || r.map_embed     || '';
+        const location  = safeText(r.location  || r.location_name || '');
+        const type      = safeText(r.type      || r.event_type    || '');
+        const tv        = safeText(r.tv        || r.tv_channel    || '');
+        const map       = r.map       || r.map_embed     || '';  // map is allowed to have HTML
         const youtube   = r.youtube   || r.youtube_link  || '';
         const instagram = r.instagram || r.instagram_link|| '';
         const facebook  = r.facebook  || r.facebook_link || '';
@@ -840,11 +845,11 @@ async function loadEventsFromSheets(isRetry) {
           __backendId: r.id || r.__backendId || '',
           title, image, artists: r.artists || '',
           dateStart, dateEnd, startTime, endTime,
-          timezone:    r.timezone    || '',
-          country:     r.country     || '',
-          city:        r.city        || '',
+          timezone:    safeText(r.timezone    || ''),
+          country:     safeText(r.country     || ''),
+          city:        safeText(r.city        || ''),
           location, description: r.description || '',
-          type, note: r.note || '', tv, map,
+          type, note: safeText(r.note || ''), tv, map,
           website:  r.website  || '',
           youtube, instagram, facebook, tiktok, x,
           whatsapp, shopee, live, download
@@ -1125,13 +1130,14 @@ function createCard(ev) {
     metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.startTime}${ev.endTime?' – '+ev.endTime:''}${tzText}</span></div>`);
   }
   // Rule 6: location only if exists — filter out any GMT values accidentally stored in location fields
-  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
+  const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
+  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()) && !hasHtml(x));
   if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
-  if (ev.description) metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
-  if (ev.type) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.type)}</span></div>`);
+  if (ev.description && !hasHtml(ev.description)) metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
+  if (ev.type && !hasHtml(ev.type)) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.type)}</span></div>`);
   // Rule 7: TV channel only if exists
-  if (ev.tv) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv)}</span></div>`);
-  if (ev.note) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
+  if (ev.tv && !hasHtml(ev.tv)) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv)}</span></div>`);
+  if (ev.note && !hasHtml(ev.note)) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
 
   // Rule 7: social icons only if links exist
   const socialHtml = buildSocialIcons(ev);
