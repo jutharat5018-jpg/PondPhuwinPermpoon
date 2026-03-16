@@ -1066,11 +1066,11 @@ function createCard(ev) {
   const metaItems = [];
   if (ev.date) metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : ''}</div>`);
   // Time + timezone display
-  const tzBadge = ev.timezone ? `<span style="display:inline-block;background:#f1f5f9;color:#475569;font-size:0.68rem;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px;letter-spacing:0.03em;">${escHtml(ev.timezone)}</span>` : '';
+  const tzText = ev.timezone ? ` (${escHtml(ev.timezone)})` : '';
   if (ev.start_time) {
-    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzBadge}</span></div>`);
+    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
   } else if (ev.timezone && !ev.start_time) {
-    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="globe" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${tzBadge}</span></div>`);
+    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="globe" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${escHtml(ev.timezone)}</span></div>`);
   } else if (!ev.date && !ev.start_time && !ev.timezone) {
     metaItems.push(`<div style="font-size:0.78rem;color:#d1d5db;font-style:italic;">No time yet</div>`);
   }
@@ -1126,11 +1126,11 @@ function openDetailModal(id) {
   document.getElementById('detail-title').textContent = ev.event_name;
 
   const lp = [ev.location_name, ev.city, ev.country].filter(x => x);
-  const tzTag = ev.timezone ? `<span style="display:inline-block;background:#f1f5f9;color:#475569;font-size:0.75rem;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px;letter-spacing:0.03em;">${escHtml(ev.timezone)}</span>` : '';
+  const tzInline = ev.timezone ? ` (${escHtml(ev.timezone)})` : '';
   document.getElementById('detail-meta').innerHTML = `
     <div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>
     <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – ' + getFullDateDisplay(ev.date_end) : ''}</span></div>
-    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzTag}</span></div>` : (ev.timezone ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="globe" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i>${tzTag}</div>` : '')}
+    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzInline}</span></div>` : (ev.timezone ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="globe" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(ev.timezone)}</span></div>` : '')}
     ${lp.length ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>` : ''}
     ${ev.event_type ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.event_type}</span></div>` : ''}
     ${ev.tv_channel ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv_channel)}</span></div>` : ''}
