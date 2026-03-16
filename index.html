@@ -532,12 +532,17 @@
     transform: translateY(-7px) rotate(-45deg);
   }
 
-  /* Mobile dropdown menu */
+  /* Mobile dropdown menu — position:fixed escapes #app overflow:hidden */
   .nav-mobile-menu {
     display: none !important;
+    position: fixed;
+    top: 52px;
+    left: 0;
+    right: 0;
+    z-index: 999;
     background: #fff;
     border-top: 1px solid #f3f4f6;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   }
   .nav-mobile-menu.is-open {
     display: block !important;
@@ -2537,8 +2542,13 @@ function toggleMobileMenu() {
 function openMobileMenu() {
   const menu = document.getElementById('nav-mobile-menu');
   const btn  = document.getElementById('nav-hamburger');
+  const nav  = document.getElementById('main-nav');
   if (!menu || !btn) return;
-  // Use inline style — beats every CSS rule including !important from Tailwind
+  // Position dropdown right below the nav bar (escapes overflow:hidden on #app)
+  if (nav) {
+    const navRect = nav.getBoundingClientRect();
+    menu.style.setProperty('top', navRect.bottom + 'px', 'important');
+  }
   menu.style.setProperty('display', 'block', 'important');
   btn.classList.add('is-open');
   btn.setAttribute('aria-expanded', 'true');
