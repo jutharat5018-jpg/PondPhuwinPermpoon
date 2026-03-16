@@ -360,13 +360,13 @@
       <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.4rem;">DESCRIPTION</p>
       <p id="detail-desc" style="font-size:0.88rem;line-height:1.6;color:#374151;"></p>
      </div>
+     <div id="detail-links-wrap" style="display:none;margin-bottom:1.25rem;">
+      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">LINKS</p>
+      <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+     </div>
      <div id="detail-map-wrap" style="display:none;margin-bottom:1.25rem;">
       <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">MAP</p>
       <div id="detail-map" class="map-embed-wrap"></div>
-     </div>
-     <div id="detail-links-wrap" style="display:none;">
-      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">LINKS</p>
-      <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
      </div>
     </div>
    </div>
@@ -574,6 +574,7 @@ let calMonth = 0;
 let calYear = 2026;
 let homeFilter = 'all';
 let editingEventId = null;
+let editingEventRowNumber = null;
 let deleteConfirmIds = new Set();
 let panelUnlocked = false;
 
@@ -852,6 +853,9 @@ async function apiPost(body) {
 
 async function loadEventsFromSheets(isRetry) {
   try {
+    // Clear server-side cache first so we always get fresh data from Sheet
+    try { await apiGet('clearCache'); } catch(e) { /* non-fatal */ }
+
     const data = await apiGet('getEvents');
     if (data.status === 'ok') {
       const raw = data.events || [];
@@ -922,7 +926,9 @@ async function loadEventsFromSheets(isRetry) {
         const download  = rawStr(r.download  || r.file_link      || '');
 
         const ev = {
-          __backendId: r.id || r.__backendId || String(i),
+          __backendId:  r.id || r.__backendId || '',
+          __rowNumber:  i + 2, // Sheet row = data index + 2 (1 for header, 1 for 0-index)
+          __rawId:      String(r.id || '').trim(), // raw id for debugging
           // ── Core fields in exact schema order ──
           dateStart, dateEnd, startTime, endTime,
           title, image, artists,
@@ -933,7 +939,7 @@ async function loadEventsFromSheets(isRetry) {
           website, whatsapp, shopee, live, download
         };
 
-        console.log(`Row ${i}:`, { title, dateStart, startTime, endTime, status });
+        console.log(`Row ${i}:`, { title, dateStart, startTime, endTime, status, id: ev.__backendId, rowNumber: ev.__rowNumber });
         return ev;
       });
 
@@ -1012,13 +1018,38 @@ async function createEventInSheets(data) {
   if (res.status !== 'ok') throw new Error(res.message||'Create failed');
   return res.id;
 }
-async function updateEventInSheets(id, data) {
+async function updateEventInSheets(id, data, rowNumber) {
   const res = await apiPost({ action:'updateEvent', id, event:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Update failed');
+  if (res.status === 'ok') return;
+  // If update by id failed and we have a row number, warn but don't block
+  console.warn('updateEvent by id failed:', res.message);
+  throw new Error(res.message||'Update failed');
 }
-async function deleteEventInSheets(id) {
-  const res = await apiPost({ action:'deleteEvent', id });
-  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
+async function deleteEventInSheets(id, rowNumber) {
+  // Step 1: clear server cache first so deleteRecord reads fresh Sheet data
+  try { await apiPost({ action:'clearCache' }); } catch(e) { /* non-fatal */ }
+
+  // Step 2: try delete by id
+  if (id) {
+    const res = await apiPost({ action:'deleteEvent', id });
+    if (res.status === 'ok') return;
+    // Log debug info returned by server
+    console.warn('deleteEvent by id failed:', res.message);
+    if (res.debug_all_ids) {
+      console.warn('IDs in Sheet:', res.debug_all_ids);
+      console.warn('Looking for:', res.debug_target);
+    }
+  }
+
+  // Step 3: fallback — delete by row number
+  if (rowNumber) {
+    console.log('Trying delete by row number:', rowNumber);
+    const res = await apiPost({ action:'deleteEventByRow', row: rowNumber });
+    if (res.status === 'ok') return;
+    throw new Error('Delete by row also failed: ' + res.message);
+  }
+
+  throw new Error('Cannot delete: id not found in Sheet and no row number available');
 }
 async function loadBirthdaysFromSheets() {
   try {
@@ -1508,34 +1539,58 @@ function renderAdminList() {
   if(typeof lucide!=='undefined')lucide.createIcons();
 }
 function createAdminRow(ev) {
-  const row=document.createElement('div'); row.dataset.eventId=ev.__backendId;
+  const row=document.createElement('div');
+  // Use __rowNumber as the stable unique key — always available even if id is corrupted
+  const rowKey = ev.__rowNumber ? String(ev.__rowNumber) : (ev.__backendId || String(Math.random()));
+  row.dataset.eventId = rowKey;
+  row.dataset.rowNumber = ev.__rowNumber || '';
   row.style.cssText='background:#fff;border-radius:12px;padding:1rem 1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;flex-wrap:wrap;';
   updateAdminRow(row,ev); return row;
 }
+function getRowKey(ev) {
+  return ev.__rowNumber ? String(ev.__rowNumber) : (ev.__backendId || '');
+}
+function findEventByKey(key) {
+  return allEvents.find(e => getRowKey(e) === key);
+}
 function updateAdminRow(row,ev) {
-  const color=getArtistColor(ev.artists); const past=isEventPast(ev); const isConfirming=deleteConfirmIds.has(ev.__backendId);
+  const rowKey=getRowKey(ev);
+  const color=getArtistColor(ev.artists); const past=isEventPast(ev); const isConfirming=deleteConfirmIds.has(rowKey);
+  // Show warning badge if id is missing/corrupted
+  const idBadge = !ev.__backendId
+    ? `<span style="font-size:0.68rem;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;" title="ID missing — will delete by row ${ev.__rowNumber}">⚠ no id</span>`
+    : '';
   row.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-    <div style="flex:1;min-width:150px;"><p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}</p><p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.dateStart)} · ${getArtistLabel(ev.artists)}</p></div>
+    <div style="flex:1;min-width:150px;">
+      <p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${idBadge}${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}</p>
+      <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.dateStart)} · ${getArtistLabel(ev.artists)}</p>
+      ${!ev.__backendId ? `<p style="font-size:0.72rem;color:#f59e0b;margin-top:2px;">Sheet row ${ev.__rowNumber} · id column empty</p>` : ''}
+    </div>
     <div style="display:flex;gap:6px;align-items:center;">${isConfirming
-      ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">Delete?</span><button class="btn-danger" onclick="confirmDelete('${ev.__backendId}')">Yes</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${ev.__backendId}')">Cancel</button>`
-      :`<button class="btn-secondary" style="font-size:0.8rem;padding:6px 10px;" onclick="openEditModal('${ev.__backendId}')"><i data-lucide="edit-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Edit</button><button class="btn-danger" onclick="startDelete('${ev.__backendId}')"><i data-lucide="trash-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:2px;"></i>Delete</button>`
+      ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">Delete?</span><button class="btn-danger" onclick="confirmDelete('${rowKey}')">Yes</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${rowKey}')">Cancel</button>`
+      :`<button class="btn-secondary" style="font-size:0.8rem;padding:6px 10px;" onclick="openEditModal('${rowKey}')"><i data-lucide="edit-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Edit</button><button class="btn-danger" onclick="startDelete('${rowKey}')"><i data-lucide="trash-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:2px;"></i>Delete</button>`
     }</div>`;
   if(typeof lucide!=='undefined')lucide.createIcons();
 }
-function startDelete(id){deleteConfirmIds.add(id);const row=document.querySelector(`#admin-events-list [data-event-id="${id}"]`);const ev=allEvents.find(e=>e.__backendId===id);if(row&&ev)updateAdminRow(row,ev);}
-function cancelDelete(id){deleteConfirmIds.delete(id);const row=document.querySelector(`#admin-events-list [data-event-id="${id}"]`);const ev=allEvents.find(e=>e.__backendId===id);if(row&&ev)updateAdminRow(row,ev);}
+function startDelete(key){deleteConfirmIds.add(key);const row=document.querySelector(`#admin-events-list [data-event-id="${key}"]`);const ev=findEventByKey(key);if(row&&ev)updateAdminRow(row,ev);}
+function cancelDelete(key){deleteConfirmIds.delete(key);const row=document.querySelector(`#admin-events-list [data-event-id="${key}"]`);const ev=findEventByKey(key);if(row&&ev)updateAdminRow(row,ev);}
 async function confirmDelete(id) {
-  const ev=allEvents.find(e=>e.__backendId===id); if(!ev)return;
+  const ev=allEvents.find(e=>e.__backendId===id || e.__rawId===id); if(!ev)return;
   deleteConfirmIds.delete(id);
   const row=document.querySelector(`#admin-events-list [data-event-id="${id}"]`);
   if(row)row.style.opacity='0.5';
-  try { await deleteEventInSheets(ev.__backendId); showToast('Event deleted.'); await loadEventsFromSheets(); }
+  try {
+    await deleteEventInSheets(ev.__backendId || ev.__rawId, ev.__rowNumber);
+    showToast('Event deleted.');
+    await loadEventsFromSheets();
+  }
   catch(e) { if(row)row.style.opacity='1'; showToast('Error: '+(e.message||'try again')); }
 }
 
 function openAddModal() {
   if(allEvents.length>=999){showToast('Limit reached.');return;}
   editingEventId=null;
+  editingEventRowNumber=null;
   document.getElementById('form-modal-title').textContent='Add New Event';
   document.getElementById('form-submit-text').textContent='Save Event';
   document.getElementById('form-submit-btn').disabled=false;
@@ -1547,9 +1602,10 @@ function openAddModal() {
   setTimeout(()=>{const n=document.getElementById('ev-title');if(n)n.focus();},50);
   if(typeof lucide!=='undefined')lucide.createIcons();
 }
-function openEditModal(id) {
-  const ev=allEvents.find(e=>e.__backendId===id); if(!ev)return;
-  editingEventId=id;
+function openEditModal(key) {
+  const ev=findEventByKey(key); if(!ev)return;
+  editingEventId=ev.__backendId || null;
+  editingEventRowNumber=ev.__rowNumber || null;
   document.getElementById('form-modal-title').textContent='Edit Event';
   document.getElementById('form-submit-text').textContent='Update Event';
   document.getElementById('form-submit-btn').disabled=false;
@@ -1563,6 +1619,8 @@ function openEditModal(id) {
 function closeEventFormModal() {
   document.getElementById('event-form-modal').style.display = 'none';
   document.body.style.overflow = '';
+  editingEventId = null;
+  editingEventRowNumber = null;
 }
 // Backdrop click is DISABLED — modal only closes via Cancel button or save success
 function closeEventFormModalBackdrop(e) { /* intentionally disabled */ }
@@ -1740,7 +1798,7 @@ async function handleEventFormSubmit() {
   let success = false;
   try {
     if (editingEventId) {
-      await updateEventInSheets(editingEventId, payload);
+      await updateEventInSheets(editingEventId, payload, editingEventRowNumber);
     } else {
       await createEventInSheets(payload);
     }
