@@ -113,7 +113,13 @@
     .cards-grid { grid-template-columns: 1fr !important; }
   }
   @media (min-width: 641px) and (max-width: 900px) {
-    .cards-grid { grid-template-columns: repeat(2,1fr) !important; }
+    .cards-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  }
+  @media (min-width: 901px) and (max-width: 1100px) {
+    .cards-grid { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+  }
+  @media (min-width: 1101px) and (max-width: 1300px) {
+    .cards-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
   }
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
@@ -137,7 +143,7 @@
  <body>
   <div id="app">
    <nav>
-    <div style="max-width:1100px;margin:auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;">
+    <div style="max-width:1400px;margin:auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;">
      <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="navigate('home')">
       <div style="width:28px;height:28px;background:#111;border-radius:6px;display:flex;align-items:center;justify-content:center;">
        <i data-lucide="music" style="width:14px;height:14px;color:#fff;stroke-width:2.5;"></i>
@@ -154,7 +160,7 @@
 
    <!-- HOME PAGE -->
    <div class="page active" id="page-home">
-    <div style="max-width:1100px;margin:auto;padding:2rem 1rem;width:100%;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
      <div style="margin-bottom:2.5rem;">
       <p id="home-tagline" style="font-size:0.8rem;font-weight:600;color:#a855f7;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem;">Pond · Phuwin · Permpoon</p>
       <h1 id="home-title" style="font-size:2.3rem;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:0.5rem;">pondphuwinpermpoon schedule</h1>
@@ -188,7 +194,7 @@
 
    <!-- CALENDAR PAGE -->
    <div class="page" id="page-calendar">
-    <div style="max-width:1100px;margin:auto;padding:2rem 1rem;width:100%;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
       <div>
        <h2 class="section-header" id="cal-section-title">Calendar</h2>
@@ -246,7 +252,7 @@
      </div>
     </div>
     <div id="admin-panel" style="display:none;flex:1;flex-direction:column;">
-     <div style="max-width:1100px;margin:auto;padding:2rem 1rem;width:100%;">
+     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
        <div>
         <h2 class="section-header">Admin Panel</h2>
@@ -592,7 +598,7 @@
   </div>
 
   <footer>
-   <div style="max-width:1100px;margin:auto;padding:1.5rem 1rem;text-align:center;font-size:0.78rem;color:#9ca3af;letter-spacing:0.04em;">
+   <div style="max-width:1400px;margin:auto;padding:1.5rem 1rem;text-align:center;font-size:0.78rem;color:#9ca3af;letter-spacing:0.04em;">
     © 2026 pondphuwin trend. Made with love.
    </div>
   </footer>
@@ -1294,7 +1300,7 @@ function renderHome() {
 
     const cg = document.createElement('div');
     cg.className = 'cards-grid';
-    cg.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;';
+    cg.style.cssText = 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;align-items:stretch;';
 
     // Render ALL cards in this group — no break, no early return
     group.forEach(ev => {
@@ -1379,13 +1385,13 @@ function createCard(ev) {
       + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + new Date(ev.dateEnd+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '');
     const timeHtml = ev.startTime
       ? `<span style="width:1px;height:13px;background:#e5e7eb;margin:0 8px;flex-shrink:0;display:inline-block;"></span>
-         <span style="display:flex;align-items:center;gap:4px;font-size:0.86rem;font-weight:700;color:#111;">
+         <span style="display:flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:700;color:#111;">
            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
            ${escHtml(ev.startTime)}${ev.endTime ? ' – '+escHtml(ev.endTime) : ''}
          </span>`
       : '';
     dtRow = `<div style="display:flex;align-items:center;margin-bottom:5px;">
-      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:${color};">
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:700;color:${color};">
         <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         ${escHtml(dateLabel)}
       </span>${timeHtml}
