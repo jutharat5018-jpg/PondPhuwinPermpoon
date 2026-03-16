@@ -1831,18 +1831,27 @@ function isEventToday(ev) {
   const evDate = new Date(ev.dateStart + 'T00:00:00');
   return evDate.getTime() === today.getTime();
 }
-function buildCountdownTag(ev, color) {
+function buildCountdownImgBadge(ev) {
   if (!ev.dateStart) return '';
   const days = daysUntilEvent(ev.dateStart);
   if (days === null) return '';
-  if (days === 0) {
-    return `<span style="display:inline-block;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:99px;background:${color}18;color:${color};margin-top:5px;border:1px solid ${color}33;">Today!</span>`;
-  }
-  if (days > 0 && days <= 30) {
-    return `<span style="display:inline-block;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:99px;background:${color}12;color:${color};margin-top:5px;border:1px solid ${color}25;">in ${days} day${days!==1?'s':''}</span>`;
-  }
-  return '';
+  let label = '';
+  if (days === 0) label = 'Today';
+  else if (days > 0 && days <= 60) label = `in ${days} day${days !== 1 ? 's' : ''}`;
+  else return '';
+  // For image cards: absolute bottom-left overlay
+  // For no-image cards: this gets wrapped differently — see no-image branch
+  return `<div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.52);color:#fff;font-size:0.72rem;font-weight:700;padding:4px 11px;border-radius:99px;">` + label + `</div>`;
 }
+function buildCountdownNoImg(ev) {
+  if (!ev.dateStart) return '';
+  const days = daysUntilEvent(ev.dateStart);
+  if (days === null || days < 0 || days > 60) return '';
+  const label = days === 0 ? 'Today' : `in ${days} day${days !== 1 ? 's' : ''}`;
+  return `<div style="font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0 2px;">${label}</div>`;
+}
+// Legacy stub
+function buildCountdownTag(ev, color) { return ''; }
 
 function createCard(ev) {
   if (!ev.title || !ev.title.trim()) return document.createDocumentFragment();
@@ -1854,7 +1863,7 @@ function createCard(ev) {
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${isEventToday(ev)?'<div style="position:absolute;top:12px;left:12px;background:#ef4444;color:#fff;font-size:0.62rem;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:0.05em;text-transform:uppercase;">TODAY</div>':''}</div>`
+    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${isEventToday(ev)?'<div style="position:absolute;top:12px;left:12px;background:#ef4444;color:#fff;font-size:0.62rem;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:0.05em;text-transform:uppercase;">TODAY</div>':''}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
 
   const artistBadge = ev.artists
@@ -1896,7 +1905,6 @@ function createCard(ev) {
       <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:6px;line-height:1.35;">${escHtml(ev.title)}</h3>
       ${dtRow}${locRow}${pillsRow}${noteRow}${descRow}
       ${socialHtml ? `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
-      ${buildCountdownTag(ev, color)}
       <div style="flex:1;"></div>
     </div>`;
   return card;
