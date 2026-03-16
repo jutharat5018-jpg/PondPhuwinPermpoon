@@ -353,8 +353,8 @@
      <form id="event-form" onsubmit="handleEventFormSubmit(event)">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="f-name">Event Name *</label>
-        <input class="form-input" id="f-name" required placeholder="e.g. Pond Concert Night">
+        <label class="form-label" for="f-name">Event Name</label>
+        <input class="form-input" id="f-name" placeholder="e.g. Pond Concert Night">
        </div>
        <div style="grid-column:1/-1;">
         <label class="form-label" for="f-image">Image URL</label>
@@ -372,14 +372,14 @@
         </div>
        </div>
        <div>
-        <label class="form-label" for="f-date">Date Start *</label>
-        <input class="form-input" id="f-date" type="date" required>
+        <label class="form-label" for="f-date">Date Start</label>
+        <input class="form-input" id="f-date" type="date">
        </div>
        <div>
         <label class="form-label" for="f-date-end">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
         <input class="form-input" id="f-date-end" type="date">
        </div>
-       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
         <div>
          <label class="form-label" for="f-start">Start Time</label>
          <input class="form-input" id="f-start" type="time">
@@ -387,6 +387,42 @@
         <div>
          <label class="form-label" for="f-end">End Time</label>
          <input class="form-input" id="f-end" type="time">
+        </div>
+        <div>
+         <label class="form-label" for="f-timezone" style="display:flex;align-items:center;gap:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Time Zone
+         </label>
+         <select class="form-input" id="f-timezone" style="appearance:auto;">
+          <option value="">— not set —</option>
+          <option value="GMT-12">GMT-12</option>
+          <option value="GMT-11">GMT-11</option>
+          <option value="GMT-10">GMT-10</option>
+          <option value="GMT-9">GMT-9</option>
+          <option value="GMT-8">GMT-8</option>
+          <option value="GMT-7">GMT-7</option>
+          <option value="GMT-6">GMT-6</option>
+          <option value="GMT-5">GMT-5</option>
+          <option value="GMT-4">GMT-4</option>
+          <option value="GMT-3">GMT-3</option>
+          <option value="GMT-2">GMT-2</option>
+          <option value="GMT-1">GMT-1</option>
+          <option value="GMT+0">GMT+0</option>
+          <option value="GMT+1">GMT+1</option>
+          <option value="GMT+2">GMT+2</option>
+          <option value="GMT+3">GMT+3</option>
+          <option value="GMT+4">GMT+4</option>
+          <option value="GMT+5">GMT+5</option>
+          <option value="GMT+6">GMT+6</option>
+          <option value="GMT+7">GMT+7</option>
+          <option value="GMT+8">GMT+8</option>
+          <option value="GMT+9">GMT+9</option>
+          <option value="GMT+10">GMT+10</option>
+          <option value="GMT+11">GMT+11</option>
+          <option value="GMT+12">GMT+12</option>
+          <option value="GMT+13">GMT+13</option>
+          <option value="GMT+14">GMT+14</option>
+         </select>
         </div>
        </div>
        <div>
@@ -412,6 +448,13 @@
        <div style="grid-column:1/-1;">
         <label class="form-label" for="f-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="f-note" placeholder="e.g. live on YouTube, time not confirmed">
+       </div>
+       <div style="grid-column:1/-1;">
+        <label class="form-label" for="f-tvchannel" style="display:flex;align-items:center;gap:5px;">
+         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:#6b7280;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+         TV Channel <span style="font-weight:400;color:#9ca3af;">(optional)</span>
+        </label>
+        <input class="form-input" id="f-tvchannel" placeholder="e.g. GMM25, ONE31, PPTV, NHK, Netflix...">
        </div>
        <!-- MAP EMBED FIELD -->
        <div style="grid-column:1/-1;">
@@ -754,7 +797,9 @@ async function loadEventsFromSheets(isRetry) {
         live_link: r.live_link||'', file_link: r.file_link||'',
         event_type: r.event_type||'', note: r.note||'',
         map_embed: r.map_embed||'',
-        date_end: r.date_end||''
+        date_end: r.date_end||'',
+        timezone: r.timezone||'',
+        tv_channel: r.tv_channel||''
       }));
       allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
       apiLoaded = true;
@@ -1020,13 +1065,22 @@ function createCard(ev) {
   }
   const metaItems = [];
   if (ev.date) metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : ''}</div>`);
-  if (ev.start_time) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}</span></div>`);
+  // Time + timezone display
+  const tzBadge = ev.timezone ? `<span style="display:inline-block;background:#f1f5f9;color:#475569;font-size:0.68rem;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px;letter-spacing:0.03em;">${escHtml(ev.timezone)}</span>` : '';
+  if (ev.start_time) {
+    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzBadge}</span></div>`);
+  } else if (ev.timezone && !ev.start_time) {
+    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="globe" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${tzBadge}</span></div>`);
+  } else if (!ev.date && !ev.start_time && !ev.timezone) {
+    metaItems.push(`<div style="font-size:0.78rem;color:#d1d5db;font-style:italic;">No time yet</div>`);
+  }
   const lp = [ev.location_name,ev.city,ev.country].filter(x=>x);
   if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
   if (ev.description) metaItems.push(`<div style="font-size:0.8rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
   const socialHtml = buildSocialIcons(ev);
   const allMeta = [...metaItems];
   if (ev.event_type) allMeta.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.event_type)}</span></div>`);
+  if (ev.tv_channel) allMeta.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv_channel)}</span></div>`);
   if (ev.note) allMeta.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
   card.innerHTML = `
     <div style="position:relative;">${imgHtml}${dateBadgeHtml}</div>
@@ -1072,12 +1126,14 @@ function openDetailModal(id) {
   document.getElementById('detail-title').textContent = ev.event_name;
 
   const lp = [ev.location_name, ev.city, ev.country].filter(x => x);
+  const tzTag = ev.timezone ? `<span style="display:inline-block;background:#f1f5f9;color:#475569;font-size:0.75rem;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px;letter-spacing:0.03em;">${escHtml(ev.timezone)}</span>` : '';
   document.getElementById('detail-meta').innerHTML = `
     <div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>
     <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – ' + getFullDateDisplay(ev.date_end) : ''}</span></div>
-    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}</span></div>` : ''}
+    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzTag}</span></div>` : (ev.timezone ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="globe" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i>${tzTag}</div>` : '')}
     ${lp.length ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>` : ''}
     ${ev.event_type ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.event_type}</span></div>` : ''}
+    ${ev.tv_channel ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv_channel)}</span></div>` : ''}
     ${ev.note ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="file-text" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(ev.note)}</span></div>` : ''}`;
 
   const descWrap = document.getElementById('detail-desc-wrap');
@@ -1246,12 +1302,13 @@ function clearForm(){const f=document.getElementById('event-form');if(f)f.reset(
 function fillForm(ev) {
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
   set('f-name',ev.event_name);set('f-image',ev.image_url);set('f-date',ev.date);
-  set('f-start',ev.start_time);set('f-end',ev.end_time);set('f-country',ev.country);
+  set('f-start',ev.start_time);set('f-end',ev.end_time);set('f-timezone',ev.timezone||'');
+  set('f-country',ev.country);
   set('f-city',ev.city);set('f-location',ev.location_name);set('f-desc',ev.description);
   set('f-yt',ev.youtube_link);set('f-ig',ev.instagram_link);set('f-fb',ev.facebook_link);
   set('f-x',ev.x_link);set('f-tiktok',ev.tiktok_link);set('f-whatsapp',ev.whatsapp_link);
   set('f-shopee',ev.shopee_link);set('f-live',ev.live_link);set('f-file',ev.file_link);
-  set('f-note',ev.note);set('f-type',ev.event_type);set('f-map',ev.map_embed);set('f-date-end',ev.date_end);
+  set('f-note',ev.note);set('f-type',ev.event_type);set('f-map',ev.map_embed);set('f-date-end',ev.date_end);set('f-tvchannel',ev.tv_channel||'');
   const arr=ev.artists?(ev.artists.split(',').map(a=>a.trim())):[];
   document.querySelectorAll('.artist-check').forEach(c=>{c.checked=arr.includes(c.value);});
 }
@@ -1259,7 +1316,7 @@ function fillForm(ev) {
 function getFormPreviewData() {
   const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
   const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
-  return { __backendId:'__preview__', event_name:gv('f-name')||'Event Name', image_url:gv('f-image'), artists:ca.join(','), date:gv('f-date'), date_end:gv('f-date-end'), start_time:gv('f-start'), end_time:gv('f-end'), country:gv('f-country'), city:gv('f-city'), location_name:gv('f-location'), description:gv('f-desc'), youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'), x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'), shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'), event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map') };
+  return { __backendId:'__preview__', event_name:gv('f-name')||'Event Name', image_url:gv('f-image'), artists:ca.join(','), date:gv('f-date'), date_end:gv('f-date-end'), start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'), country:gv('f-country'), city:gv('f-city'), location_name:gv('f-location'), description:gv('f-desc'), youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'), x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'), shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'), event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), tv_channel:gv('f-tvchannel') };
 }
 function openPreviewPopup() {
   const popup=document.getElementById('preview-popup'); if(!popup)return;
@@ -1280,18 +1337,17 @@ async function handleEventFormSubmit(e) {
   e.preventDefault();
   const name=(document.getElementById('f-name').value||'').trim();
   const date=document.getElementById('f-date').value;
-  if(!name){showToast('Event name is required.');return;}
-  if(!date){showToast('Date is required.');return;}
   const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
   const gv=id=>(document.getElementById(id)?document.getElementById(id).value.trim():'');
   const data = {
     event_name:name, image_url:gv('f-image'), artists:ca.join(','), date,
-    start_time:gv('f-start'), end_time:gv('f-end'), country:gv('f-country'),
+    start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'),
+    country:gv('f-country'),
     city:gv('f-city'), location_name:gv('f-location'), description:gv('f-desc'),
     youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'),
     x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'),
     shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'),
-    event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), weibo_link:''
+    event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), weibo_link:'', tv_channel:gv('f-tvchannel')
   };
   const btn=document.getElementById('form-submit-btn');
   const txt=document.getElementById('form-submit-text');
