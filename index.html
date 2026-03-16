@@ -33,7 +33,6 @@
   #app { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
   .page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; }
   .page.active { display: flex; flex-direction: column; }
-  nav { background: #fff; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
   .nav-link { cursor: pointer; transition: color 0.2s; font-size: 1rem; font-weight: 500; padding: 0.5rem 0.75rem; border-radius: 6px; color: #6b7280; }
   .nav-link:hover, .nav-link.active { color: #111; background: #f5f5f5; }
   .event-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; display: flex; flex-direction: column; }
@@ -439,19 +438,198 @@
     .cal-list-item { gap: 6px !important; padding: 8px !important; }
     .cal-list-date { width: 36px !important; }
   }
+  /* ══════════════════════════════════════════════
+     HAMBURGER NAV SYSTEM
+  ══════════════════════════════════════════════ */
+
+  /* Nav shell */
+  #main-nav {
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  /* Inner row */
+  .nav-inner {
+    max-width: 1400px;
+    margin: auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    min-width: 0;
+  }
+
+  /* Logo */
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+  #nav-site-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Desktop nav links */
+  .nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  /* Hamburger button — hidden on desktop */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 6px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-hamburger:hover { background: #f5f5f5; }
+  .ham-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #111;
+    border-radius: 99px;
+    transition: transform 0.25s ease, opacity 0.25s ease, width 0.25s ease;
+    transform-origin: center;
+  }
+
+  /* Hamburger → X animation when open */
+  .nav-hamburger.is-open .ham-bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .nav-hamburger.is-open .ham-bar:nth-child(2) {
+    opacity: 0;
+    width: 0;
+  }
+  .nav-hamburger.is-open .ham-bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Mobile dropdown menu */
+  .nav-mobile-menu {
+    display: none; /* shown only on mobile */
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.22s ease;
+    opacity: 0;
+    background: #fff;
+    border-top: 1px solid #f3f4f6;
+  }
+  .nav-mobile-menu.is-open {
+    max-height: 300px;
+    opacity: 1;
+  }
+  .nav-mobile-inner {
+    max-width: 1400px;
+    margin: auto;
+    padding: 6px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-mobile-link {
+    display: block;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .nav-mobile-link:hover,
+  .nav-mobile-link:active { background: #f5f5f5; }
+  .nav-mobile-link.active  { color: #111; background: #f5f5f5; }
+
+  /* ── Show hamburger on mobile, hide on desktop ── */
+  @media (max-width: 767px) {
+    .nav-desktop   { display: none !important; }
+    .nav-hamburger { display: flex !important; }
+    .nav-mobile-menu { display: block; }
+    #nav-site-title { max-width: 200px; }
+  }
+
+  /* Tablet: show desktop links but allow wrapping */
+  @media (min-width: 768px) {
+    .nav-hamburger   { display: none !important; }
+    .nav-mobile-menu { display: none !important; }
+    .nav-desktop     { display: flex !important; }
+  }
+
+  /* Very small phones */
+  @media (max-width: 380px) {
+    #nav-site-title { max-width: 150px; font-size: 0.82rem; }
+  }
   </style>
  </head>
  <body>
   <div id="app">
-   <nav>
-    <div style="max-width:1400px;margin:auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;min-width:0;overflow:hidden;">
-     <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="navigate('home')">
-      <span id="nav-site-title" style="font-weight:700;font-size:0.95rem;letter-spacing:-0.02em;">PondPhuwin and Permpoon Schedule</span>
+   <nav id="main-nav">
+    <div class="nav-inner">
+
+     <!-- Logo / Site title -->
+     <div class="nav-logo" onclick="navigate('home')">
+      <span id="nav-site-title">PondPhuwin and Permpoon Schedule</span>
      </div>
-     <div style="display:flex;align-items:center;gap:4px;" id="nav-links">
+
+     <!-- Desktop links (hidden on mobile) -->
+     <div class="nav-desktop" id="nav-links">
       <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Home</span>
       <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Calendar</span>
       <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Admin</span>
+     </div>
+
+     <!-- Hamburger button (hidden on desktop) -->
+     <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu" aria-expanded="false">
+      <span class="ham-bar"></span>
+      <span class="ham-bar"></span>
+      <span class="ham-bar"></span>
+     </button>
+
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <div class="nav-mobile-menu" id="nav-mobile-menu" aria-hidden="true">
+     <div class="nav-mobile-inner">
+      <span class="nav-mobile-link" data-page="home" onclick="navigate('home');closeMobileMenu()">
+       <i data-lucide="home" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:8px;"></i>Home
+      </span>
+      <span class="nav-mobile-link" data-page="calendar" onclick="navigate('calendar');closeMobileMenu()">
+       <i data-lucide="calendar" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:8px;"></i>Calendar
+      </span>
+      <span class="nav-mobile-link nav-mobile-admin" data-page="admin" id="nav-admin-link-mobile" style="display:none;" onclick="navigate('admin');closeMobileMenu()">
+       <i data-lucide="settings" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:8px;"></i>Admin
+      </span>
      </div>
     </div>
    </nav>
@@ -2178,6 +2356,7 @@ function doAdminLogin() {
     err.style.display = 'none';
     document.getElementById('login-pw-field').value = '';
     const n = document.getElementById('nav-admin-link'); if(n) n.style.display = 'inline-flex';
+    syncMobileAdminLink();
     document.getElementById('admin-login').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'flex';
     navigate('admin'); renderAdminList(); renderAnniversaryAdmin(); debounceLucide();
@@ -2194,6 +2373,8 @@ function adminLogout() {
   document.getElementById('login-pw-field').value = '';
   document.getElementById('login-pw-err').style.display = 'none';
   const navAdmin = document.getElementById('nav-admin-link'); if(navAdmin) navAdmin.style.display = 'none';
+  syncMobileAdminLink();
+  closeMobileMenu();
   navigate('home'); showToast('Logged out');
 }
 
@@ -2216,6 +2397,7 @@ function navigate(page) {
   if (pageEl) pageEl.classList.add('active');
   const navEl = document.querySelector(`.nav-link[data-page="${page}"]`);
   if (navEl) navEl.classList.add('active');
+  syncMobileNavActive();
   scheduleRender();
   debounceLucide();
 }
@@ -2347,7 +2529,63 @@ async function handleEventFormSubmit() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// UTILITIES
+// HAMBURGER MENU
+// ═══════════════════════════════════════════════════════════════════
+function toggleMobileMenu() {
+  const menu = document.getElementById('nav-mobile-menu');
+  const btn  = document.getElementById('nav-hamburger');
+  if (!menu || !btn) return;
+  const isOpen = menu.classList.contains('is-open');
+  if (isOpen) closeMobileMenu();
+  else        openMobileMenu();
+}
+function openMobileMenu() {
+  const menu = document.getElementById('nav-mobile-menu');
+  const btn  = document.getElementById('nav-hamburger');
+  if (!menu || !btn) return;
+  menu.classList.add('is-open');
+  btn.classList.add('is-open');
+  btn.setAttribute('aria-expanded', 'true');
+  menu.setAttribute('aria-hidden', 'false');
+  syncMobileAdminLink();
+  debounceLucide();
+}
+function closeMobileMenu() {
+  const menu = document.getElementById('nav-mobile-menu');
+  const btn  = document.getElementById('nav-hamburger');
+  if (!menu || !btn) return;
+  menu.classList.remove('is-open');
+  btn.classList.remove('is-open');
+  btn.setAttribute('aria-expanded', 'false');
+  menu.setAttribute('aria-hidden', 'true');
+}
+function syncMobileAdminLink() {
+  // Mirror admin link visibility from desktop to mobile menu
+  const desktop = document.getElementById('nav-admin-link');
+  const mobile  = document.getElementById('nav-admin-link-mobile');
+  if (!desktop || !mobile) return;
+  mobile.style.display = desktop.style.display === 'none' ? 'none' : 'block';
+}
+function syncMobileNavActive() {
+  // Keep mobile menu active state in sync with current page
+  document.querySelectorAll('.nav-mobile-link').forEach(link => {
+    link.classList.toggle('active', link.dataset.page === currentPage);
+  });
+}
+
+// Close mobile menu when clicking outside
+document.addEventListener('click', function(e) {
+  const nav  = document.getElementById('main-nav');
+  const menu = document.getElementById('nav-mobile-menu');
+  if (!menu || !menu.classList.contains('is-open')) return;
+  if (nav && !nav.contains(e.target)) closeMobileMenu();
+});
+
+// Close mobile menu on ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeMobileMenu();
+});
+
 // ═══════════════════════════════════════════════════════════════════
 function debounceLucide() {
   if (typeof lucide === 'undefined') return;
