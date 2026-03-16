@@ -58,6 +58,7 @@
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
+  @keyframes pill-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
@@ -618,6 +619,15 @@ let editingEventRowNumber = null;
 let deleteConfirmIds = new Set();
 let panelUnlocked = false;
 
+// ── Local cache helpers ───────────────────────────────────────────────────────
+// Store/load from sessionStorage so refresh within same tab is instant
+const LC_EVENTS = 'ppp_events_v1';
+const LC_BDAYS  = 'ppp_bdays_v1';
+const LC_ANNIVS = 'ppp_annivs_v1';
+function lcSave(key, data) { try { sessionStorage.setItem(key, JSON.stringify(data)); } catch(e) {} }
+function lcLoad(key) { try { const v = sessionStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
+function lcClear() { try { sessionStorage.removeItem(LC_EVENTS); sessionStorage.removeItem(LC_BDAYS); sessionStorage.removeItem(LC_ANNIVS); } catch(e) {} }
+
 const API_URL = 'https://script.google.com/macros/s/AKfycbwOqV8FAzHRl4jlNTebwOqzm5Si34J8IEW8UijV2grusYeF7TcilC9Lp5E40d-1cwf5/exec';
 let apiLoaded = false;
 
@@ -891,113 +901,71 @@ async function apiPost(body) {
   }
 }
 
+function processEvents(raw) {
+  const cleanDate = v => { if (!v) return ''; const s = String(v).trim(); return s.startsWith('1899-12-30') ? '' : s; };
+  const rawStr = v => (v != null && v !== '') ? String(v).trim() : '';
+  const safeText = v => { if (!v) return ''; const s = String(v).trim(); return /<[a-z][\s\S]*>/i.test(s) ? '' : s; };
+  const mapped = raw.map((r, i) => ({
+    __backendId: r.id || r.__backendId || '',
+    __rowNumber: i + 2,
+    __rawId:     String(r.id || '').trim(),
+    dateStart:   cleanDate(r.dateStart || r.date || r.date_start || ''),
+    dateEnd:     cleanDate(r.dateEnd   || r.date_end  || ''),
+    startTime:   rawStr(r.startTime || r.start_time || ''),
+    endTime:     rawStr(r.endTime   || r.end_time   || ''),
+    timezone:    safeText(r.timezone || ''),
+    title:       safeText(r.title       || r.event_name    || ''),
+    image:       rawStr(r.image         || r.image_url     || ''),
+    artists:     safeText(r.artists     || ''),
+    country:     safeText(r.country     || ''),
+    city:        safeText(r.city        || ''),
+    location:    safeText(r.location    || r.location_name || ''),
+    description: rawStr(r.description  || ''),
+    type:        safeText(r.type        || r.event_type    || ''),
+    note:        safeText(r.note        || ''),
+    tv:          safeText(r.tv          || r.tv_channel    || ''),
+    map:         r.map || r.map_embed   || '',
+    status:      rawStr(r.status || '').toLowerCase(),
+    youtube:     rawStr(r.youtube   || r.youtube_link   || ''),
+    instagram:   rawStr(r.instagram || r.instagram_link || ''),
+    facebook:    rawStr(r.facebook  || r.facebook_link  || ''),
+    x:           rawStr(r.x         || r.x_link         || ''),
+    tiktok:      rawStr(r.tiktok    || r.tiktok_link    || ''),
+    website:     rawStr(r.website   || ''),
+    whatsapp:    rawStr(r.whatsapp  || r.whatsapp_link  || ''),
+    shopee:      rawStr(r.shopee    || r.shopee_link    || ''),
+    live:        rawStr(r.live      || r.live_link      || ''),
+    download:    rawStr(r.download  || r.file_link      || ''),
+  }));
+  const filtered = mapped.filter(e => e.title && (!e.status || e.status === 'upcoming'));
+  filtered.sort((a, b) => {
+    if (!a.dateStart && !b.dateStart) return 0;
+    if (!a.dateStart) return 1;
+    if (!b.dateStart) return -1;
+    const cmp = a.dateStart.localeCompare(b.dateStart);
+    return cmp !== 0 ? cmp : (a.startTime || '').localeCompare(b.startTime || '');
+  });
+  return filtered;
+}
+
 async function loadEventsFromSheets(isRetry) {
+  // ── Show cached data immediately so user sees content right away ──
+  if (!isRetry) {
+    const cached = lcLoad(LC_EVENTS);
+    if (cached && cached.length) {
+      allEvents = cached;
+      apiLoaded = true;
+      hideConnectionError();
+      renderHome();
+      if (currentPage !== 'home') renderCurrentPage();
+    }
+  }
   try {
     const data = await apiGet('getEvents');
     if (data.status === 'ok') {
       const raw = data.events || [];
-
-      // DEBUG logs reduced — only log summary, not full raw data (improves perf on large sheets)
-      console.log('Total rows received from Sheet:', raw.length);
-
-      // ── Helpers ────────────────────────────────────────────────────────
-      // Strip Sheets empty-date sentinel 1899-12-30
-      const cleanDate = v => {
-        if (!v) return '';
-        const s = String(v).trim();
-        return s.startsWith('1899-12-30') ? '' : s;
-      };
-      // Raw string — keep value exactly as-is, just ensure it's a string
-      // Used for time fields: never convert, never strip, never touch
-      const rawStr = v => (v != null && v !== '') ? String(v).trim() : '';
-      // Safe plain text — strip HTML tags (for title, location, etc.)
-      const safeText = v => {
-        if (!v) return '';
-        const s = String(v).trim();
-        return /<[a-z][\s\S]*>/i.test(s) ? '' : s;
-      };
-
-      // ── Map each row — support BOTH simple schema and full PPP schema ──
-      // Simple schema (current Sheet): date, title, type, location,
-      //                                description, image, map, status
-      // Full schema (PPP): dateStart, startTime, artists, etc.
-      const mapped = raw.map((r, i) => {
-        // ── Status — normalise to lowercase for comparison ────────────────
-        const status    = rawStr(r.status || '').toLowerCase();
-
-        // ── Dates — YYYY-MM-DD string, read strict key first ─────────────
-        const dateStart = cleanDate(r.dateStart || r.date || r.date_start || '');
-        const dateEnd   = cleanDate(r.dateEnd   || r.date_end  || '');
-
-        // ── Time — keep EXACTLY as plain string HH:MM, never convert ─────
-        // rawStr() preserves "09:00", "14:30", "" — no HTML stripping,
-        // no Date() conversion, no timezone shift
-        const startTime = rawStr(r.startTime || r.start_time || '');
-        const endTime   = rawStr(r.endTime   || r.end_time   || '');
-        const timezone  = safeText(r.timezone || '');
-
-        // ── Text fields ───────────────────────────────────────────────────
-        const title       = safeText(r.title       || r.event_name    || '');
-        const image       = rawStr(r.image         || r.image_url     || '');  // URL: keep as-is
-        const artists     = safeText(r.artists     || '');
-        const country     = safeText(r.country     || '');
-        const city        = safeText(r.city        || '');
-        const location    = safeText(r.location    || r.location_name || '');
-        const description = rawStr(r.description  || '');  // keep formatting
-        const type        = safeText(r.type        || r.event_type    || '');
-        const note        = safeText(r.note        || '');
-        const tv          = safeText(r.tv          || r.tv_channel    || '');
-        const map         = r.map || r.map_embed   || '';  // HTML allowed (iframe embed)
-
-        // ── Social links — URLs kept as-is ────────────────────────────────
-        const youtube   = rawStr(r.youtube   || r.youtube_link   || '');
-        const instagram = rawStr(r.instagram || r.instagram_link || '');
-        const facebook  = rawStr(r.facebook  || r.facebook_link  || '');
-        const x         = rawStr(r.x         || r.x_link         || '');
-        const tiktok    = rawStr(r.tiktok    || r.tiktok_link    || '');
-        const website   = rawStr(r.website   || '');
-        const whatsapp  = rawStr(r.whatsapp  || r.whatsapp_link  || '');
-        const shopee    = rawStr(r.shopee    || r.shopee_link    || '');
-        const live      = rawStr(r.live      || r.live_link      || '');
-        const download  = rawStr(r.download  || r.file_link      || '');
-
-        const ev = {
-          __backendId:  r.id || r.__backendId || '',
-          __rowNumber:  i + 2, // Sheet row = data index + 2 (1 for header, 1 for 0-index)
-          __rawId:      String(r.id || '').trim(), // raw id for debugging
-          // ── Core fields in exact schema order ──
-          dateStart, dateEnd, startTime, endTime,
-          title, image, artists,
-          country, city, location, description,
-          type, note, tv, map, status,
-          timezone,
-          youtube, instagram, facebook, tiktok, x,
-          website, whatsapp, shopee, live, download
-        };
-
-        return ev;
-      });
-
-      // ── Filter: status must be "upcoming" (case-insensitive) ──────────
-      // Also include rows with no status set if they have a title (backward compat)
-      allEvents = mapped.filter(e => {
-        if (!e.title) return false;                          // must have title
-        if (!e.status) return true;                          // no status → show (old data)
-        return e.status === 'upcoming';                      // status = upcoming
-      });
-
-
-
-      // ── Sort by date ascending, no-date events go last ────────────────
-      allEvents.sort((a, b) => {
-        if (!a.dateStart && !b.dateStart) return 0;
-        if (!a.dateStart) return 1;   // TBA → end
-        if (!b.dateStart) return -1;  // TBA → end
-        const cmp = a.dateStart.localeCompare(b.dateStart);
-        if (cmp !== 0) return cmp;
-        return (a.startTime || '').localeCompare(b.startTime || '');
-      });
-
+      allEvents = processEvents(raw);
+      lcSave(LC_EVENTS, allEvents);
       apiLoaded = true;
       hideConnectionError();
       renderHome();
@@ -1083,10 +1051,14 @@ async function deleteEventInSheets(id, rowNumber) {
   return { status: 'not_found' };
 }
 async function loadBirthdaysFromSheets() {
+  // show cache first
+  const cached = lcLoad(LC_BDAYS);
+  if (cached) { allBirthdays = cached; renderBirthdayBanners(); renderAnniversaryAdmin(); }
   try {
     const data = await apiGet('getBirthdays');
     if (data.status === 'ok') {
       allBirthdays = (data.birthdays||[]).map(r => ({ __backendId:r.id||'', artist_name:r.artist_name||'', birthday_month:parseInt(r.birthday_month)||0, birthday_day:parseInt(r.birthday_day)||0, color:r.color||'#6b7280' }));
+      lcSave(LC_BDAYS, allBirthdays);
       renderBirthdayBanners(); renderAnniversaryAdmin();
     }
   } catch(e) { console.warn('Birthday load error:', e); }
@@ -1100,10 +1072,14 @@ async function deleteBirthdayInSheets(id) {
   if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
 }
 async function loadAnniversariesFromSheets() {
+  // show cache first
+  const cached = lcLoad(LC_ANNIVS);
+  if (cached) { allAnniversaries = cached; renderBirthdayBanners(); renderAnniversaryAdmin(); }
   try {
     const data = await apiGet('getAnniversaries');
     if (data.status === 'ok') {
       allAnniversaries = (data.anniversaries||[]).map(r => ({ __backendId:r.id||'', anniversary_name:r.anniversary_name||'', anniversary_month:parseInt(r.anniversary_month)||0, anniversary_day:parseInt(r.anniversary_day)||0, anniversary_year:r.anniversary_year?parseInt(r.anniversary_year):null, color:r.color||'#a855f7' }));
+      lcSave(LC_ANNIVS, allAnniversaries);
       renderBirthdayBanners(); renderAnniversaryAdmin();
     }
   } catch(e) { console.warn('Anniversary load error:', e); }
@@ -1141,6 +1117,13 @@ try {
   }
 } catch(e) { console.warn('elementSdk not available:', e); }
 
+let _lucideTimer = null;
+function debounceLucide() {
+  if (typeof lucide === 'undefined') return;
+  clearTimeout(_lucideTimer);
+  _lucideTimer = setTimeout(() => lucide.createIcons(), 50);
+}
+
 function navigate(page) {
   // Security gate: admin only accessible if URL key + logged in
   if (page === 'admin' && (!panelUnlocked || !isLoggedIn())) return;
@@ -1153,7 +1136,7 @@ function navigate(page) {
   const navEl = document.querySelector(`.nav-link[data-page="${page}"]`);
   if (navEl) navEl.classList.add('active');
   renderCurrentPage();
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+  debounceLucide();
 }
 
 function renderCurrentPage() {
@@ -1269,7 +1252,7 @@ function renderHome() {
   if (events.length === 0) {
     grid.innerHTML = '';
     noEv.style.display = 'block';
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    debounceLucide();
     return;
   }
 
@@ -1323,11 +1306,48 @@ function renderHome() {
     grid.appendChild(gw);
   });
 
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+  debounceLucide();
+}
+
+
+function getTypeStyle(type) {
+  if (!type) return null;
+  const t = type.trim().toLowerCase();
+  const map = {
+    'live event':         { bg:'#fff7ed', color:'#c2410c', border:'#fed7aa', dot:'#f97316' },
+    'concert':            { bg:'#fdf4ff', color:'#7e22ce', border:'#d8b4fe' },
+    'private event':      { bg:'#fce7f3', color:'#9d174d', border:'#fbcfe8' },
+    'event':              { bg:'#f0fdf4', color:'#15803d', border:'#bbf7d0' },
+    'variety & game show':{ bg:'#eff6ff', color:'#1d4ed8', border:'#bfdbfe' },
+    'collab':             { bg:'#f9fafb', color:'#374151', border:'#e5e7eb' },
+    'tpop fest':          { bg:'#fefce8', color:'#854d0e', border:'#fde047' },
+    'fanmeet':            { bg:'#fef0ff', color:'#a21caf', border:'#f0abfc' },
+    'fansign':            { bg:'#fdf2ff', color:'#86198f', border:'#e879f9' },
+    'presstour':          { bg:'#faf5ff', color:'#6d28d9', border:'#ddd6fe' },
+    'fancon':             { bg:'#f0f9ff', color:'#0369a1', border:'#bae6fd' },
+    'fanfest':            { bg:'#fff1f2', color:'#be123c', border:'#fda4af' },
+    'music mv':           { bg:'#fefce8', color:'#713f12', border:'#fef08a' },
+    'live':               { bg:'#fff7ed', color:'#9a3412', border:'#fdba74', dot:'#f97316' },
+    'series':             { bg:'#f0fdf4', color:'#166534', border:'#86efac' },
+    'fan party':          { bg:'#eff6ff', color:'#1e40af', border:'#93c5fd' },
+    'fanday':             { bg:'#fdf4ff', color:'#9333ea', border:'#e9d5ff' },
+    'short drama':        { bg:'#f0f9ff', color:'#0c4a6e', border:'#7dd3fc' },
+    'fashion week':       { bg:'#fef2f2', color:'#991b1b', border:'#fca5a5' },
+    'onair':              { bg:'#fef2f2', color:'#b91c1c', border:'#fca5a5', dot:'#ef4444' },
+  };
+  return map[t] || { bg:'#f3f4f6', color:'#374151', border:'#e5e7eb' };
+}
+
+function buildTypePill(type, size) {
+  if (!type) return '';
+  const s = getTypeStyle(type);
+  const fs = size === 'lg' ? '0.82rem' : '0.72rem';
+  const pad = size === 'lg' ? '5px 12px' : '3px 9px';
+  const dot = s.dot ? \`<span style="width:6px;height:6px;border-radius:50%;background:\${s.dot};margin-right:5px;flex-shrink:0;display:inline-block;animation:pill-pulse 1.2s ease-in-out infinite;"></span>\` : '';
+  return \`<span style="display:inline-flex;align-items:center;font-size:\${fs};font-weight:700;border-radius:6px;padding:\${pad};background:\${s.bg};color:\${s.color};border:1px solid \${s.border};">\${dot}\${escHtml(type)}</span>\`;
 }
 
 function createCard(ev) {
-  // Rule 1: skip if no title
   if (!ev.title || !ev.title.trim()) return document.createDocumentFragment();
 
   const color = getArtistColor(ev.artists);
@@ -1336,49 +1356,87 @@ function createCard(ev) {
   card.dataset.eventId = ev.__backendId;
   card.onclick = () => openDetailModal(ev.__backendId);
 
-  // Rule 2: image only if url exists — no placeholder, no empty space
-  const imgHtml = ev.image
-    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" onerror="this.parentElement.remove();" loading="lazy">${buildDateBadge(ev, color)}</div>`
-    : (ev.dateStart ? `<div style="position:relative;height:0;">${buildDateBadge(ev, color)}</div>` : '');
-
-  // Date row — only if date exists
-  const metaItems = [];
-  if (ev.dateStart) {
-    const dateStr = getMonthDisplay(ev.dateStart) + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – '+getMonthDisplay(ev.dateEnd) : '');
-    metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateStr}</div>`);
-  }
-  // Time — show exactly as typed, no conversion, no timezone append
-  if (ev.startTime) {
-    const timeStr = ev.startTime + (ev.endTime ? ' – ' + ev.endTime : '');
-    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${escHtml(timeStr)}</span></div>`);
-  }
-  // Rule 6: location only if exists — filter out any GMT values accidentally stored in location fields
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
-  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()) && !hasHtml(x));
-  if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
-  if (ev.description && !hasHtml(ev.description)) metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
-  if (ev.type && !hasHtml(ev.type)) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.type)}</span></div>`);
-  // Rule 7: TV channel only if exists
-  if (ev.tv && !hasHtml(ev.tv)) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv)}</span></div>`);
-  if (ev.note && !hasHtml(ev.note)) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
 
-  // Rule 7: social icons only if links exist
-  const socialHtml = buildSocialIcons(ev);
+  // ── Top section: image or color strip ──
+  const imgHtml = ev.image
+    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" onerror="this.parentElement.style.display='none';" loading="lazy">${buildDateBadge(ev, color)}</div>`
+    : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
 
-  // Rule 8: artist badge only if artists exist
+  // ── Artist badge ──
   const artistBadge = (ev.artists && ev.artists.trim())
-    ? `<span class="artist-badge" style="background:${color}18;color:${color};margin-bottom:0.5rem;font-size:0.68rem;padding:2px 8px;"><i data-lucide="user" style="width:9px;height:9px;stroke-width:2.5;"></i>${getArtistLabel(ev.artists)}</span>`
+    ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:7px;margin-bottom:7px;background:${color}18;color:${color};border:1px solid ${color}44;">
+        <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ${getArtistLabel(ev.artists)}
+      </span>`
     : '';
+
+  // ── Date + Time row ──
+  let dtRow = '';
+  if (ev.dateStart) {
+    const d = new Date(ev.dateStart + 'T00:00:00');
+    const dateLabel = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+      + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + new Date(ev.dateEnd+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '');
+    const timeHtml = ev.startTime
+      ? `<span style="width:1px;height:13px;background:#e5e7eb;margin:0 8px;flex-shrink:0;display:inline-block;"></span>
+         <span style="display:flex;align-items:center;gap:4px;font-size:0.86rem;font-weight:700;color:#111;">
+           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+           ${escHtml(ev.startTime)}${ev.endTime ? ' – '+escHtml(ev.endTime) : ''}
+         </span>`
+      : '';
+    dtRow = `<div style="display:flex;align-items:center;margin-bottom:5px;">
+      <span style="display:flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;color:${color};">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        ${escHtml(dateLabel)}
+      </span>${timeHtml}
+    </div>`;
+  }
+
+  // ── Location ──
+  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()) && !hasHtml(x));
+  const locRow = lp.length
+    ? `<div style="display:flex;align-items:center;gap:4px;font-size:0.7rem;color:#6b7280;margin-bottom:5px;">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        ${lp.join(', ')}
+      </div>`
+    : '';
+
+  // ── Pills row: type + tv ──
+  const typePill = buildTypePill(ev.type, 'sm');
+  const tvPill = (ev.tv && !hasHtml(ev.tv))
+    ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;font-weight:700;background:#fff7ed;color:#c2410c;border-radius:5px;padding:3px 8px;border:1px solid #fed7aa;">
+        <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+        ${escHtml(ev.tv)}
+      </span>`
+    : '';
+  const pillsRow = (typePill || tvPill)
+    ? `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:5px;">${tvPill}${typePill}</div>`
+    : '';
+
+  // ── Note ──
+  const noteRow = (ev.note && !hasHtml(ev.note))
+    ? `<div style="font-size:0.76rem;font-weight:700;color:#374151;margin-bottom:5px;display:flex;align-items:flex-start;gap:5px;background:#fafafa;border-left:3px solid #374151;padding:4px 7px;border-radius:0 5px 5px 0;line-height:1.4;">
+        <svg width="11" height="11" fill="none" stroke="#374151" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        ${escHtml(ev.note)}
+      </div>`
+    : '';
+
+  // ── Description ──
+  const descRow = (ev.description && !hasHtml(ev.description))
+    ? `<div style="font-size:0.7rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:4px;">${escHtml(ev.description)}</div>`
+    : '';
+
+  const socialHtml = buildSocialIcons(ev);
 
   card.innerHTML = `
     ${imgHtml}
     <div style="padding:0.85rem;display:flex;flex-direction:column;flex:1;">
       ${artistBadge}
-      <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:${metaItems.length?'0.4rem':'0.6rem'};line-height:1.3;">${escHtml(ev.title)}</h3>
-      ${metaItems.length ? `<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:0.6rem;">${metaItems.join('')}</div>` : ''}
-      ${socialHtml ? `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:0.6rem;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
+      <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:6px;line-height:1.35;">${escHtml(ev.title)}</h3>
+      ${dtRow}${locRow}${pillsRow}${noteRow}${descRow}
+      ${socialHtml ? `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
       <div style="flex:1;"></div>
-      <button style="width:100%;border:1.5px solid #111;background:#fff;border-radius:8px;padding:7px;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s;margin-top:0.6rem;" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='#fff'">View Details</button>
+      <button style="width:100%;border:none;background:#111;color:#fff;border-radius:8px;padding:8px;font-size:0.78rem;font-weight:700;cursor:pointer;margin-top:0.6rem;letter-spacing:0.02em;" onmouseenter="this.style.background='#333'" onmouseleave="this.style.background='#111'">View Details</button>
     </div>`;
   return card;
 }
@@ -1420,29 +1478,49 @@ function openDetailModal(id) {
     ? `<img src="${escHtml(ev.image)}" style="width:100%;height:auto;display:block;" alt="${escHtml(ev.title)}" loading="lazy">`
     : '';
 
-  // Artist badge: only if artists exist
+  // Artist badge — ตรงกับ card
   document.getElementById('detail-artist-badge').innerHTML = (ev.artists && ev.artists.trim())
-    ? `<span class="artist-badge" style="background:${color}18;color:${color};">${getArtistLabel(ev.artists)}</span>`
+    ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:700;padding:4px 11px;border-radius:7px;background:${color}18;color:${color};border:1px solid ${color}44;">
+        <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        ${getArtistLabel(ev.artists)}
+      </span>`
     : '';
 
   document.getElementById('detail-title').textContent = ev.title;
 
-  // Build meta rows — each only if data exists
   const hasHtmlDetail = v => !!v && /<[a-z][\s\S]*>/i.test(v);
   const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !hasHtmlDetail(x));
 
   const metaRows = [];
-  if (ev.dateStart) metaRows.push(`<div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.dateStart)}</div>`);
-  if (ev.dateStart) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.dateStart)}${ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + getFullDateDisplay(ev.dateEnd) : ''}</span></div>`);
-  // Time — show exactly as typed, no conversion, no timezone dropdown append
-  if (ev.startTime) {
-    const timeStr = ev.startTime + (ev.endTime ? ' – ' + ev.endTime : '');
-    metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(timeStr)}</span></div>`);
+
+  // date + time แถวเดียวกัน ตรงกับ card
+  if (ev.dateStart) {
+    const d = new Date(ev.dateStart + 'T00:00:00');
+    const dateLabel = getFullDateDisplay(ev.dateStart) + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + getFullDateDisplay(ev.dateEnd) : '');
+    const timeHtml = ev.startTime
+      ? `<span style="width:1px;height:14px;background:#e5e7eb;margin:0 10px;flex-shrink:0;display:inline-block;"></span>
+         <span style="display:flex;align-items:center;gap:5px;font-size:1rem;font-weight:700;color:#111;">
+           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+           ${escHtml(ev.startTime)}${ev.endTime ? ' – '+escHtml(ev.endTime) : ''}
+         </span>`
+      : '';
+    metaRows.push(`<div style="display:flex;align-items:center;margin-bottom:2px;">
+      <span style="display:flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:700;color:${color};">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        ${escHtml(dateLabel)}
+      </span>${timeHtml}
+    </div>`);
   }
-  if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
-  if (ev.type) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.type}</span></div>`);
-  if (ev.tv) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv)}</span></div>`);
-  if (ev.note) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="file-text" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(ev.note)}</span></div>`);
+
+  if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.88rem;color:#374151;margin-top:4px;"><svg width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span>${lp.join(', ')}</span></div>`);
+
+  // type pill + tv pill แถวเดียวกัน compact
+  const typePillHtml = buildTypePill(ev.type, 'lg');
+  const tvPillHtml = ev.tv ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.75rem;font-weight:700;background:#fff7ed;color:#c2410c;border-radius:6px;padding:4px 10px;border:1px solid #fed7aa;"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>${escHtml(ev.tv)}</span>` : '';
+  if (typePillHtml || tvPillHtml) metaRows.push(`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px;">${tvPillHtml}${typePillHtml}</div>`);
+
+  // note — เข้ม+หนา ตรงกับ card
+  if (ev.note && !hasHtmlDetail(ev.note)) metaRows.push(`<div style="font-size:0.85rem;font-weight:700;color:#374151;margin-top:8px;display:flex;align-items:flex-start;gap:6px;background:#fafafa;border-left:3px solid #374151;padding:6px 10px;border-radius:0 6px 6px 0;line-height:1.5;"><svg width="13" height="13" fill="none" stroke="#374151" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${escHtml(ev.note)}</div>`);
 
   document.getElementById('detail-meta').innerHTML = metaRows.join('');
 
@@ -1476,7 +1554,7 @@ function openDetailModal(id) {
 
   document.getElementById('detail-modal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+  debounceLucide();
 }
 
 function closeDetailModal() {
@@ -1526,7 +1604,7 @@ function renderCalendar() {
     cell.innerHTML = dayNumHtml+bdayHtml+eventDotsHtml;
     grid.appendChild(cell);
   }
-  if (typeof lucide!=='undefined') lucide.createIcons();
+  debounceLucide();
 }
 
 function prevMonth() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
@@ -1560,7 +1638,7 @@ function doAdminLogin() {
     document.getElementById('admin-panel').style.display = 'flex';
     navigate('admin');
     renderAdminList(); renderAnniversaryAdmin();
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    debounceLucide();
   } else {
     err.style.display = 'block';
     document.getElementById('login-pw-field').select();
@@ -1581,15 +1659,15 @@ function adminLogout() {
 async function adminRefresh() {
   const btn = document.getElementById('admin-refresh-btn');
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-top-color:#111;"></span>'; }
+  lcClear(); // clear local cache so we get fresh data
   try {
-    // Clear server-side cache so next load reads fresh Sheet data
     await apiPost({ action: 'clearCache' });
   } catch(e) { /* non-fatal */ }
   await loadEventsFromSheets();
   if (btn) {
     btn.disabled = false;
     btn.innerHTML = '<i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>Refresh';
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    debounceLucide();
   }
   showToast('Refreshed from Sheet ✓');
 }
@@ -1600,10 +1678,10 @@ function renderAdminList() {
   const limitWarn=document.getElementById('admin-limit-warn');
   if(!list)return;
   limitWarn.style.display=allEvents.length>=999?'block':'none';
-  if(allEvents.length===0){list.innerHTML='';noEv.style.display='block';if(typeof lucide!=='undefined')lucide.createIcons();return;}
+  if(allEvents.length===0){list.innerHTML='';noEv.style.display='block';debounceLucide();return;}
   noEv.style.display='none'; list.innerHTML='';
   allEvents.forEach(ev => list.appendChild(createAdminRow(ev)));
-  if(typeof lucide!=='undefined')lucide.createIcons();
+  debounceLucide();
 }
 function createAdminRow(ev) {
   const row=document.createElement('div');
@@ -1637,7 +1715,7 @@ function updateAdminRow(row,ev) {
       ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">Delete?</span><button class="btn-danger" onclick="confirmDelete('${rowKey}')">Yes</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${rowKey}')">Cancel</button>`
       :`<button class="btn-secondary" style="font-size:0.8rem;padding:6px 10px;" onclick="openEditModal('${rowKey}')"><i data-lucide="edit-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Edit</button><button class="btn-danger" onclick="startDelete('${rowKey}')"><i data-lucide="trash-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:2px;"></i>Delete</button>`
     }</div>`;
-  if(typeof lucide!=='undefined')lucide.createIcons();
+  debounceLucide();
 }
 function startDelete(key){deleteConfirmIds.add(key);const row=document.querySelector(`#admin-events-list [data-event-id="${key}"]`);const ev=findEventByKey(key);if(row&&ev)updateAdminRow(row,ev);}
 function cancelDelete(key){deleteConfirmIds.delete(key);const row=document.querySelector(`#admin-events-list [data-event-id="${key}"]`);const ev=findEventByKey(key);if(row&&ev)updateAdminRow(row,ev);}
@@ -1659,10 +1737,9 @@ async function confirmDelete(key) {
     if (result.status === 'ok') {
       showToast('Event deleted.');
     } else if (result.status === 'not_found') {
-      // Already deleted from Sheet manually — remove from UI silently
       showToast('Removed. (Row was already deleted from Sheet)');
     }
-    // Either way — reload to get fresh data
+    lcClear(); // force fresh fetch after delete
     await loadEventsFromSheets();
 
   } catch(err) {
@@ -1684,7 +1761,7 @@ function openAddModal() {
   document.getElementById('event-form-modal').style.display='flex';
   document.body.style.overflow='hidden';
   setTimeout(()=>{const n=document.getElementById('ev-title');if(n)n.focus();},50);
-  if(typeof lucide!=='undefined')lucide.createIcons();
+  debounceLucide();
 }
 function openEditModal(key) {
   const ev=findEventByKey(key); if(!ev)return;
@@ -1698,7 +1775,7 @@ function openEditModal(key) {
   fillForm(ev);
   document.getElementById('event-form-modal').style.display='flex';
   document.body.style.overflow='hidden';
-  if(typeof lucide!=='undefined')lucide.createIcons();
+  debounceLucide();
 }
 function closeEventFormModal() {
   document.getElementById('event-form-modal').style.display = 'none';
@@ -1819,7 +1896,7 @@ function openPreviewPopup() {
   const btn=card.querySelector('button[onmouseenter]'); if(btn)btn.style.display='none';
   const pc=document.getElementById('preview-popup-card'); pc.innerHTML=''; pc.appendChild(card);
   popup.style.display='flex'; document.body.style.overflow='hidden';
-  if(typeof lucide!=='undefined')lucide.createIcons();
+  debounceLucide();
 }
 function closePreviewPopup(){const p=document.getElementById('preview-popup');if(p)p.style.display='none';}
 function updatePreview(){}
@@ -1913,9 +1990,10 @@ async function handleEventFormSubmit() {
 
   // ── Only close and reload if save actually succeeded ─────────────────
   if (success) {
-    closeEventFormModal();                                       // close AFTER save
+    closeEventFormModal();
     showToast(editingEventId ? 'Event updated! ✓' : 'Event added! ✓');
     clearForm();
+    lcClear(); // force fresh fetch after write
     await loadEventsFromSheets();
     if (isAdmin) renderAdminList();
   }
@@ -1979,7 +2057,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // ──────────────────────────────────────────
 
   const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
-  if(typeof lucide!=='undefined')lucide.createIcons();
+  debounceLucide();
 });
   </script>
  </body>
