@@ -1064,15 +1064,16 @@ function createCard(ev) {
     }
   }
   const metaItems = [];
-  if (ev.date) metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : ''}</div>`);
-  // Time + timezone display
+  // Date row — ถ้าไม่มีเวลาแต่มี timezone ให้ต่อท้าย date
   const tzText = ev.timezone ? ` (${escHtml(ev.timezone)})` : '';
+  if (ev.date) {
+    const dateStr = getMonthDisplay(ev.date) + (ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : '');
+    const dateTz = (!ev.start_time && ev.timezone) ? dateStr + tzText : dateStr;
+    metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateTz}</div>`);
+  }
+  // Time row — แสดงเฉพาะถ้ามี start_time
   if (ev.start_time) {
     metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
-  } else if (ev.timezone && !ev.start_time) {
-    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="globe" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${escHtml(ev.timezone)}</span></div>`);
-  } else if (!ev.date && !ev.start_time && !ev.timezone) {
-    metaItems.push(`<div style="font-size:0.78rem;color:#d1d5db;font-style:italic;">No time yet</div>`);
   }
   const lp = [ev.location_name,ev.city,ev.country].filter(x=>x);
   if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
