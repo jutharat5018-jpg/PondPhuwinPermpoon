@@ -534,23 +534,18 @@
 
   /* Mobile dropdown menu */
   .nav-mobile-menu {
-    display: none; /* shown only on mobile */
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.22s ease;
-    opacity: 0;
+    display: none;
     background: #fff;
     border-top: 1px solid #f3f4f6;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.07);
   }
   .nav-mobile-menu.is-open {
-    max-height: 300px;
-    opacity: 1;
+    display: block;
   }
   .nav-mobile-inner {
     max-width: 1400px;
     margin: auto;
-    padding: 6px 12px 10px;
+    padding: 8px 12px 14px;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -558,30 +553,29 @@
   .nav-mobile-link {
     display: block;
     width: 100%;
-    padding: 12px 14px;
+    padding: 13px 14px;
     border-radius: 10px;
     font-size: 0.95rem;
     font-weight: 600;
     color: #111;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     letter-spacing: -0.01em;
   }
   .nav-mobile-link:hover,
-  .nav-mobile-link:active { background: #f5f5f5; color: #111; }
-  .nav-mobile-link.active  { color: #111; background: #f3f4f6; }
+  .nav-mobile-link:active { background: #f5f5f5; }
+  .nav-mobile-link.active  { background: #f3f4f6; }
 
   /* ── Show hamburger on mobile, hide on desktop ── */
   @media (max-width: 767px) {
     .nav-desktop   { display: none !important; }
     .nav-hamburger { display: flex !important; }
-    .nav-mobile-menu { display: block; }
     #nav-site-title { max-width: 200px; }
   }
 
-  /* Tablet: show desktop links but allow wrapping */
+  /* Tablet+: show desktop links, hide hamburger + mobile menu */
   @media (min-width: 768px) {
     .nav-hamburger   { display: none !important; }
     .nav-mobile-menu { display: none !important; }
@@ -2550,7 +2544,7 @@ function openMobileMenu() {
   menu.setAttribute('aria-hidden', 'false');
   syncMobileAdminLink();
   syncMobileNavActive();
-  // Force Lucide to render icons inside the now-visible menu
+  // Force Lucide icons to render inside the now-visible dropdown
   if (typeof lucide !== 'undefined') {
     try { lucide.createIcons(); } catch(e) {}
   }
