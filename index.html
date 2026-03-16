@@ -484,11 +484,11 @@
         <input class="form-input" id="f-note" placeholder="e.g. live on YouTube, time not confirmed">
        </div>
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="f-tvchannel" style="display:flex;align-items:center;gap:5px;">
+        <label class="form-label" for="f-tv" style="display:flex;align-items:center;gap:5px;">
          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:#6b7280;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
          TV Channel <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
-        <input class="form-input" id="f-tvchannel" placeholder="e.g. GMM25, ONE31, PPTV, NHK, Netflix...">
+        <input class="form-input" id="f-tv" name="tv" placeholder="e.g. GMM25, ONE31, PPTV, NHK, Netflix...">
        </div>
        <!-- MAP EMBED FIELD -->
        <div style="grid-column:1/-1;">
@@ -504,39 +504,43 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
        <div>
         <label class="form-label" for="f-yt">YouTube</label>
-        <input class="form-input" id="f-yt" placeholder="https://youtube.com/...">
+        <input class="form-input" id="f-yt" name="youtube" placeholder="https://youtube.com/...">
        </div>
        <div>
         <label class="form-label" for="f-ig">Instagram</label>
-        <input class="form-input" id="f-ig" placeholder="https://instagram.com/...">
+        <input class="form-input" id="f-ig" name="instagram" placeholder="https://instagram.com/...">
        </div>
        <div>
         <label class="form-label" for="f-fb">Facebook</label>
-        <input class="form-input" id="f-fb" placeholder="https://facebook.com/...">
+        <input class="form-input" id="f-fb" name="facebook" placeholder="https://facebook.com/...">
        </div>
        <div>
         <label class="form-label" for="f-x">X (Twitter)</label>
-        <input class="form-input" id="f-x" placeholder="https://x.com/...">
+        <input class="form-input" id="f-x" name="x" placeholder="https://x.com/...">
        </div>
        <div>
         <label class="form-label" for="f-tiktok">TikTok</label>
-        <input class="form-input" id="f-tiktok" placeholder="https://tiktok.com/...">
+        <input class="form-input" id="f-tiktok" name="tiktok" placeholder="https://tiktok.com/...">
+       </div>
+       <div>
+        <label class="form-label" for="f-website">Website</label>
+        <input class="form-input" id="f-website" name="website" placeholder="https://...">
        </div>
        <div>
         <label class="form-label" for="f-whatsapp">WhatsApp</label>
-        <input class="form-input" id="f-whatsapp" placeholder="https://wa.me/...">
+        <input class="form-input" id="f-whatsapp" name="whatsapp" placeholder="https://wa.me/...">
        </div>
        <div>
         <label class="form-label" for="f-shopee">Shopee</label>
-        <input class="form-input" id="f-shopee" placeholder="https://shopee.com/...">
+        <input class="form-input" id="f-shopee" name="shopee" placeholder="https://shopee.com/...">
        </div>
        <div>
-        <label class="form-label" for="f-live">Live Stream URL</label>
-        <input class="form-input" id="f-live" placeholder="YouTube/FB/TikTok/IG Live URL">
+        <label class="form-label" for="f-live">Live Stream</label>
+        <input class="form-input" id="f-live" name="live" placeholder="YouTube/FB/TikTok/IG Live URL">
        </div>
        <div>
-        <label class="form-label" for="f-file">File Download</label>
-        <input class="form-input" id="f-file" placeholder="https://...">
+        <label class="form-label" for="f-file">Download</label>
+        <input class="form-input" id="f-file" name="download" placeholder="https://...">
        </div>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;">
@@ -827,20 +831,21 @@ async function loadEventsFromSheets(isRetry) {
     if (data.status === 'ok') {
       allEvents = (data.events||[]).map(r => ({
         __backendId: r.id||r.__backendId||'',
-        event_name: r.event_name||'', image_url: r.image_url||'',
+        title: r.title||'', image: r.image||'',
         artists: r.artists||'', date: r.date||'',
         start_time: r.start_time||'', end_time: r.end_time||'',
-        location_name: r.location_name||'', city: r.city||'', country: r.country||'',
-        description: r.description||'', youtube_link: r.youtube_link||'',
-        instagram_link: r.instagram_link||'', facebook_link: r.facebook_link||'',
-        x_link: r.x_link||'', tiktok_link: r.tiktok_link||'',
-        whatsapp_link: r.whatsapp_link||'', shopee_link: r.shopee_link||'',
-        live_link: r.live_link||'', file_link: r.file_link||'',
-        event_type: r.event_type||'', note: r.note||'',
+        location: r.location||'', city: r.city||'', country: r.country||'',
+        description: r.description||'', youtube: r.youtube||'',
+        instagram: r.instagram||'', facebook: r.facebook||'',
+        x: r.x||'', tiktok: r.tiktok||'',
+        website: r.website||'',
+        whatsapp: r.whatsapp||'', shopee: r.shopee||'',
+        live: r.live||'', download: r.download||'',
+        type: r.type||'', note: r.note||'',
         map_embed: r.map_embed||'',
         date_end: r.date_end||'',
         timezone: r.timezone||'',
-        tv_channel: r.tv_channel||''
+        tv: r.tv||''
       }));
       allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
       apiLoaded = true;
@@ -1028,6 +1033,7 @@ const SOCIAL_ICONS = {
   tiktok: `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>`,
   whatsapp: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`,
   shopee: `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#EE4D2D"/><path fill="white" d="M18.332 9.273h-1.457a4.875 4.875 0 10-9.75 0H5.668a1.667 1.667 0 00-1.66 1.82l.78 8.874A1.667 1.667 0 006.45 21.5h11.1a1.667 1.667 0 001.662-1.533l.78-8.874a1.667 1.667 0 00-1.66-1.82zM12 5.7a2.875 2.875 0 012.875 2.873v.3H9.125v-.3A2.875 2.875 0 0112 5.7zm2.354 7.97a.4.4 0 01-.566 0l-1.288-1.288v4.018a.4.4 0 01-.8 0v-4.018l-1.288 1.288a.4.4 0 01-.566-.566l2-2a.4.4 0 01.566 0l2 2a.4.4 0 010 .566z"/></svg>`,
+  website: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B7280" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
   download: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B7280" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
 };
 
@@ -1036,22 +1042,23 @@ function makeSocialBtn(href, iconSvg, label) {
 }
 function buildSocialIcons(ev) {
   let html = '';
-  if (ev.youtube_link) html += makeSocialBtn(ev.youtube_link, SOCIAL_ICONS.youtube, 'YouTube');
-  if (ev.instagram_link) html += makeSocialBtn(ev.instagram_link, SOCIAL_ICONS.instagram, 'Instagram');
-  if (ev.facebook_link) html += makeSocialBtn(ev.facebook_link, SOCIAL_ICONS.facebook, 'Facebook');
-  if (ev.x_link) html += makeSocialBtn(ev.x_link, SOCIAL_ICONS.x, 'X (Twitter)');
-  if (ev.tiktok_link) html += makeSocialBtn(ev.tiktok_link, SOCIAL_ICONS.tiktok, 'TikTok');
-  if (ev.whatsapp_link) html += makeSocialBtn(ev.whatsapp_link, SOCIAL_ICONS.whatsapp, 'WhatsApp');
-  if (ev.shopee_link) html += makeSocialBtn(ev.shopee_link, SOCIAL_ICONS.shopee, 'Shopee');
-  if (ev.live_link) html += makeSocialBtn(ev.live_link, getLiveIcon(ev.live_link), getLiveLabelFromUrl(ev.live_link));
-  if (ev.file_link) html += makeSocialBtn(ev.file_link, SOCIAL_ICONS.download, 'Download');
+  if (ev.youtube) html += makeSocialBtn(ev.youtube, SOCIAL_ICONS.youtube, 'YouTube');
+  if (ev.instagram) html += makeSocialBtn(ev.instagram, SOCIAL_ICONS.instagram, 'Instagram');
+  if (ev.facebook) html += makeSocialBtn(ev.facebook, SOCIAL_ICONS.facebook, 'Facebook');
+  if (ev.x) html += makeSocialBtn(ev.x, SOCIAL_ICONS.x, 'X (Twitter)');
+  if (ev.tiktok) html += makeSocialBtn(ev.tiktok, SOCIAL_ICONS.tiktok, 'TikTok');
+  if (ev.website) html += makeSocialBtn(ev.website, SOCIAL_ICONS.website, 'Website');
+  if (ev.whatsapp) html += makeSocialBtn(ev.whatsapp, SOCIAL_ICONS.whatsapp, 'WhatsApp');
+  if (ev.shopee) html += makeSocialBtn(ev.shopee, SOCIAL_ICONS.shopee, 'Shopee');
+  if (ev.live) html += makeSocialBtn(ev.live, getLiveIcon(ev.live), getLiveLabelFromUrl(ev.live));
+  if (ev.download) html += makeSocialBtn(ev.download, SOCIAL_ICONS.download, 'Download');
   return html;
 }
 
 function renderHome() {
   renderBirthdayBanners();
   // Rule 1: only events with a title
-  const events = allEvents.filter(ev => !isEventAutoHidden(ev) && ev.event_name && ev.event_name.trim());
+  const events = allEvents.filter(ev => !isEventAutoHidden(ev) && ev.title && ev.title.trim());
   const grid = document.getElementById('events-grid');
   const noEv = document.getElementById('no-events');
   const count = document.getElementById('events-count');
@@ -1085,7 +1092,7 @@ function renderHome() {
 
 function createCard(ev) {
   // Rule 1: skip if no title
-  if (!ev.event_name || !ev.event_name.trim()) return document.createDocumentFragment();
+  if (!ev.title || !ev.title.trim()) return document.createDocumentFragment();
 
   const color = getArtistColor(ev.artists);
   const card = document.createElement('div');
@@ -1094,8 +1101,8 @@ function createCard(ev) {
   card.onclick = () => openDetailModal(ev.__backendId);
 
   // Rule 2: image only if url exists — no placeholder, no empty space
-  const imgHtml = ev.image_url
-    ? `<div style="position:relative;"><img src="${escHtml(ev.image_url)}" alt="${escHtml(ev.event_name)}" class="card-img" onerror="this.parentElement.remove();" loading="lazy">${buildDateBadge(ev, color)}</div>`
+  const imgHtml = ev.image
+    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" onerror="this.parentElement.remove();" loading="lazy">${buildDateBadge(ev, color)}</div>`
     : (ev.date ? `<div style="position:relative;height:0;">${buildDateBadge(ev, color)}</div>` : '');
 
   // Rule 3-4: date row only if date exists; time+timezone only if time exists
@@ -1113,12 +1120,12 @@ function createCard(ev) {
     metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
   }
   // Rule 6: location only if exists — filter out any GMT values accidentally stored in location fields
-  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
+  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
   if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
   if (ev.description) metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
-  if (ev.event_type) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.event_type)}</span></div>`);
+  if (ev.type) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.type)}</span></div>`);
   // Rule 7: TV channel only if exists
-  if (ev.tv_channel) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv_channel)}</span></div>`);
+  if (ev.tv) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv)}</span></div>`);
   if (ev.note) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
 
   // Rule 7: social icons only if links exist
@@ -1133,7 +1140,7 @@ function createCard(ev) {
     ${imgHtml}
     <div style="padding:0.85rem;display:flex;flex-direction:column;flex:1;">
       ${artistBadge}
-      <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:${metaItems.length?'0.4rem':'0.6rem'};line-height:1.3;">${escHtml(ev.event_name)}</h3>
+      <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:${metaItems.length?'0.4rem':'0.6rem'};line-height:1.3;">${escHtml(ev.title)}</h3>
       ${metaItems.length ? `<div style="display:flex;flex-direction:column;gap:3px;margin-bottom:0.6rem;">${metaItems.join('')}</div>` : ''}
       ${socialHtml ? `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:0.6rem;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
       <div style="flex:1;"></div>
@@ -1170,13 +1177,13 @@ function filterHome(artist) {
 
 function openDetailModal(id) {
   const ev = allEvents.find(e => e.__backendId === id);
-  if (!ev || !ev.event_name) return;
+  if (!ev || !ev.title) return;
   const color = getArtistColor(ev.artists);
 
   // Image: only render if url exists, no placeholder
   const imgWrap = document.getElementById('detail-img-wrap');
-  imgWrap.innerHTML = ev.image_url
-    ? `<img src="${escHtml(ev.image_url)}" style="width:100%;height:auto;display:block;" alt="${escHtml(ev.event_name)}" loading="lazy">`
+  imgWrap.innerHTML = ev.image
+    ? `<img src="${escHtml(ev.image)}" style="width:100%;height:auto;display:block;" alt="${escHtml(ev.title)}" loading="lazy">`
     : '';
 
   // Artist badge: only if artists exist
@@ -1184,13 +1191,13 @@ function openDetailModal(id) {
     ? `<span class="artist-badge" style="background:${color}18;color:${color};">${getArtistLabel(ev.artists)}</span>`
     : '';
 
-  document.getElementById('detail-title').textContent = ev.event_name;
+  document.getElementById('detail-title').textContent = ev.title;
 
   // Build meta rows — each only if data exists
   const rawTzD = (ev.timezone||'').trim();
   const validTzD = /^GMT[+-]\d{1,2}$/.test(rawTzD) ? rawTzD : '';
   const tzInline = validTzD ? ` (${validTzD})` : '';
-  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
+  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
 
   const metaRows = [];
   if (ev.date) metaRows.push(`<div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>`);
@@ -1198,8 +1205,8 @@ function openDetailModal(id) {
   // Time+timezone: only if time exists; timezone never alone
   if (ev.start_time) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzInline}</span></div>`);
   if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
-  if (ev.event_type) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.event_type}</span></div>`);
-  if (ev.tv_channel) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv_channel)}</span></div>`);
+  if (ev.type) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.type}</span></div>`);
+  if (ev.tv) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv)}</span></div>`);
   if (ev.note) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="file-text" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(ev.note)}</span></div>`);
 
   document.getElementById('detail-meta').innerHTML = metaRows.join('');
@@ -1279,7 +1286,7 @@ function renderCalendar() {
     }).join('');
     const eventDotsHtml = dayEvents.map(ev => {
       const c = getArtistColor(ev.artists);
-      return `<div class="cal-event-dot" style="background:${c}20;color:${c};" onclick="event.stopPropagation();openDetailModal('${ev.__backendId}')" title="${escHtml(ev.event_name)}">${escHtml(ev.event_name)}${ev.event_type?`<span style="opacity:0.65;font-size:0.58rem;margin-left:3px;">${escHtml(ev.event_type)}</span>`:''}</div>`;
+      return `<div class="cal-event-dot" style="background:${c}20;color:${c};" onclick="event.stopPropagation();openDetailModal('${ev.__backendId}')" title="${escHtml(ev.title)}">${escHtml(ev.title)}${ev.type?`<span style="opacity:0.65;font-size:0.58rem;margin-left:3px;">${escHtml(ev.type)}</span>`:''}</div>`;
     }).join('');
     cell.innerHTML = dayNumHtml+bdayHtml+eventDotsHtml;
     grid.appendChild(cell);
@@ -1355,7 +1362,7 @@ function createAdminRow(ev) {
 function updateAdminRow(row,ev) {
   const color=getArtistColor(ev.artists); const past=isEventPast(ev); const isConfirming=deleteConfirmIds.has(ev.__backendId);
   row.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-    <div style="flex:1;min-width:150px;"><p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.event_name)}${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}</p><p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.date)} · ${getArtistLabel(ev.artists)}</p></div>
+    <div style="flex:1;min-width:150px;"><p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}</p><p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.date)} · ${getArtistLabel(ev.artists)}</p></div>
     <div style="display:flex;gap:6px;align-items:center;">${isConfirming
       ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">Delete?</span><button class="btn-danger" onclick="confirmDelete('${ev.__backendId}')">Yes</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${ev.__backendId}')">Cancel</button>`
       :`<button class="btn-secondary" style="font-size:0.8rem;padding:6px 10px;" onclick="openEditModal('${ev.__backendId}')"><i data-lucide="edit-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Edit</button><button class="btn-danger" onclick="startDelete('${ev.__backendId}')"><i data-lucide="trash-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:2px;"></i>Delete</button>`
@@ -1405,14 +1412,14 @@ function closeEventFormModalBackdrop(e){if(e.target===document.getElementById('e
 function clearForm(){const f=document.getElementById('event-form');if(f)f.reset();document.querySelectorAll('.artist-check').forEach(c=>{c.checked=false;});}
 function fillForm(ev) {
   const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
-  set('f-name',ev.event_name);set('f-image',ev.image_url);set('f-date',ev.date);
+  set('f-name',ev.title);set('f-image',ev.image);set('f-date',ev.date);
   set('f-start',ev.start_time);set('f-end',ev.end_time);set('f-timezone',ev.timezone||'');
   set('f-country',ev.country);
-  set('f-city',ev.city);set('f-location',ev.location_name);set('f-desc',ev.description);
-  set('f-yt',ev.youtube_link);set('f-ig',ev.instagram_link);set('f-fb',ev.facebook_link);
-  set('f-x',ev.x_link);set('f-tiktok',ev.tiktok_link);set('f-whatsapp',ev.whatsapp_link);
-  set('f-shopee',ev.shopee_link);set('f-live',ev.live_link);set('f-file',ev.file_link);
-  set('f-note',ev.note);set('f-type',ev.event_type);set('f-map',ev.map_embed);set('f-date-end',ev.date_end);set('f-tvchannel',ev.tv_channel||'');
+  set('f-city',ev.city);set('f-location',ev.location);set('f-desc',ev.description);
+  set('f-yt',ev.youtube);set('f-ig',ev.instagram);set('f-fb',ev.facebook);
+  set('f-x',ev.x);set('f-tiktok',ev.tiktok);set('f-website',ev.website);set('f-whatsapp',ev.whatsapp);
+  set('f-shopee',ev.shopee);set('f-live',ev.live);set('f-file',ev.download);
+  set('f-note',ev.note);set('f-type',ev.type);set('f-map',ev.map_embed);set('f-date-end',ev.date_end);set('f-tv',ev.tv||'');
   const arr=ev.artists?(ev.artists.split(',').map(a=>a.trim())):[];
   document.querySelectorAll('.artist-check').forEach(c=>{c.checked=arr.includes(c.value);});
 }
@@ -1420,7 +1427,7 @@ function fillForm(ev) {
 function getFormPreviewData() {
   const gv=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
   const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
-  return { __backendId:'__preview__', event_name:gv('f-name')||'Event Name', image_url:gv('f-image'), artists:ca.join(','), date:gv('f-date'), date_end:gv('f-date-end'), start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'), country:gv('f-country'), city:gv('f-city'), location_name:gv('f-location'), description:gv('f-desc'), youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'), x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'), shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'), event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), tv_channel:gv('f-tvchannel') };
+  return { __backendId:'__preview__', title:gv('f-name')||'Event Name', image:gv('f-image'), artists:ca.join(','), date:gv('f-date'), date_end:gv('f-date-end'), start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'), country:gv('f-country'), city:gv('f-city'), location:gv('f-location'), description:gv('f-desc'), youtube:gv('f-yt'), instagram:gv('f-ig'), facebook:gv('f-fb'), x:gv('f-x'), tiktok:gv('f-tiktok'), website:gv('f-website'), whatsapp:gv('f-whatsapp'), shopee:gv('f-shopee'), live:gv('f-live'), download:gv('f-file'), type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), tv:gv('f-tv') };
 }
 function openPreviewPopup() {
   const popup=document.getElementById('preview-popup'); if(!popup)return;
@@ -1444,14 +1451,14 @@ async function handleEventFormSubmit(e) {
   const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
   const gv=id=>(document.getElementById(id)?document.getElementById(id).value.trim():'');
   const data = {
-    event_name:name, image_url:gv('f-image'), artists:ca.join(','), date,
+    title:name, image:gv('f-image'), artists:ca.join(','), date,
     start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'),
     country:gv('f-country'),
-    city:gv('f-city'), location_name:gv('f-location'), description:gv('f-desc'),
-    youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'),
-    x_link:gv('f-x'), tiktok_link:gv('f-tiktok'), whatsapp_link:gv('f-whatsapp'),
-    shopee_link:gv('f-shopee'), live_link:gv('f-live'), file_link:gv('f-file'),
-    event_type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), weibo_link:'', tv_channel:gv('f-tvchannel')
+    city:gv('f-city'), location:gv('f-location'), description:gv('f-desc'),
+    youtube:gv('f-yt'), instagram:gv('f-ig'), facebook:gv('f-fb'),
+    x:gv('f-x'), tiktok:gv('f-tiktok'), website:gv('f-website'), whatsapp:gv('f-whatsapp'),
+    shopee:gv('f-shopee'), live:gv('f-live'), download:gv('f-file'),
+    type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), tv:gv('f-tv')
   };
   const btn=document.getElementById('form-submit-btn');
   const txt=document.getElementById('form-submit-text');
