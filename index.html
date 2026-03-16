@@ -33,9 +33,13 @@
   .card-img { width: 100%; height: 220px; object-fit: cover; display: block; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   /* ── CALENDAR ── */
-  .cal-day { min-height: 130px; border: 1px solid #f0f0f0; padding: 6px; background: #fff; transition: background 0.15s; box-sizing: border-box; }
-  .cal-day:hover { background: #f9f9f9; }
-  .cal-event-dot { font-size: 0.88rem; font-weight: 600; padding: 3px 8px; border-radius: 5px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.5; max-width: 100%; display: block; min-width: 0; }
+  .cal-day { height: 130px; border: 1px solid #f0f0f0; padding: 6px; background: #fff; transition: background 0.15s; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; }
+  .cal-day:hover { background: #f9f9f9; cursor: pointer; }
+  .cal-events-wrap { flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .cal-events-wrap::-webkit-scrollbar { width: 3px; }
+  .cal-events-wrap::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
+  .cal-event-dot { font-size: 0.75rem; font-weight: 600; padding: 2px 4px; border-radius: 4px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.5; max-width: 100%; display: flex; align-items: center; gap: 5px; min-width: 0; }
+  .cal-event-dot-circle { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
@@ -1579,33 +1583,60 @@ function renderCalendar() {
   const grid = document.getElementById('cal-grid');
   if (!grid) return;
   grid.innerHTML = '';
+
+  // empty cells before first day
   for (let i=0;i<firstDay;i++) {
-    const empty = document.createElement('div'); empty.className='cal-day'; empty.style.background='#fafafa'; grid.appendChild(empty);
+    const empty = document.createElement('div');
+    empty.className = 'cal-day';
+    empty.style.background = '#fafafa';
+    grid.appendChild(empty);
   }
+
   for (let d=1;d<=daysInMonth;d++) {
     const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dayEvents = allEvents.filter(ev => {
       if (!ev.dateStart) return false;
-      if (ev.dateEnd && ev.dateEnd > ev.dateStart) {
-        return dateStr >= ev.dateStart && dateStr <= ev.dateEnd;
-      }
+      if (ev.dateEnd && ev.dateEnd > ev.dateStart) return dateStr >= ev.dateStart && dateStr <= ev.dateEnd;
       return ev.dateStart === dateStr;
     });
     const bdays = getBirthdaysOnDate(month+1, d);
     const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
-    const cell = document.createElement('div'); cell.className='cal-day';
+
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+
+    // click on cell (not on event) — if has events, open first one
+    if (dayEvents.length > 0) {
+      cell.style.cursor = 'pointer';
+      cell.onclick = () => openDetailModal(dayEvents[0].__backendId);
+    }
+
+    // day number
     const dayNumHtml = isToday
-      ? `<div style="font-size:0.78rem;font-weight:800;background:#111;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:2px;">${d}</div>`
-      : `<div style="font-size:0.78rem;font-weight:500;color:#9ca3af;padding:1px 2px;margin-bottom:2px;">${d}</div>`;
+      ? `<div style="font-size:0.78rem;font-weight:800;background:#111;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:2px;flex-shrink:0;">${d}</div>`
+      : `<div style="font-size:0.78rem;font-weight:500;color:#9ca3af;padding:1px 2px;margin-bottom:2px;flex-shrink:0;">${d}</div>`;
+
+    // birthdays/anniversaries
     const bdayHtml = bdays.map(b => {
       const isAnniv = b.type==='anniversary';
-      return `<div class="cal-event-dot" style="background:${b.color}22;color:${b.color};border:1px solid ${b.color}55;" title="${isAnniv?b.label+' Anniversary 🥂':b.name+"'s Birthday 🎂"}">${isAnniv?b.label+' 🥂':b.name+' 🎂'}</div>`;
+      return `<div class="cal-event-dot" style="color:${b.color};" title="${isAnniv?b.label+' Anniversary':b.name+"'s Birthday"}">
+        <span class="cal-event-dot-circle" style="background:${b.color};"></span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${isAnniv?b.label+' 🥂':b.name+' 🎂'}</span>
+      </div>`;
     }).join('');
+
+    // events — style B: dot + ชื่อ
     const eventDotsHtml = dayEvents.map(ev => {
       const c = getArtistColor(ev.artists);
-      return `<div class="cal-event-dot" style="background:${c}20;color:${c};" onclick="event.stopPropagation();openDetailModal('${ev.__backendId}')" title="${escHtml(ev.title)}">${escHtml(ev.title)}${ev.type?`<span style="opacity:0.65;font-size:0.58rem;margin-left:3px;">${escHtml(ev.type)}</span>`:''}</div>`;
+      return `<div class="cal-event-dot" title="${escHtml(ev.title)}"
+        onclick="event.stopPropagation();openDetailModal('${ev.__backendId}')">
+        <span class="cal-event-dot-circle" style="background:${c};"></span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#374151;">${escHtml(ev.title)}</span>
+      </div>`;
     }).join('');
-    cell.innerHTML = dayNumHtml+bdayHtml+eventDotsHtml;
+
+    // scrollable events wrap
+    cell.innerHTML = dayNumHtml + `<div class="cal-events-wrap">${bdayHtml}${eventDotsHtml}</div>`;
     grid.appendChild(cell);
   }
   debounceLucide();
