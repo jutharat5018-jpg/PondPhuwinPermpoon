@@ -1510,8 +1510,9 @@ function escHtml(str) {
 function filterHome(artist) {
   homeFilter = artist;
   document.querySelectorAll('.artist-filter-btn').forEach(btn => {
-    if (btn.dataset.artist === artist) { btn.style.background='#111'; btn.style.color='#fff'; btn.style.borderColor='#111'; }
-    else { const c=btn.dataset.artist==='Pond'?'#f97316':btn.dataset.artist==='Phuwin'?'#6b7280':btn.dataset.artist==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
+    const a = btn.dataset.artist;
+    if (a === artist) { const ac=a==='all'?'#111':getArtistColor(a); btn.style.background=ac; btn.style.color='#fff'; btn.style.borderColor=ac; }
+    else { const c=a==='Pond'?'#f97316':a==='Phuwin'?'#6b7280':a==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
   });
   renderHome();
 }
