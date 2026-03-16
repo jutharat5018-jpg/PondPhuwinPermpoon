@@ -517,7 +517,7 @@ let editingEventId = null;
 let deleteConfirmIds = new Set();
 const ADMIN_PASS = 'ppp1257pondphuwinpp';
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwRvT8rv6WnMu7nIXtVxgHuyRToB9AraT5HS0SSjB5mv4KQcXy5bDrqJNy1ylZyTaiR0A/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx6zuMCUTLdCw0AoKuwDo0Kr3mS3V2ywNx-EB_wF5RPZBwUCQTXuXID7AMT1LZUGTE/exec';
 let apiLoaded = false;
 
 function getLiveIcon(url) {
@@ -695,15 +695,8 @@ async function apiRequest(payload) {
       delete window[cbName];
       if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl);
     };
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('API timeout'));
-    }, 12000);
-    window[cbName] = function(data) {
-      clearTimeout(timeout);
-      cleanup();
-      resolve(data);
-    };
+    const timeout = setTimeout(() => { cleanup(); reject(new Error('API timeout')); }, 12000);
+    window[cbName] = function(data) { clearTimeout(timeout); cleanup(); resolve(data); };
     const action = payload.action;
     let url = API_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cbName;
     if (payload.id)          url += '&id='   + encodeURIComponent(payload.id);
@@ -711,10 +704,7 @@ async function apiRequest(payload) {
     if (payload.birthday)    url += '&data=' + encodeURIComponent(JSON.stringify(payload.birthday));
     if (payload.anniversary) url += '&data=' + encodeURIComponent(JSON.stringify(payload.anniversary));
     scriptEl = document.createElement('script');
-    scriptEl.onerror = function() {
-      clearTimeout(timeout); cleanup();
-      reject(new Error('Script load failed'));
-    };
+    scriptEl.onerror = function() { clearTimeout(timeout); cleanup(); reject(new Error('Script load failed')); };
     scriptEl.src = url;
     document.head.appendChild(scriptEl);
   });
