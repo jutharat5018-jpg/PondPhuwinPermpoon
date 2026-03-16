@@ -1245,14 +1245,14 @@ function renderHome() {
 
   count.textContent = events.length + ' event' + (events.length !== 1 ? 's' : '');
 
-  if (events.length === 0 && !apiLoaded) {
-    // Show skeleton while loading
-    grid.innerHTML = [1,2,3].map(() => `<div style="background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.07);overflow:hidden;margin-bottom:1.25rem;">
-      <div style="width:100%;height:220px;background:linear-gradient(90deg,#f3f4f6 25%,#e9eaec 50%,#f3f4f6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+  // Skeleton: แสดงเฉพาะตอนกำลังโหลดครั้งแรก (ไม่มีข้อมูลเลย + ยังไม่ load เสร็จ + ไม่ได้กด filter)
+  if (events.length === 0 && !apiLoaded && homeFilter === 'all') {
+    grid.innerHTML = [1,2,3,4,5].map(() => `<div style="background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.07);overflow:hidden;">
+      <div style="width:100%;height:160px;background:linear-gradient(90deg,#f3f4f6 25%,#e9eaec 50%,#f3f4f6 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
       <div style="padding:0.85rem;">
-        <div style="height:12px;width:40%;background:#f3f4f6;border-radius:6px;margin-bottom:10px;animation:shimmer 1.4s infinite;"></div>
-        <div style="height:18px;width:70%;background:#f3f4f6;border-radius:6px;margin-bottom:8px;animation:shimmer 1.4s infinite;"></div>
-        <div style="height:12px;width:55%;background:#f3f4f6;border-radius:6px;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:10px;width:40%;background:#f3f4f6;border-radius:6px;margin-bottom:8px;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:16px;width:70%;background:#f3f4f6;border-radius:6px;margin-bottom:7px;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:10px;width:55%;background:#f3f4f6;border-radius:6px;animation:shimmer 1.4s infinite;"></div>
       </div>
     </div>`).join('');
     noEv.style.display = 'none';
