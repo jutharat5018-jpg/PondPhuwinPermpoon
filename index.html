@@ -57,7 +57,7 @@
   /* mobile: stack cal top, list bottom */
   @media (max-width: 700px) {
     #cal-layout { grid-template-columns: 1fr !important; }
-    #cal-left { width: 100% !important; max-width: 100% !important; }
+    #cal-left { width: 100% !important; }
     #cal-grid { grid-template-columns: repeat(7,1fr) !important; width:100% !important; }
     .cal-day { width:100% !important; height:40px !important; }
     #cal-event-list { max-height: none !important; }
@@ -164,283 +164,12 @@
   /* Map embed */
   .map-embed-wrap { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
-
-  /* ══════════════════════════════════════════════════
-     MOBILE RESPONSIVE — max 768px ONLY
-     Desktop layout above 768px is untouched
-  ══════════════════════════════════════════════════ */
-  @media (max-width: 768px) {
-
-    /* ── Global box model safety ── */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      max-width: 100%;
-    }
-    html, body { overflow-x: hidden; }
-    #app { overflow-x: hidden; }
-    .page { overflow-x: hidden; }
-
-    /* ── NAV ── */
-    nav > div {
-      padding: 0 12px !important;
-      height: 50px !important;
-      flex-wrap: nowrap !important;
-      gap: 4px !important;
-    }
-    #nav-site-title {
-      font-size: 0.78rem !important;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 160px;
-    }
-    #nav-links {
-      flex-shrink: 0;
-      gap: 2px !important;
-    }
-    .nav-link {
-      font-size: 0.78rem !important;
-      padding: 5px 7px !important;
-      white-space: nowrap;
-    }
-    .nav-link i { margin-right: 2px !important; }
-
-    /* ── PAGE CONTAINER ── */
-    #page-home > div,
-    #page-calendar > div,
-    #admin-panel > div {
-      padding: 1rem 12px !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      overflow-x: hidden;
-    }
-
-    /* ── HOME: Title ── */
-    #home-title {
-      font-size: 1.5rem !important;
-      line-height: 1.25 !important;
-    }
-    #home-tagline {
-      font-size: 0.7rem !important;
-    }
-
-    /* ── FILTER BUTTONS ── */
-    .artist-filter-btn,
-    .cal-filter-btn {
-      font-size: 0.75rem !important;
-      padding: 4px 12px !important;
-    }
-    /* filter bar rows */
-    #page-home > div > div[style*="flex-wrap"],
-    #page-calendar > div > div[style*="flex-wrap"] {
-      flex-wrap: wrap !important;
-      gap: 6px !important;
-    }
-
-    /* ── EVENT CARDS GRID ── */
-    .cards-grid {
-      grid-template-columns: 1fr !important;
-      gap: 12px !important;
-    }
-
-    /* ── EVENT CARD ── */
-    .event-card {
-      border-radius: 12px !important;
-      width: 100% !important;
-    }
-    .card-img {
-      width: 100% !important;
-      height: auto !important;
-      min-height: 160px;
-      max-height: 220px;
-      object-fit: cover !important;
-    }
-    .card-img-placeholder {
-      height: 160px !important;
-    }
-    /* card inner padding */
-    .event-card > div[style*="padding:0.85rem"] {
-      padding: 0.75rem !important;
-    }
-
-    /* ── CALENDAR PAGE header ── */
-    #page-calendar > div > div[style*="justify-content:space-between"]:first-child {
-      flex-wrap: wrap !important;
-      gap: 8px !important;
-    }
-    #cal-month-label {
-      font-size: 0.85rem !important;
-      min-width: 100px !important;
-    }
-
-    /* ── CALENDAR LAYOUT: stack vertically ── */
-    #cal-layout {
-      grid-template-columns: 1fr !important;
-      gap: 16px !important;
-    }
-    #cal-left {
-      width: 100% !important;
-      min-width: 0 !important;
-    }
-
-    /* day-of-week header row */
-    #cal-left > div:first-child > div {
-      font-size: 0.68rem !important;
-      padding: 5px 0 !important;
-    }
-
-    /* calendar day cells */
-    #cal-grid {
-      width: 100% !important;
-    }
-    .cal-day {
-      width: 100% !important;
-      height: 38px !important;
-      border-radius: 6px !important;
-    }
-    .cal-day > span:first-child {
-      font-size: 0.78rem !important;
-    }
-
-    /* event list (right column, now below) */
-    #cal-event-list {
-      max-height: none !important;
-      overflow-y: visible !important;
-      padding-right: 0 !important;
-    }
-    .cal-list-item {
-      gap: 10px !important;
-      padding: 10px 12px !important;
-    }
-    .cal-list-title {
-      font-size: 0.82rem !important;
-      white-space: normal !important;
-      overflow: visible !important;
-    }
-    .cal-list-num { font-size: 1.1rem !important; }
-    .cal-list-dow { font-size: 0.62rem !important; }
-
-    /* ── BIRTHDAY BANNERS ── */
-    .bday-banner {
-      flex-wrap: wrap !important;
-      gap: 6px !important;
-      padding: 8px 12px !important;
-      font-size: 0.75rem !important;
-    }
-    .bday-countdown {
-      margin-left: 0 !important;
-    }
-
-    /* ── DETAIL MODAL ── */
-    .modal-backdrop {
-      padding: 0 !important;
-      align-items: flex-end !important;
-    }
-    .modal-box {
-      border-radius: 20px 20px 0 0 !important;
-      max-height: 92vh !important;
-      width: 100% !important;
-      max-width: 100% !important;
-    }
-    .detail-hero {
-      max-height: 260px !important;
-      width: 100% !important;
-      object-fit: contain !important;
-    }
-
-    /* ── ADMIN PAGE ── */
-    #admin-login > div {
-      padding: 1.5rem !important;
-      max-width: 100% !important;
-    }
-    /* admin header row */
-    #admin-panel > div > div[style*="justify-content:space-between"] {
-      flex-wrap: wrap !important;
-      gap: 8px !important;
-    }
-    /* birthday form grid: single column */
-    #bday-form-wrap > div[style*="grid-template-columns:1fr 1fr 1fr 1fr"] {
-      grid-template-columns: 1fr 1fr !important;
-    }
-
-    /* EVENT FORM MODAL */
-    .modal-box form > div[style*="grid-template-columns:1fr 1fr"],
-    #form-preview-layout {
-      grid-template-columns: 1fr !important;
-    }
-    /* form footer buttons */
-    .modal-box > div:last-child,
-    div[style*="justify-content:flex-end"][style*="gap:8px"] {
-      flex-wrap: wrap !important;
-      gap: 6px !important;
-    }
-    /* form submit buttons full width on small screens */
-    #form-submit-btn,
-    .modal-box .btn-primary,
-    .modal-box .btn-secondary {
-      flex: 1 1 auto !important;
-      text-align: center !important;
-      justify-content: center !important;
-    }
-
-    /* ── IMAGES ── */
-    img {
-      max-width: 100% !important;
-      height: auto !important;
-    }
-
-    /* ── SECTION HEADER row ── */
-    div[style*="justify-content:space-between"] > .section-header {
-      font-size: 1.15rem !important;
-    }
-
-    /* ── MONTH GROUP HEADER ── */
-    .month-group-header-label { font-size: 0.95rem !important; }
-    .month-group { margin-bottom: 1.75rem !important; }
-
-    /* ── MAP EMBED ── */
-    .map-embed-wrap iframe { height: 200px !important; }
-
-    /* ── ADMIN EVENT LIST ITEMS ── */
-    #admin-events-list > div {
-      flex-wrap: wrap !important;
-      gap: 8px !important;
-    }
-
-    /* ── LINK BUTTONS in detail modal ── */
-    .link-btn {
-      font-size: 0.75rem !important;
-      padding: 6px 10px !important;
-    }
-
-    /* ── FOOTER ── */
-    footer > div {
-      padding: 1rem 12px !important;
-      font-size: 0.72rem !important;
-    }
-
-    /* ── TOAST ── */
-    #toast {
-      width: calc(100% - 32px) !important;
-      left: 16px !important;
-      transform: none !important;
-      text-align: center !important;
-      font-size: 0.85rem !important;
-      bottom: 1rem !important;
-    }
-
-    /* ── PREVIEW POPUP ── */
-    #preview-popup > div {
-      max-width: 100% !important;
-      border-radius: 20px 20px 0 0 !important;
-    }
-  }
   </style>
  </head>
  <body>
   <div id="app">
    <nav>
-    <div style="max-width:1400px;margin:auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;min-width:0;overflow:hidden;">
+    <div style="max-width:1400px;margin:auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;">
      <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="navigate('home')">
       <span id="nav-site-title" style="font-weight:700;font-size:0.95rem;letter-spacing:-0.02em;">PondPhuwin and Permpoon Schedule</span>
      </div>
@@ -454,7 +183,7 @@
 
    <!-- HOME PAGE -->
    <div class="page active" id="page-home">
-    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
      <div style="margin-bottom:2.5rem;">
       <p id="home-tagline" style="font-size:0.8rem;font-weight:600;color:#a855f7;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem;">Pond · Phuwin · Permpoon</p>
       <h1 id="home-title" style="font-size:2.3rem;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:0.5rem;">PondPhuwinPermpoon Schedule</h1>
@@ -488,10 +217,10 @@
 
    <!-- CALENDAR PAGE -->
    <div class="page" id="page-calendar">
-    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
 
      <!-- Header -->
-     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px;">
+     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
       <div>
        <h2 class="section-header" id="cal-section-title">Calendar</h2>
        <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;">All scheduled events</p>
@@ -520,7 +249,7 @@
      <div id="cal-layout" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;">
 
       <!-- LEFT: Mini calendar -->
-      <div id="cal-left" style="width:500px;flex-shrink:0;min-width:0;max-width:100%;">
+      <div id="cal-left" style="width:500px;flex-shrink:0;">
        <!-- day headers -->
        <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
         <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">S</div>
@@ -571,11 +300,11 @@
      </div>
     </div>
     <div id="admin-panel" style="display:none;flex:1;flex-direction:column;">
-     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
        <div>
         <h2 class="section-header">Admin Panel</h2>
-        <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;">Manage events</p>
+        <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;">Manage events · Status auto-determined from date</p>
        </div>
        <button class="btn-secondary" onclick="adminLogout()"><i data-lucide="log-out" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Logout</button>
       </div>
@@ -755,13 +484,11 @@
         <input class="form-input" id="ev-dateStart" name="dateStart" type="date" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
        </div>
        <div>
-        <label class="form-label" for="ev-status" style="font-weight:700;">Status <span style="color:#ec4899;">*</span></label>
-        <select class="form-input" id="ev-status" name="status" style="appearance:auto;border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
-         <option value="upcoming">upcoming</option>
-         <option value="past">past</option>
-         <option value="cancelled">cancelled</option>
-         <option value="">— not set —</option>
-        </select>
+        <label class="form-label" style="font-weight:700;color:#9ca3af;">Status <span style="font-weight:400;font-size:0.78rem;">(auto-determined by date)</span></label>
+        <div style="padding:0.6rem 0.95rem;border-radius:8px;background:#f9fafb;border:1px solid #e5e7eb;font-size:0.85rem;color:#6b7280;display:flex;align-items:center;gap:6px;">
+         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+         Past if date &lt; today · Upcoming if date ≥ today
+        </div>
        </div>
 
        <div>
@@ -1250,7 +977,6 @@ function processEvents(raw) {
     note:        safeText(r.note        || ''),
     tv:          safeText(r.tv          || r.tv_channel    || ''),
     map:         r.map || r.map_embed   || '',
-    status:      rawStr(r.status || '').toLowerCase(),
     youtube:     rawStr(r.youtube   || r.youtube_link   || ''),
     instagram:   rawStr(r.instagram || r.instagram_link || ''),
     facebook:    rawStr(r.facebook  || r.facebook_link  || ''),
@@ -1262,7 +988,8 @@ function processEvents(raw) {
     live:        rawStr(r.live      || r.live_link      || ''),
     download:    rawStr(r.download  || r.file_link      || ''),
   }));
-  const filtered = mapped.filter(e => e.title && (!e.status || e.status === 'upcoming'));
+  // Keep all events with a title — status is computed from date at render time
+  const filtered = mapped.filter(e => e.title);
   filtered.sort((a, b) => {
     if (!a.dateStart && !b.dateStart) return 0;
     if (!a.dateStart) return 1;
@@ -1494,14 +1221,17 @@ function getFullDateDisplay(dateStr) {
   return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
 }
 
-// Auto-hide disabled — all events show on public page regardless of time
-function isEventAutoHidden(ev) { return false; }
+// Status is fully automatic — derived from dateStart vs today.
+// "upcoming" = dateStart >= today (today's events included)
+// "past"     = dateStart < today
 function isEventPast(ev) {
-  // Time is now a free-text string ("18:00 GMT+7", "6 PM", etc.) — cannot
-  // be safely concatenated into Date(). Compare by date only (end of day).
   if (!ev.dateStart) return false;
-  return new Date(ev.dateStart + 'T23:59:59') < new Date();
+  // Compare against the start of today in local time
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return new Date(ev.dateStart + 'T00:00:00') < today;
 }
+function isEventUpcoming(ev) { return !isEventPast(ev); }
 
 const SOCIAL_ICONS = {
   youtube: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
@@ -1540,10 +1270,11 @@ function buildSocialIcons(ev) {
 function renderHome() {
   renderBirthdayBanners();
 
-  // Show ALL events in allEvents — already filtered to upcoming by loadEventsFromSheets
-  // Apply artist filter if set
+  // Homepage shows ONLY upcoming events (dateStart >= today).
+  // Apply artist filter on top if set.
   const events = allEvents.filter(ev => {
     if (!ev.title || !ev.title.trim()) return false;
+    if (isEventPast(ev)) return false;          // hide past events from homepage
     if (homeFilter === 'all') return true;
     if (!ev.artists) return false;
     return ev.artists.split(',').map(a => a.trim()).includes(homeFilter);
@@ -2045,13 +1776,14 @@ function renderCalendarEventList() {
       const color = getArtistColor(ev.artists);
       const loc = [ev.location, ev.city, ev.country].filter(Boolean).join(', ');
       const artistLabel = ev.artists ? ev.artists.split(',').map(a=>a.trim()).join(' · ') : '';
+      const pastBadge = isEventPast(ev) ? '<span style="font-size:0.62rem;background:#f3f4f6;color:#9ca3af;padding:1px 5px;border-radius:4px;font-weight:600;margin-left:5px;">Past</span>' : '';
       return `<div class="cal-list-item" onclick="openDetailModal('${ev.__backendId}')">
-        ${i === 0 ? `<div class="cal-list-date"><div class="cal-list-dow">${dow}</div><div class="cal-list-num" style="color:${color};">${dayNum}</div></div>` : '<div style="width:48px;flex-shrink:0;"></div>'}
-        <div class="cal-list-bar" style="background:${color};"></div>
+        ${i === 0 ? `<div class="cal-list-date"><div class="cal-list-dow">${dow}</div><div class="cal-list-num" style="color:${isEventPast(ev)?'#9ca3af':color};">${dayNum}</div></div>` : '<div style="width:48px;flex-shrink:0;"></div>'}
+        <div class="cal-list-bar" style="background:${isEventPast(ev)?'#d1d5db':color};"></div>
         <div class="cal-list-body">
-          <div class="cal-list-title">${escHtml(ev.title)}</div>
+          <div class="cal-list-title">${escHtml(ev.title)}${pastBadge}</div>
           <div class="cal-list-meta">
-            ${artistLabel ? `<span style="color:${color};font-weight:700;">${escHtml(artistLabel)}</span>` : ''}
+            ${artistLabel ? `<span style="color:${isEventPast(ev)?'#9ca3af':color};font-weight:700;">${escHtml(artistLabel)}</span>` : ''}
             ${loc ? `<span>${escHtml(loc)}</span>` : ''}
           </div>
         </div>
@@ -2274,7 +2006,6 @@ function fillForm(ev) {
   set('note',        ev.note);
   set('tv',          ev.tv);
   set('map',         ev.map);
-  set('status',      ev.status);
   // timezone dropdown removed — timezone is now included in the time string
   set('youtube',     ev.youtube);
   set('instagram',   ev.instagram);
@@ -2312,7 +2043,6 @@ function readFormSchema() {
     note:        fv('note'),
     tv:          fv('tv'),
     map:         fv('map'),
-    status:      fv('status'),
     timezone:    '',                // timezone dropdown removed — include timezone in time string
     youtube:     fv('youtube'),
     instagram:   fv('instagram'),
@@ -2346,7 +2076,6 @@ function getFormPreviewData() {
     note:        d.note,
     tv:          d.tv,
     map:         d.map,
-    status:      d.status,
     timezone:    d.timezone,
     youtube:     d.youtube,
     instagram:   d.instagram,
@@ -2428,7 +2157,6 @@ async function handleEventFormSubmit() {
     note:        schema.note,
     tv:          schema.tv,
     map:         schema.map,
-    status:      schema.status,
     timezone:    schema.timezone,
     youtube:     schema.youtube,
     instagram:   schema.instagram,
