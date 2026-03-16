@@ -237,8 +237,9 @@
        </div>
        <button class="btn-secondary" onclick="adminLogout()"><i data-lucide="log-out" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Logout</button>
       </div>
-      <div style="margin-bottom:1rem;">
+      <div style="margin-bottom:1rem;display:flex;gap:8px;align-items:center;">
        <button class="btn-primary" onclick="openAddModal()"><i data-lucide="plus" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:4px;"></i>Add Event</button>
+       <button class="btn-secondary" onclick="adminRefresh()" id="admin-refresh-btn" style="display:flex;align-items:center;gap:5px;"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>Refresh</button>
       </div>
       <div id="admin-events-list" style="display:flex;flex-direction:column;gap:10px;"></div>
       <div id="admin-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
@@ -1026,30 +1027,26 @@ async function updateEventInSheets(id, data, rowNumber) {
   throw new Error(res.message||'Update failed');
 }
 async function deleteEventInSheets(id, rowNumber) {
-  // Step 1: clear server cache first so deleteRecord reads fresh Sheet data
-  try { await apiPost({ action:'clearCache' }); } catch(e) { /* non-fatal */ }
-
-  // Step 2: try delete by id
+  // Try delete by id first
   if (id) {
-    const res = await apiPost({ action:'deleteEvent', id });
-    if (res.status === 'ok') return;
-    // Log debug info returned by server
-    console.warn('deleteEvent by id failed:', res.message);
-    if (res.debug_all_ids) {
-      console.warn('IDs in Sheet:', res.debug_all_ids);
-      console.warn('Looking for:', res.debug_target);
+    const res = await apiPost({ action: 'deleteEvent', id });
+    if (res.status === 'ok') return { status: 'ok' };
+    // If "Not found" — row was already deleted from Sheet (e.g. manually)
+    if (res.message && res.message.toLowerCase().includes('not found')) {
+      return { status: 'not_found' };
     }
+    console.warn('deleteEvent by id failed:', res.message);
   }
-
-  // Step 3: fallback — delete by row number
+  // Fallback: delete by Sheet row number
   if (rowNumber) {
-    console.log('Trying delete by row number:', rowNumber);
-    const res = await apiPost({ action:'deleteEventByRow', row: rowNumber });
-    if (res.status === 'ok') return;
-    throw new Error('Delete by row also failed: ' + res.message);
+    const res = await apiPost({ action: 'deleteEventByRow', row: rowNumber });
+    if (res.status === 'ok') return { status: 'ok' };
+    if (res.message && res.message.toLowerCase().includes('not found')) {
+      return { status: 'not_found' };
+    }
+    throw new Error('Delete by row failed: ' + (res.message || 'unknown error'));
   }
-
-  throw new Error('Cannot delete: id not found in Sheet and no row number available');
+  return { status: 'not_found' };
 }
 async function loadBirthdaysFromSheets() {
   try {
@@ -1404,16 +1401,7 @@ function openDetailModal(id) {
     descWrap.style.display = 'none';
   }
 
-  // Map: only if embed code exists
-  const mapWrap = document.getElementById('detail-map-wrap');
-  if (ev.map && ev.map.trim()) {
-    mapWrap.style.display = 'block';
-    document.getElementById('detail-map').innerHTML = ev.map.replace(/width="[^"]*"/g, 'width="100%"').replace(/height="[^"]*"/g, 'height="300"');
-  } else {
-    mapWrap.style.display = 'none';
-  }
-
-  // Links: only if any social link exists
+  // Links: render BEFORE map — matches HTML order (links-wrap is above map-wrap in DOM)
   const linksWrap = document.getElementById('detail-links-wrap');
   const linksHtml = buildSocialIcons(ev);
   if (linksHtml) {
@@ -1421,6 +1409,15 @@ function openDetailModal(id) {
     document.getElementById('detail-links').innerHTML = linksHtml;
   } else {
     linksWrap.style.display = 'none';
+  }
+
+  // Map: only if embed code exists
+  const mapWrap = document.getElementById('detail-map-wrap');
+  if (ev.map && ev.map.trim()) {
+    mapWrap.style.display = 'block';
+    document.getElementById('detail-map').innerHTML = ev.map.replace(/width="[^"]*"/g, 'width="100%"').replace(/height="[^"]*"/g, 'height="300"');
+  } else {
+    mapWrap.style.display = 'none';
   }
 
   document.getElementById('detail-modal').style.display = 'flex';
@@ -1527,7 +1524,21 @@ function adminLogout() {
   showToast('Logged out');
 }
 
-function renderAdminList() {
+async function adminRefresh() {
+  const btn = document.getElementById('admin-refresh-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-top-color:#111;"></span>'; }
+  try {
+    // Clear server-side cache so next load reads fresh Sheet data
+    await apiPost({ action: 'clearCache' });
+  } catch(e) { /* non-fatal */ }
+  await loadEventsFromSheets();
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>Refresh';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  showToast('Refreshed from Sheet ✓');
+}
   const list=document.getElementById('admin-events-list');
   const noEv=document.getElementById('admin-no-events');
   const limitWarn=document.getElementById('admin-limit-warn');
@@ -1574,17 +1585,34 @@ function updateAdminRow(row,ev) {
 }
 function startDelete(key){deleteConfirmIds.add(key);const row=document.querySelector(`#admin-events-list [data-event-id="${key}"]`);const ev=findEventByKey(key);if(row&&ev)updateAdminRow(row,ev);}
 function cancelDelete(key){deleteConfirmIds.delete(key);const row=document.querySelector(`#admin-events-list [data-event-id="${key}"]`);const ev=findEventByKey(key);if(row&&ev)updateAdminRow(row,ev);}
-async function confirmDelete(id) {
-  const ev=allEvents.find(e=>e.__backendId===id || e.__rawId===id); if(!ev)return;
-  deleteConfirmIds.delete(id);
-  const row=document.querySelector(`#admin-events-list [data-event-id="${id}"]`);
-  if(row)row.style.opacity='0.5';
-  try {
-    await deleteEventInSheets(ev.__backendId || ev.__rawId, ev.__rowNumber);
-    showToast('Event deleted.');
+async function confirmDelete(key) {
+  const ev = findEventByKey(key);
+  if (!ev) {
+    // Not in local list anymore — re-fetch and re-render
+    deleteConfirmIds.delete(key);
     await loadEventsFromSheets();
+    return;
   }
-  catch(e) { if(row)row.style.opacity='1'; showToast('Error: '+(e.message||'try again')); }
+  deleteConfirmIds.delete(key);
+  const rowEl = document.querySelector(`#admin-events-list [data-event-id="${key}"]`);
+  if (rowEl) rowEl.style.opacity = '0.5';
+
+  try {
+    const result = await deleteEventInSheets(ev.__backendId || ev.__rawId, ev.__rowNumber);
+
+    if (result.status === 'ok') {
+      showToast('Event deleted.');
+    } else if (result.status === 'not_found') {
+      // Already deleted from Sheet manually — remove from UI silently
+      showToast('Removed. (Row was already deleted from Sheet)');
+    }
+    // Either way — reload to get fresh data
+    await loadEventsFromSheets();
+
+  } catch(err) {
+    if (rowEl) rowEl.style.opacity = '1';
+    showToast('Error: ' + (err.message || 'try again'));
+  }
 }
 
 function openAddModal() {
