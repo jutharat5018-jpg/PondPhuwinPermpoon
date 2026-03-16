@@ -7,7 +7,18 @@
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <style>
   :root {
     --color-pond: #f97316;
@@ -32,7 +43,6 @@
   .card-img-placeholder { width: 100%; height: 220px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
   .card-img { width: 100%; height: 220px; object-fit: cover; display: block; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
-  /* ── CALENDAR ── */
   .cal-day { min-height: 130px; border: 1px solid #f0f0f0; padding: 6px; background: #fff; transition: background 0.15s; box-sizing: border-box; }
   .cal-day:hover { background: #f9f9f9; }
   .cal-event-dot { font-size: 0.88rem; font-weight: 600; padding: 3px 8px; border-radius: 5px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; line-height: 1.5; max-width: 100%; display: block; min-width: 0; }
@@ -88,10 +98,96 @@
   .month-group-header-label { font-size: 1.15rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
   .month-group-header-line { flex: 1; height: 1px; background: #e5e7eb; }
   .month-group-header-count { font-size: 0.75rem; font-weight: 600; color: #9ca3af; background: #f3f4f6; border-radius: 99px; padding: 2px 8px; }
-  /* Map embed */
   .map-embed-wrap { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
-  </style>
+
+  /* ── MAP PAGE ── */
+  #map-container { width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1); position: relative; background: #dbeafe; }
+  #map-svg-wrap { width:100%; position:relative; display:block; }
+  #map-svg-wrap svg { width:100%; height:auto; display:block; }
+  .map-pin { cursor:pointer; transition: transform 0.15s; transform-origin: center; }
+  .map-pin:hover { transform: scale(1.5); }
+  .map-pin circle { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+  .map-tooltip { position:absolute; background:#fff; border-radius:10px; padding:8px 12px; font-size:0.78rem; box-shadow:0 4px 20px rgba(0,0,0,0.15); pointer-events:none; z-index:10; min-width:160px; transform:translate(-50%,-110%); white-space:nowrap; border:1px solid #f0f0f0; }
+  .map-tooltip-title { font-weight:700; color:#111; margin-bottom:2px; }
+  .map-tooltip-meta { color:#6b7280; font-size:0.72rem; }
+  .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important; border: none !important; }
+  .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
+  .leaflet-popup-tip-container { display: none; }
+  .map-popup { padding: 14px 16px; min-width: 220px; max-width: 280px; }
+  .map-popup-artist { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .map-popup-title { font-size: 0.95rem; font-weight: 700; color: #111; margin-bottom: 6px; line-height: 1.3; }
+  .map-popup-meta { font-size: 0.78rem; color: #6b7280; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+  .map-popup-btn { display: block; width: 100%; margin-top: 10px; background: #111; color: #fff; border: none; border-radius: 8px; padding: 7px 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; transition: background 0.15s; }
+  .map-popup-btn:hover { background: #333; }
+  .map-filter-btn { padding: 5px 14px; border-radius: 99px; border: 1.5px solid #e5e7eb; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; background: #fff; }
+  .map-filter-btn.active { background: #111; color: #fff; border-color: #111; }
+  .map-stat-card { background: #fff; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
+  .map-stat-num { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; }
+  .map-stat-label { font-size: 0.72rem; font-weight: 600; color: #9ca3af; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+  .timeline-item { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .timeline-date { font-size: 0.72rem; font-weight: 700; color: #9ca3af; letter-spacing: 0.06em; text-transform: uppercase; }
+  .timeline-name { font-size: 0.88rem; font-weight: 700; color: #111; }
+  .timeline-loc { font-size: 0.75rem; color: #6b7280; margin-top: 1px; }
+  .geo-loading { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #6b7280; padding: 8px 0; }
+  .geo-progress { height: 4px; background: #f0f0f0; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .geo-progress-bar { height: 100%; background: #111; border-radius: 99px; transition: width 0.3s; }
+  /* MarkerCluster custom style */
+  .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-clip: padding-box; border-radius: 20px; }
+  .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font-size: 12px; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; }
+  .marker-cluster-small { background-color: rgba(17,17,17,0.15); width: 40px; height: 40px; }
+  .marker-cluster-small div { background-color: rgba(17,17,17,0.7); }
+  .marker-cluster-medium { background-color: rgba(168,85,247,0.2); width: 40px; height: 40px; }
+  .marker-cluster-medium div { background-color: rgba(168,85,247,0.8); }
+  .marker-cluster-large { background-color: rgba(236,72,153,0.2); width: 40px; height: 40px; }
+  .marker-cluster-large div { background-color: rgba(236,72,153,0.85); }
+  @media (max-width: 768px) {
+    #map-container { height: 360px; }
+    .map-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
+  
+  /* ── LEAFLET MAP PAGE ── */
+  .leaflet-tile { filter: brightness(0.85) saturate(0.9); }
+  .leaflet-control-zoom { display:none !important; }
+  .leaflet-popup-content-wrapper { background:rgba(10,12,22,0.97) !important; border:1px solid rgba(255,255,255,0.12) !important; border-radius:14px !important; color:#fff !important; box-shadow:0 20px 60px rgba(0,0,0,0.7) !important; padding:0 !important; min-width:240px; }
+  .leaflet-popup-tip { background:rgba(10,12,22,0.97) !important; }
+  .leaflet-popup-content { margin:0 !important; padding:0 !important; width:auto !important; }
+  .lmap-popup-wrap { overflow:hidden; border-radius:14px; }
+  .lmap-popup-img { width:100%;height:110px;object-fit:cover;display:block; }
+  .lmap-popup-placeholder { width:100%;height:70px;display:flex;align-items:center;justify-content:center;font-size:26px; }
+  .lmap-popup-body { padding:12px 14px; }
+  .lmap-popup-badge { display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-bottom:7px; }
+  .lmap-popup-title { font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:#fff;margin-bottom:7px;line-height:1.3; }
+  .lmap-popup-meta { font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px;display:flex;align-items:flex-start;gap:5px; }
+  .lmap-popup-btn { flex:1;padding:7px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;border:none;font-family:'DM Sans',sans-serif;transition:all 0.18s; }
+  .lmap-popup-btn-primary { background:rgba(99,102,241,0.25);color:#a5b4fc;border:1px solid rgba(99,102,241,0.4) !important; }
+  .lmap-popup-btn-primary:hover { background:rgba(99,102,241,0.4); }
+  .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div { background-color:rgba(99,102,241,0.7) !important;color:#fff !important;font-weight:700;font-family:'DM Sans',sans-serif; }
+  .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large { background-color:rgba(30,32,50,0.85) !important; }
+
+  /* ── LEAFLET MAP PAGE ── */
+  .leaflet-tile { filter: brightness(0.85) saturate(0.9); }
+  .leaflet-control-zoom { display:none !important; }
+  .leaflet-popup-content-wrapper { background:rgba(10,12,22,0.97) !important; border:1px solid rgba(255,255,255,0.12) !important; border-radius:14px !important; color:#fff !important; box-shadow:0 20px 60px rgba(0,0,0,0.7) !important; padding:0 !important; min-width:230px; }
+  .leaflet-popup-tip { background:rgba(10,12,22,0.97) !important; }
+  .leaflet-popup-content { margin:0 !important; padding:0 !important; width:auto !important; }
+  .lmpopup { overflow:hidden; border-radius:14px; }
+  .lmpopup-img { width:100%; height:100px; object-fit:cover; display:block; }
+  .lmpopup-ph { width:100%; height:65px; display:flex; align-items:center; justify-content:center; font-size:26px; }
+  .lmpopup-body { padding:10px 13px; }
+  .lmpopup-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; padding:2px 8px; border-radius:20px; margin-bottom:6px; }
+  .lmpopup-title { font-family:'Playfair Display',serif; font-size:13px; font-weight:600; color:#fff; margin-bottom:6px; line-height:1.3; }
+  .lmpopup-meta { font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:2px; }
+  .lmpopup-btn { display:block; width:100%; margin-top:8px; padding:6px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; text-align:center; background:rgba(99,102,241,0.25); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); font-family:'DM Sans',sans-serif; transition:background 0.15s; }
+  .lmpopup-btn:hover { background:rgba(99,102,241,0.4); }
+  .lmpopup-listitem { padding:9px 13px; border-bottom:1px solid rgba(255,255,255,0.06); cursor:pointer; transition:background 0.15s; }
+  .lmpopup-listitem:hover { background:rgba(255,255,255,0.04); }
+  .lmpopup-listitem:last-child { border-bottom:none; }
+  .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large { background-color:rgba(30,32,50,0.85) !important; }
+  .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div { background-color:rgba(99,102,241,0.7) !important; color:#fff !important; font-weight:700; }
+</style>
  </head>
  <body>
   <div id="app">
@@ -106,7 +202,8 @@
      <div style="display:flex;align-items:center;gap:4px;" id="nav-links">
       <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Home</span>
       <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Calendar</span>
-      <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Admin</span>
+      <a class="nav-link" href="map.html" style="text-decoration:none;"><i data-lucide="map-pin" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Map</a>
+      <span id="nav-admin-link" style="display:none;"></span>
      </div>
     </div>
    </nav>
@@ -163,7 +260,6 @@
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block;"></span>PondPermpoon</span>
       <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block;"></span>PhuwinPermpoon</span>
      </div>
-     <!-- Calendar header row -->
      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));width:100%;">
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">SUN</div>
       <div style="text-align:center;font-size:0.9rem;font-weight:700;color:#9ca3af;padding:10px 0;letter-spacing:0.07em;">MON</div>
@@ -175,6 +271,55 @@
      </div>
      <div id="cal-grid" class="cal-grid"></div>
     </div>
+   </div>
+
+   <!-- ══════════════════════════════════════
+        MAP PAGE
+   ══════════════════════════════════════ -->
+   <div class="page" id="page-map" style="overflow:hidden;position:relative;flex:1;min-height:0;">
+
+    <!-- Full-screen Leaflet map -->
+    <div id="leaflet-map" style="position:absolute;inset:0;z-index:0;"></div>
+
+    <!-- Topbar overlay -->
+    <div style="position:absolute;top:0;left:0;right:0;z-index:1000;background:linear-gradient(180deg,rgba(8,10,18,0.97) 0%,rgba(8,10,18,0.75) 80%,transparent 100%);padding:0 16px;height:52px;display:flex;align-items:center;gap:10px;">
+     <span style="font-family:'Playfair Display',serif;font-size:15px;color:#e8d5b7;letter-spacing:0.04em;white-space:nowrap;">PPP Events Map</span>
+     <div style="flex:1;"></div>
+     <button onclick="lmapTogglePanel()" style="width:34px;height:34px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.8);" title="Filters">
+      <i data-lucide="sliders-horizontal" style="width:14px;height:14px;"></i>
+     </button>
+    </div>
+
+    <!-- Filter Panel -->
+    <div id="lmap-panel" style="position:absolute;top:60px;left:16px;z-index:1000;background:rgba(8,10,18,0.93);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;width:220px;backdrop-filter:blur(12px);transition:transform 0.3s,opacity 0.3s;max-height:calc(100% - 100px);overflow-y:auto;">
+     <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;">Members</div>
+     <div id="lmap-member-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+     <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;">Time</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+      <button data-lmt="all" onclick="lmapSetTime('all')" class="lmap-time-btn" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;">All</button>
+      <button data-lmt="upcoming" onclick="lmapSetTime('upcoming')" class="lmap-time-btn" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);">Upcoming</button>
+      <button data-lmt="past" onclick="lmapSetTime('past')" class="lmap-time-btn" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.5);">Past</button>
+     </div>
+     <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;">Travel Path</div>
+     <div id="lmap-paths"></div>
+     <button onclick="lmapReset()" style="width:100%;margin-top:10px;padding:7px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.6);font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Reset Filters</button>
+    </div>
+
+    <!-- Map Controls -->
+    <div style="position:absolute;right:16px;top:60px;z-index:1000;display:flex;flex-direction:column;gap:8px;">
+     <button onclick="lmap&&lmap.zoomIn()" style="width:34px;height:34px;background:rgba(8,10,18,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.7);"><i data-lucide="plus" style="width:15px;height:15px;"></i></button>
+     <button onclick="lmap&&lmap.zoomOut()" style="width:34px;height:34px;background:rgba(8,10,18,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.7);"><i data-lucide="minus" style="width:15px;height:15px;"></i></button>
+     <button onclick="lmapFitAll()" style="width:34px;height:34px;background:rgba(8,10,18,0.9);border:1px solid rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.7);"><i data-lucide="maximize-2" style="width:14px;height:14px;"></i></button>
+    </div>
+
+    <!-- Stats Bar -->
+    <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;background:rgba(8,10,18,0.88);border:1px solid rgba(255,255,255,0.1);border-radius:30px;padding:7px 18px;backdrop-filter:blur(12px);white-space:nowrap;gap:0;">
+     <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);padding:0 10px;border-right:1px solid rgba(255,255,255,0.1);"><div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>Pond <span id="lmap-cnt-pond" style="font-weight:700;color:#fff;font-size:13px;margin-left:2px;">0</span></div>
+     <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);padding:0 10px;border-right:1px solid rgba(255,255,255,0.1);"><div style="width:7px;height:7px;border-radius:50%;background:#6b7280;"></div>Phuwin <span id="lmap-cnt-phuwin" style="font-weight:700;color:#fff;font-size:13px;margin-left:2px;">0</span></div>
+     <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);padding:0 10px;border-right:1px solid rgba(255,255,255,0.1);"><div style="width:7px;height:7px;border-radius:50%;background:#22c55e;"></div>Permpoon <span id="lmap-cnt-permpoon" style="font-weight:700;color:#fff;font-size:13px;margin-left:2px;">0</span></div>
+     <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);padding:0 10px;"><i data-lucide="map-pin" style="width:12px;height:12px;color:rgba(255,255,255,0.4);"></i>Total <span id="lmap-cnt-total" style="font-weight:700;color:#fff;font-size:13px;margin-left:2px;">0</span></div>
+    </div>
+
    </div>
 
    <!-- ADMIN PAGE -->
@@ -413,7 +558,6 @@
         <label class="form-label" for="f-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="f-note" placeholder="e.g. live on YouTube, time not confirmed">
        </div>
-       <!-- MAP EMBED FIELD -->
        <div style="grid-column:1/-1;">
         <label class="form-label" for="f-map">
          <svg width="13" height="13" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:3px;" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -520,276 +664,244 @@ const ADMIN_PASS = 'ppp1257pondphuwinpp';
 const API_URL = 'https://script.google.com/macros/s/AKfycbzc5_sUbh_KX7VndMpR2E9TFX-YW1c-XEPie1e5lunCcUeKjxEmjMl3FLCp1DKT9LuY/exec';
 let apiLoaded = false;
 
-function getLiveIcon(url) {
-  if (!url) return null;
-  const u = url.toLowerCase();
-  if (u.includes('youtube.com') || u.includes('youtu.be')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
-  if (u.includes('facebook.com') || u.includes('fb.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="white" d="M16.671 15.469l.525-3.424h-3.284v-2.22c0-.937.459-1.849 1.932-1.849h1.495V5.023S15.918 4.8 14.6 4.8c-2.703 0-4.471 1.638-4.471 4.603v2.641H7.227v3.424h2.902V23.9a12.1 12.1 0 003.783 0v-8.431h2.759z"/></svg>`;
-  if (u.includes('tiktok.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M17.59 8.69a4.83 4.83 0 01-3.77-4.25V4h-3.45v11.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05A6.34 6.34 0 001.15 15.3a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V10.7a8.18 8.18 0 004.78 1.52V8.76a4.85 4.85 0 01-1.01-.07z"/></svg>`;
-  if (u.includes('instagram.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><defs><radialGradient id="ig-live-g" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect width="24" height="24" rx="6" fill="url(#ig-live-g)"/><path fill="white" d="M12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 7.4a2.9 2.9 0 110-5.8 2.9 2.9 0 010 5.8zm4.68-7.57a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1z"/></svg>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="11" fill="#EF4444"/><circle cx="12" cy="12" r="4" fill="white"/></svg>`;
-}
+// ══════════════════════════════════════
+// MAP PAGE — embedded Leaflet dark
+// ══════════════════════════════════════
+let lmap = null, lmapCluster = null, lmapReady = false;
+let lmapMembers = new Set(['Pond','Phuwin','Permpoon']);
+let lmapTime = 'all';
+let lmapPaths = {Pond:false,Phuwin:false,Permpoon:false};
+let lmapPathLayers = {Pond:null,Phuwin:null,Permpoon:null};
+let lmapPanelOpen = true;
 
-function getLiveLabelFromUrl(url) {
-  if (!url) return 'Live Stream';
-  const u = url.toLowerCase();
-  if (u.includes('youtube.com') || u.includes('youtu.be')) return 'YouTube Live';
-  if (u.includes('facebook.com') || u.includes('fb.com')) return 'Facebook Live';
-  if (u.includes('tiktok.com')) return 'TikTok Live';
-  if (u.includes('instagram.com')) return 'Instagram Live';
-  return 'Live Stream';
-}
+const LMAP_CFG = {
+  Pond:     {color:'#f97316', bg:'rgba(249,115,22,0.15)'},
+  Phuwin:   {color:'#6b7280', bg:'rgba(107,114,128,0.15)'},
+  Permpoon: {color:'#22c55e', bg:'rgba(34,197,94,0.15)'},
+};
 
-const SPECIAL_WARN_DAYS = 7;
+const LMAP_CITIES = {
+  'bangkok':[13.7563,100.5018],'chiang mai':[18.7883,98.9853],'phuket':[7.8804,98.3923],
+  'pattaya':[12.9236,100.8825],'hat yai':[7.0067,100.4747],'khon kaen':[16.4419,102.836],
+  'tokyo':[35.6762,139.6503],'osaka':[34.6937,135.5023],'kyoto':[35.0116,135.7681],
+  'fukuoka':[33.5904,130.4017],'nagoya':[35.1815,136.9066],'sapporo':[43.0618,141.3545],
+  'seoul':[37.5665,126.978],'busan':[35.1796,129.0756],
+  'singapore':[1.3521,103.8198],
+  'manila':[14.5995,120.9842],'cebu':[10.3157,123.8854],
+  'jakarta':[-6.2088,106.8456],'bali':[-8.3405,115.092],
+  'kuala lumpur':[3.139,101.6869],'penang':[5.4141,100.3288],
+  'hong kong':[22.3193,114.1694],
+  'taipei':[25.033,121.5654],'kaohsiung':[22.6273,120.3014],
+  'beijing':[39.9042,116.4074],'shanghai':[31.2304,121.4737],
+  'guangzhou':[23.1291,113.2644],'shenzhen':[22.5431,114.0579],
+  'ho chi minh':[10.8231,106.6297],'hanoi':[21.0285,105.8542],
+  'yangon':[16.8661,96.1951],'phnom penh':[11.5564,104.9282],
+  'colombo':[6.9271,79.8612],'mumbai':[19.076,72.8777],'delhi':[28.6139,77.209],
+  'london':[51.5074,-0.1278],'paris':[48.8566,2.3522],'berlin':[52.52,13.405],
+  'amsterdam':[52.3676,4.9041],'madrid':[40.4168,-3.7038],'rome':[41.9028,12.4964],
+  'new york':[40.7128,-74.006],'los angeles':[34.0522,-118.2437],
+  'chicago':[41.8781,-87.6298],'san francisco':[37.7749,-122.4194],
+  'toronto':[43.6532,-79.3832],'vancouver':[49.2827,-123.1207],
+  'sydney':[-33.8688,151.2093],'melbourne':[-37.8136,144.9631],
+  'dubai':[25.2048,55.2708],'auckland':[-36.8509,174.7645],
+  'thailand':[15.0,101.0],'japan':[36.2,138.25],'korea':[36.5,127.5],
+  'south korea':[36.5,127.5],'indonesia':[-5.0,120.0],'philippines':[13.0,122.0],
+  'malaysia':[4.2,108.0],'vietnam':[14.0,108.0],'taiwan':[23.7,121.0],
+  'china':[35.0,104.0],'usa':[38.0,-97.0],'uk':[54.0,-2.0],
+  'france':[46.0,2.0],'australia':[-25.0,134.0],'india':[20.0,77.0],
+  'uae':[24.0,54.0],'cambodia':[12.5657,104.991],'myanmar':[19.1633,96.0785],
+};
 
-function daysUntilDate(month, day) {
-  const now = new Date();
-  let d = new Date(now.getFullYear(), month - 1, day);
-  if (d - now < -86400000) d = new Date(now.getFullYear() + 1, month - 1, day);
-  return Math.ceil((d - now) / 86400000);
-}
-function isDateToday(month, day) {
-  const now = new Date();
-  return now.getMonth() + 1 === month && now.getDate() === day;
-}
-function getSpecialOnDate(month, day) {
-  const bdayMatches = allBirthdays.filter(b => b.birthday_month === month && b.birthday_day === day);
-  const annivMatches = allAnniversaries.filter(a => a.anniversary_month === month && a.anniversary_day === day);
-  return [
-    ...bdayMatches.map(b => ({ name: b.artist_name, month: b.birthday_month, day: b.birthday_day, color: b.color || '#6b7280', type: 'birthday', __backendId: b.__backendId })),
-    ...annivMatches.map(a => ({ label: a.anniversary_name, month: a.anniversary_month, day: a.anniversary_day, color: a.color || '#a855f7', type: 'anniversary', startYear: a.anniversary_year, __backendId: a.__backendId }))
-  ];
-}
-function getBirthdaysOnDate(month, day) { return getSpecialOnDate(month, day); }
-
-function makeBannerHtml(item, days) {
-  const isToday = days === 0 || isDateToday(item.month, item.day);
-  const isBday = item.type === 'birthday';
-  const icon = isToday ? '🎉' : (isBday ? '🎂' : '🥂');
-  const color = item.color || '#a855f7';
-  const label = isBday ? item.name + "'s Birthday" : item.label;
-  const todayMsg = isBday ? `Happy Birthday ${item.name}! 🎂` : `🥂 ${item.label} — Happy Anniversary!`;
-  const now = new Date();
-  let nextDate = new Date(now.getFullYear(), item.month - 1, item.day);
-  if (nextDate < now) nextDate = new Date(now.getFullYear() + 1, item.month - 1, item.day);
-  const dateLabel = nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-  let yearsHtml = '';
-  if (!isBday && item.startYear) {
-    const yrs = nextDate.getFullYear() - item.startYear;
-    if (yrs > 0) yearsHtml = ` <span style="font-size:0.7rem;background:${color}22;color:${color};padding:2px 7px;border-radius:99px;font-weight:700;margin-left:4px;">${yrs} yr${yrs!==1?'s':''}</span>`;
+function lmapGetCoords(ev) {
+  const city = (ev.city||'').toLowerCase().trim();
+  const ctry = (ev.country||'').toLowerCase().trim();
+  if (city && LMAP_CITIES[city]) return LMAP_CITIES[city];
+  if (ctry && LMAP_CITIES[ctry]) return LMAP_CITIES[ctry];
+  for (const [k,v] of Object.entries(LMAP_CITIES)) {
+    if (city && (city.includes(k) || (k.includes(city) && city.length > 2))) return v;
+    if (ctry && (ctry.includes(k) || (k.includes(ctry) && ctry.length > 2))) return v;
   }
-  if (isToday) {
-    return `<div class="bday-banner bday-today" style="border-left:4px solid ${color};background:${color}15;">
-      <span class="bday-icon">${icon}</span>
-      <div><span style="font-weight:700;color:${color};">${todayMsg}</span>${yearsHtml}</div>
-    </div>`;
-  }
-  return `<div class="bday-banner" style="border-left:4px solid ${color};background:${color}0d;">
-    <span class="bday-icon">${icon}</span>
-    <div>
-      <span style="font-weight:700;color:${color};">${label}</span>${yearsHtml}
-      <span style="font-size:0.78rem;color:#6b7280;margin-left:6px;">in <strong>${days} day${days!==1?'s':''}</strong> · ${dateLabel}</span>
-    </div>
-    <div class="bday-countdown" style="background:${color};color:#fff;">${days}d</div>
+  return null;
+}
+
+function lmapMakeIcon(color, past) {
+  const op = past ? 0.55 : 1;
+  return L.divIcon({className:'', iconSize:[26,34], iconAnchor:[13,34], popupAnchor:[0,-36],
+    html:`<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34" viewBox="0 0 28 36" opacity="${op}"><defs><filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.5)"/></filter></defs><path d="M14 0C6.27 0 0 6.27 0 14c0 10 14 22 14 22s14-12 14-22C28 6.27 21.73 0 14 0z" fill="${color}" filter="url(#sh)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><circle cx="14" cy="14" r="5.5" fill="rgba(255,255,255,0.9)"/></svg>`
+  });
+}
+
+function lmapSinglePopup(ev) {
+  const c = getArtistColor(ev.artists);
+  const lp = [ev.location_name,ev.city,ev.country].filter(Boolean).join(', ');
+  const dt = ev.date ? new Date(ev.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}) : 'TBA';
+  const img = ev.image_url ? `<img src="${escHtml(ev.image_url)}" class="lmpopup-img" onerror="this.style.display='none'" loading="lazy"/>` : `<div class="lmpopup-ph" style="background:linear-gradient(135deg,${c}22,${c}44);">🎵</div>`;
+  return `<div class="lmpopup">${img}<div class="lmpopup-body">
+    <div class="lmpopup-badge" style="background:${c}22;color:${c};border:1px solid ${c}44;">${escHtml(getArtistLabel(ev.artists)||'Event')} ${isEventPast(ev)?'· Past':'· Upcoming'}</div>
+    <div class="lmpopup-title">${escHtml(ev.event_name)}</div>
+    <div class="lmpopup-meta">📅 ${dt}${ev.start_time?' · '+ev.start_time:''}</div>
+    ${lp?`<div class="lmpopup-meta">📍 ${escHtml(lp)}</div>`:''}
+    ${ev.event_type?`<div class="lmpopup-meta">🎪 ${escHtml(ev.event_type)}</div>`:''}
+    <button class="lmpopup-btn" onclick="lmapOpenDetail('${ev.__backendId}')">View Details →</button>
+  </div></div>`;
+}
+
+function lmapMultiPopup(evs) {
+  return `<div class="lmpopup"><div style="padding:10px 13px 7px;border-bottom:1px solid rgba(255,255,255,0.08);"><div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);">${evs.length} Events here</div></div>
+  ${evs.map(ev=>{const c=getArtistColor(ev.artists);const dt=ev.date?new Date(ev.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'TBA';return`<div class="lmpopup-listitem" onclick="lmapOpenDetail('${ev.__backendId}')"><div style="display:flex;align-items:center;gap:7px;"><div style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0;"></div><div><div style="font-size:12px;font-weight:600;color:#fff;line-height:1.3;">${escHtml(ev.event_name)}</div><div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:1px;">${dt} · ${escHtml(getArtistLabel(ev.artists))}</div></div></div></div>`;}).join('')}
   </div>`;
 }
 
-function renderBirthdayBanners() {
-  const wrap = document.getElementById('bday-banners');
-  if (!wrap) return;
-  const allSpecial = [
-    ...allBirthdays.map(b => ({ name: b.artist_name, month: b.birthday_month, day: b.birthday_day, color: b.color || '#6b7280', type: 'birthday' })),
-    ...allAnniversaries.map(a => ({ label: a.anniversary_name, month: a.anniversary_month, day: a.anniversary_day, color: a.color || '#a855f7', type: 'anniversary', startYear: a.anniversary_year }))
-  ];
-  let bannerHtml = '';
-  allSpecial.forEach(item => {
-    const days = daysUntilDate(item.month, item.day);
-    const isToday = isDateToday(item.month, item.day);
-    if (isToday || days <= SPECIAL_WARN_DAYS) bannerHtml += makeBannerHtml(item, days);
+function lmapOpenDetail(id) {
+  if (lmap) lmap.closePopup();
+  openDetailModal(id);
+}
+
+function lmapGetFiltered() {
+  return allEvents.filter(ev => {
+    if (!ev.city && !ev.country) return false;
+    const artists = (ev.artists||'').split(',').map(a=>a.trim());
+    if (!artists.some(a => lmapMembers.has(a))) return false;
+    if (lmapTime === 'upcoming' && isEventPast(ev)) return false;
+    if (lmapTime === 'past' && !isEventPast(ev)) return false;
+    return true;
   });
-  wrap.innerHTML = bannerHtml;
-  wrap.style.display = bannerHtml ? 'flex' : 'none';
 }
 
-function renderAnniversaryAdmin() {
-  const list = document.getElementById('anniv-list');
-  if (!list) return;
-  const bdayListEl = document.getElementById('bday-admin-list');
-  if (bdayListEl) {
-    if (allBirthdays.length === 0) {
-      bdayListEl.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ยังไม่มีวันเกิด</p>';
-    } else {
-      const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      bdayListEl.innerHTML = allBirthdays.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
-        <span style="width:10px;height:10px;border-radius:50%;background:${b.color||'#6b7280'};flex-shrink:0;display:inline-block;"></span>
-        <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${b.artist_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[b.birthday_month-1]} ${b.birthday_day}</p></div>
-        <button onclick="deleteBirthday('${b.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">ลบ</button>
-      </div>`).join('');
-    }
-  }
-  if (allAnniversaries.length === 0) {
-    list.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ยังไม่มี Anniversary</p>';
-    return;
-  }
-  const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  list.innerHTML = allAnniversaries.map(a => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
-    <span style="width:10px;height:10px;border-radius:50%;background:${a.color||'#a855f7'};flex-shrink:0;display:inline-block;"></span>
-    <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${a.anniversary_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[a.anniversary_month-1]} ${a.anniversary_day}${a.anniversary_year?' (since '+a.anniversary_year+')':''}</p></div>
-    <button onclick="deleteAnniversary('${a.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">ลบ</button>
-  </div>`).join('');
+function lmapRenderMarkers() {
+  if (!lmapCluster) return;
+  lmapCluster.clearLayers();
+  Object.keys(lmapPathLayers).forEach(m => { if(lmapPathLayers[m]){lmap.removeLayer(lmapPathLayers[m]);lmapPathLayers[m]=null;} });
+
+  const evs = lmapGetFiltered();
+  const loc = {};
+  evs.forEach(ev => {
+    const c = lmapGetCoords(ev); if(!c) return;
+    const k = c[0].toFixed(2)+','+c[1].toFixed(2);
+    if(!loc[k]) loc[k]={c,evs:[]};
+    loc[k].evs.push(ev);
+  });
+  Object.values(loc).forEach(({c,evs:es}) => {
+    const color = getArtistColor(es[0].artists);
+    const past = es.every(isEventPast);
+    const m = L.marker(c, {icon: lmapMakeIcon(color, past)});
+    m.bindPopup(es.length===1 ? lmapSinglePopup(es[0]) : lmapMultiPopup(es), {maxWidth:290,minWidth:230});
+    lmapCluster.addLayer(m);
+  });
+
+  document.getElementById('lmap-cnt-pond').textContent = evs.filter(e=>(e.artists||'').includes('Pond')).length;
+  document.getElementById('lmap-cnt-phuwin').textContent = evs.filter(e=>(e.artists||'').includes('Phuwin')).length;
+  document.getElementById('lmap-cnt-permpoon').textContent = evs.filter(e=>(e.artists||'').includes('Permpoon')).length;
+  document.getElementById('lmap-cnt-total').textContent = evs.length;
+
+  Object.keys(lmapPaths).forEach(member => {
+    if (!lmapPaths[member]) return;
+    const me = evs.filter(e=>(e.artists||'').includes(member)).sort((a,b)=>a.date.localeCompare(b.date));
+    if (me.length < 2) return;
+    const ll = me.map(lmapGetCoords).filter(Boolean);
+    lmapPathLayers[member] = L.polyline(ll, {color:LMAP_CFG[member].color, weight:2.5, opacity:0.65, dashArray:'6,8'}).addTo(lmap);
+  });
 }
 
-async function deleteBirthday(id) {
-  try { await deleteBirthdayInSheets(id); showToast('Birthday deleted.'); await loadBirthdaysFromSheets(); }
-  catch(e) { showToast('Error: ' + (e.message||'delete failed')); }
-}
-async function deleteAnniversary(id) {
-  try { await deleteAnniversaryInSheets(id); showToast('Anniversary deleted.'); await loadAnniversariesFromSheets(); }
-  catch(e) { showToast('Error: ' + (e.message||'delete failed')); }
-}
-function openAnnivForm() { document.getElementById('anniv-form-wrap').style.display = 'block'; }
-function closeAnnivForm() {
-  document.getElementById('anniv-form-wrap').style.display = 'none';
-  ['anniv-label','anniv-month','anniv-day','anniv-year'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('anniv-color').value = '#a855f7';
-}
-async function saveAnniversary() {
-  const label = (document.getElementById('anniv-label').value||'').trim();
-  const month = parseInt(document.getElementById('anniv-month').value);
-  const day   = parseInt(document.getElementById('anniv-day').value);
-  const year  = document.getElementById('anniv-year').value.trim();
-  const color = document.getElementById('anniv-color').value||'#a855f7';
-  if (!label) { showToast('กรุณาใส่ชื่อ Anniversary'); return; }
-  if (!month||month<1||month>12) { showToast('เดือนไม่ถูกต้อง'); return; }
-  if (!day||day<1||day>31) { showToast('วันไม่ถูกต้อง'); return; }
-  try {
-    await createAnniversaryInSheets({ anniversary_name:label, anniversary_month:String(month), anniversary_day:String(day), anniversary_year:year||'', color });
-    closeAnnivForm(); showToast('Anniversary saved!'); await loadAnniversariesFromSheets();
-  } catch(e) { showToast('Error: '+(e.message||'save failed')); }
-}
-function openBdayForm() { document.getElementById('bday-form-wrap').style.display = 'block'; }
-function closeBdayForm() {
-  document.getElementById('bday-form-wrap').style.display = 'none';
-  ['bday-artist-name','bday-month','bday-day'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('bday-color').value = '#6b7280';
-}
-async function saveBirthday() {
-  const name  = (document.getElementById('bday-artist-name').value||'').trim();
-  const month = parseInt(document.getElementById('bday-month').value);
-  const day   = parseInt(document.getElementById('bday-day').value);
-  const color = document.getElementById('bday-color').value||'#6b7280';
-  if (!name) { showToast('กรุณาใส่ชื่อศิลปิน'); return; }
-  if (!month||month<1||month>12) { showToast('เดือนไม่ถูกต้อง'); return; }
-  if (!day||day<1||day>31) { showToast('วันไม่ถูกต้อง'); return; }
-  try {
-    await createBirthdayInSheets({ artist_name:name, birthday_month:String(month), birthday_day:String(day), color });
-    closeBdayForm(); showToast('Birthday saved!'); await loadBirthdaysFromSheets();
-  } catch(e) { showToast('Error: '+(e.message||'save failed')); }
+function lmapFitAll() {
+  const pts = lmapGetFiltered().map(lmapGetCoords).filter(Boolean);
+  if (!pts.length || !lmap) return;
+  lmap.fitBounds(L.latLngBounds(pts), {padding:[60,60]});
 }
 
-async function apiRequest(payload) {
-  const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) });
-  if (!res.ok) throw new Error('API error '+res.status);
-  return await res.json();
+function lmapTogglePanel() {
+  lmapPanelOpen = !lmapPanelOpen;
+  const p = document.getElementById('lmap-panel');
+  if (p) { p.style.transform = lmapPanelOpen?'':'translateX(-250px)'; p.style.opacity = lmapPanelOpen?'1':'0'; p.style.pointerEvents = lmapPanelOpen?'':'none'; }
 }
 
-async function loadEventsFromSheets() {
-  try {
-    const data = await apiRequest({ action:'getEvents' });
-    if (data.status === 'ok') {
-      allEvents = (data.events||[]).map(r => ({
-        __backendId: r.id||r.__backendId||'',
-        event_name: r.event_name||'', image_url: r.image_url||'',
-        artists: r.artists||'', date: r.date||'',
-        start_time: r.start_time||'', end_time: r.end_time||'',
-        location_name: r.location_name||'', city: r.city||'', country: r.country||'',
-        description: r.description||'', youtube_link: r.youtube_link||'',
-        instagram_link: r.instagram_link||'', facebook_link: r.facebook_link||'',
-        x_link: r.x_link||'', tiktok_link: r.tiktok_link||'',
-        whatsapp_link: r.whatsapp_link||'', shopee_link: r.shopee_link||'',
-        live_link: r.live_link||'', file_link: r.file_link||'',
-        event_type: r.event_type||'', note: r.note||'',
-        map_embed: r.map_embed||'',
-        date_end: r.date_end||''
-      }));
-      allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
-      apiLoaded = true;
-      renderCurrentPage();
-    }
-  } catch(e) { console.warn('Sheets API error:', e); showToast('Cannot connect to Google Sheets.'); }
+function lmapSetTime(v) {
+  lmapTime = v;
+  document.querySelectorAll('.lmap-time-btn').forEach(btn => {
+    const on = btn.dataset.lmt === v;
+    btn.style.background = on ? 'rgba(255,255,255,0.15)' : 'transparent';
+    btn.style.color = on ? '#fff' : 'rgba(255,255,255,0.5)';
+    btn.style.borderColor = on ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)';
+  });
+  lmapRenderMarkers();
 }
 
-async function createEventInSheets(data) {
-  const res = await apiRequest({ action:'createEvent', event:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
-  return res.id;
-}
-async function updateEventInSheets(id, data) {
-  const res = await apiRequest({ action:'updateEvent', id, event:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Update failed');
-}
-async function deleteEventInSheets(id) {
-  const res = await apiRequest({ action:'deleteEvent', id });
-  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
-}
-async function loadBirthdaysFromSheets() {
-  try {
-    const data = await apiRequest({ action:'getBirthdays' });
-    if (data.status === 'ok') {
-      allBirthdays = (data.birthdays||[]).map(r => ({ __backendId:r.id||'', artist_name:r.artist_name||'', birthday_month:parseInt(r.birthday_month)||0, birthday_day:parseInt(r.birthday_day)||0, color:r.color||'#6b7280' }));
-      renderBirthdayBanners(); renderAnniversaryAdmin();
-    }
-  } catch(e) { console.warn('Birthday load error:', e); }
-}
-async function createBirthdayInSheets(data) {
-  const res = await apiRequest({ action:'createBirthday', birthday:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
-}
-async function deleteBirthdayInSheets(id) {
-  const res = await apiRequest({ action:'deleteBirthday', id });
-  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
-}
-async function loadAnniversariesFromSheets() {
-  try {
-    const data = await apiRequest({ action:'getAnniversaries' });
-    if (data.status === 'ok') {
-      allAnniversaries = (data.anniversaries||[]).map(r => ({ __backendId:r.id||'', anniversary_name:r.anniversary_name||'', anniversary_month:parseInt(r.anniversary_month)||0, anniversary_day:parseInt(r.anniversary_day)||0, anniversary_year:r.anniversary_year?parseInt(r.anniversary_year):null, color:r.color||'#a855f7' }));
-      renderBirthdayBanners(); renderAnniversaryAdmin();
-    }
-  } catch(e) { console.warn('Anniversary load error:', e); }
-}
-async function createAnniversaryInSheets(data) {
-  const res = await apiRequest({ action:'createAnniversary', anniversary:data });
-  if (res.status !== 'ok') throw new Error(res.message||'Create failed');
-}
-async function deleteAnniversaryInSheets(id) {
-  const res = await apiRequest({ action:'deleteAnniversary', id });
-  if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
+function lmapToggleMember(name) {
+  if (lmapMembers.has(name)) { if(lmapMembers.size===1) return; lmapMembers.delete(name); }
+  else lmapMembers.add(name);
+  document.querySelectorAll('[data-lmap-m]').forEach(c => { c.style.opacity = lmapMembers.has(c.dataset.lmapM)?'1':'0.35'; c.style.filter = lmapMembers.has(c.dataset.lmapM)?'':'grayscale(0.6)'; });
+  lmapRenderMarkers();
 }
 
-(async () => {
-  await Promise.all([ loadEventsFromSheets(), loadBirthdaysFromSheets(), loadAnniversariesFromSheets() ]);
-})();
+function lmapTogglePath(m) {
+  lmapPaths[m] = !lmapPaths[m];
+  const t = document.getElementById('lmap-tog-'+m.toLowerCase());
+  if (t) { t.style.background = lmapPaths[m]?'#6366f1':'rgba(255,255,255,0.15)'; const dot = t.querySelector('div'); if(dot) dot.style.transform = lmapPaths[m]?'translateX(14px)':''; }
+  lmapRenderMarkers();
+}
 
-try {
-  if (window.elementSdk) {
-    window.elementSdk.init({
-      defaultConfig: { site_title:'PondPhuwinPermpoon Schedule', site_tagline:'Pond · Phuwin · Permpoon' },
-      onConfigChange: async (config) => {
-        const t = config.site_title||'PondPhuwinPermpoon Schedule';
-        const tl = config.site_tagline||'Pond · Phuwin · Permpoon';
-        const navEl = document.getElementById('nav-site-title');
-        const titleEl = document.getElementById('home-title');
-        const taglineEl = document.getElementById('home-tagline');
-        if (navEl) navEl.textContent = t.replace(' 2026','');
-        if (titleEl) titleEl.textContent = t;
-        if (taglineEl) taglineEl.textContent = tl;
-      },
-      mapToCapabilities: () => ({ recolorables:[], borderables:[] }),
-      mapToEditPanelValues: (config) => new Map([['site_title', config.site_title||'PondPhuwinPermpoon Schedule'],['site_tagline', config.site_tagline||'Pond · Phuwin · Permpoon']])
+function lmapReset() {
+  lmapMembers = new Set(['Pond','Phuwin','Permpoon']);
+  lmapTime = 'all';
+  lmapSetTime('all');
+  document.querySelectorAll('[data-lmap-m]').forEach(c => { c.style.opacity='1'; c.style.filter=''; });
+  Object.keys(lmapPaths).forEach(m => { lmapPaths[m]=false; const t=document.getElementById('lmap-tog-'+m.toLowerCase()); if(t){t.style.background='rgba(255,255,255,0.15)';const d=t.querySelector('div');if(d)d.style.transform='';} });
+  lmapRenderMarkers();
+}
+
+function lmapBuildUI() {
+  const mc = document.getElementById('lmap-member-chips');
+  if (mc) {
+    mc.innerHTML = '';
+    Object.entries(LMAP_CFG).forEach(([name,cfg]) => {
+      const d = document.createElement('div');
+      d.dataset.lmapM = name;
+      d.style.cssText = `display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid ${cfg.color}66;background:${cfg.bg};color:${cfg.color};user-select:none;`;
+      d.innerHTML = `<div style="width:6px;height:6px;border-radius:50%;background:${cfg.color};"></div>${name}`;
+      d.onclick = () => lmapToggleMember(name);
+      mc.appendChild(d);
     });
   }
-} catch(e) { console.warn('elementSdk not available:', e); }
+  const pt = document.getElementById('lmap-paths');
+  if (pt) {
+    pt.innerHTML = Object.keys(LMAP_CFG).map(m => `<div onclick="lmapTogglePath('${m}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;cursor:pointer;">
+      <span style="font-size:12px;color:rgba(255,255,255,0.75);">${m}'s Path</span>
+      <div id="lmap-tog-${m.toLowerCase()}" style="width:32px;height:18px;background:rgba(255,255,255,0.15);border-radius:9px;position:relative;transition:background 0.2s;cursor:pointer;flex-shrink:0;">
+        <div style="position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform 0.2s;"></div>
+      </div>
+    </div>`).join('');
+  }
+}
+
+function renderMapPage() {
+  if (!lmapReady) {
+    lmapReady = true;
+    lmapBuildUI();
+    setTimeout(() => {
+      if (!window.L) return;
+      lmap = L.map('leaflet-map', {center:[20,20], zoom:3, zoomControl:false});
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution:'&copy; <a href="https://carto.com/">CARTO</a> &copy; OSM',
+        subdomains:'abcd', maxZoom:19
+      }).addTo(lmap);
+      lmapCluster = L.markerClusterGroup({maxClusterRadius:50,
+        iconCreateFunction: c => L.divIcon({className:'',iconSize:[40,40],iconAnchor:[20,20],
+          html:`<div style="width:40px;height:40px;background:rgba(10,12,22,0.9);border:2px solid rgba(99,102,241,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#a5b4fc;box-shadow:0 4px 16px rgba(0,0,0,0.5),0 0 0 4px rgba(99,102,241,0.1);">${c.getChildCount()}</div>`})
+      });
+      lmap.addLayer(lmapCluster);
+      lmapRenderMarkers();
+      setTimeout(() => lmapFitAll(), 400);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }, 100);
+  } else if (lmap) {
+    setTimeout(() => { lmap.invalidateSize(true); lmapRenderMarkers(); }, 100);
+  }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+// ══════════════════════════════════════
+// NAVIGATION & CORE
+// ══════════════════════════════════════
 
 function navigate(page) {
   currentPage = page;
@@ -806,6 +918,7 @@ function navigate(page) {
 function renderCurrentPage() {
   if (currentPage === 'home') renderHome();
   else if (currentPage === 'calendar') renderCalendar();
+  else if (currentPage === 'map') renderMapPage();
   else if (currentPage === 'admin' && isAdmin) renderAdminList();
 }
 
@@ -834,7 +947,6 @@ function getFullDateDisplay(dateStr) {
   if (!dateStr) return '';
   return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
 }
-
 const AUTO_HIDE_MINUTES = 10;
 function isEventAutoHidden(ev) {
   if (!ev.date || !ev.start_time) return false;
@@ -846,34 +958,22 @@ function isEventPast(ev) {
   const endTime = ev.end_time||ev.start_time||'23:59';
   return new Date(ev.date+'T'+endTime) < new Date();
 }
-
-const SOCIAL_ICONS = {
-  youtube: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
-  instagram: `<svg viewBox="0 0 24 24" width="22" height="22"><defs><radialGradient id="ig2" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><path fill="url(#ig2)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`,
-  facebook: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
-  x: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.629L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
-  tiktok: `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>`,
-  whatsapp: `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`,
-  shopee: `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#EE4D2D"/><path fill="white" d="M18.332 9.273h-1.457a4.875 4.875 0 10-9.75 0H5.668a1.667 1.667 0 00-1.66 1.82l.78 8.874A1.667 1.667 0 006.45 21.5h11.1a1.667 1.667 0 001.662-1.533l.78-8.874a1.667 1.667 0 00-1.66-1.82zM12 5.7a2.875 2.875 0 012.875 2.873v.3H9.125v-.3A2.875 2.875 0 0112 5.7zm2.354 7.97a.4.4 0 01-.566 0l-1.288-1.288v4.018a.4.4 0 01-.8 0v-4.018l-1.288 1.288a.4.4 0 01-.566-.566l2-2a.4.4 0 01.566 0l2 2a.4.4 0 010 .566z"/></svg>`,
-  download: `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B7280" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
-};
-
-function makeSocialBtn(href, iconSvg, label) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);text-decoration:none;flex-shrink:0;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;" title="${label}" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">${iconSvg}</a>`;
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-function buildSocialIcons(ev) {
-  let html = '';
-  if (ev.youtube_link) html += makeSocialBtn(ev.youtube_link, SOCIAL_ICONS.youtube, 'YouTube');
-  if (ev.instagram_link) html += makeSocialBtn(ev.instagram_link, SOCIAL_ICONS.instagram, 'Instagram');
-  if (ev.facebook_link) html += makeSocialBtn(ev.facebook_link, SOCIAL_ICONS.facebook, 'Facebook');
-  if (ev.x_link) html += makeSocialBtn(ev.x_link, SOCIAL_ICONS.x, 'X (Twitter)');
-  if (ev.tiktok_link) html += makeSocialBtn(ev.tiktok_link, SOCIAL_ICONS.tiktok, 'TikTok');
-  if (ev.whatsapp_link) html += makeSocialBtn(ev.whatsapp_link, SOCIAL_ICONS.whatsapp, 'WhatsApp');
-  if (ev.shopee_link) html += makeSocialBtn(ev.shopee_link, SOCIAL_ICONS.shopee, 'Shopee');
-  if (ev.live_link) html += makeSocialBtn(ev.live_link, getLiveIcon(ev.live_link), getLiveLabelFromUrl(ev.live_link));
-  if (ev.file_link) html += makeSocialBtn(ev.file_link, SOCIAL_ICONS.download, 'Download');
-  return html;
+function filterHome(artist) {
+  homeFilter = artist;
+  document.querySelectorAll('.artist-filter-btn').forEach(btn => {
+    if (btn.dataset.artist === artist) { btn.style.background='#111'; btn.style.color='#fff'; btn.style.borderColor='#111'; }
+    else { const c=btn.dataset.artist==='Pond'?'#f97316':btn.dataset.artist==='Phuwin'?'#6b7280':btn.dataset.artist==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
+  });
+  renderHome();
 }
+
+// ══════════════════════════════════════
+// HOME & CARD RENDERING
+// ══════════════════════════════════════
 
 function renderHome() {
   renderBirthdayBanners();
@@ -953,19 +1053,6 @@ function createCard(ev) {
   return card;
 }
 
-function escHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function filterHome(artist) {
-  homeFilter = artist;
-  document.querySelectorAll('.artist-filter-btn').forEach(btn => {
-    if (btn.dataset.artist === artist) { btn.style.background='#111'; btn.style.color='#fff'; btn.style.borderColor='#111'; }
-    else { const c=btn.dataset.artist==='Pond'?'#f97316':btn.dataset.artist==='Phuwin'?'#6b7280':btn.dataset.artist==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
-  });
-  renderHome();
-}
 
 function openDetailModal(id) {
   const ev = allEvents.find(e => e.__backendId === id);
@@ -1194,7 +1281,6 @@ async function handleEventFormSubmit(e) {
   const date=document.getElementById('f-date').value;
   if(!name){showToast('Event name is required.');return;}
   if(!date){showToast('Date is required.');return;}
-  // Clear incomplete time values to avoid browser validation error
   const startEl = document.getElementById('f-start');
   const endEl = document.getElementById('f-end');
   if (startEl && !startEl.checkValidity()) startEl.value = '';
