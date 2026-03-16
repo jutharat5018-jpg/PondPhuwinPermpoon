@@ -1835,13 +1835,13 @@ function buildCountdownImgBadge(ev) {
   if (!ev.dateStart) return '';
   const days = daysUntilEvent(ev.dateStart);
   if (days === null) return '';
-  let label = '';
-  if (days === 0) label = 'Today';
-  else if (days > 0 && days <= 60) label = `in ${days} day${days !== 1 ? 's' : ''}`;
-  else return '';
-  // For image cards: absolute bottom-left overlay
-  // For no-image cards: this gets wrapped differently — see no-image branch
-  return `<div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.52);color:#fff;font-size:0.72rem;font-weight:700;padding:4px 11px;border-radius:99px;">` + label + `</div>`;
+  if (days === 0) {
+    return `<div style="position:absolute;bottom:10px;left:10px;background:#ef4444;color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 8px rgba(0,0,0,0.25);">TODAY</div>`;
+  }
+  if (days > 0 && days <= 7) {
+    return `<div style="position:absolute;bottom:10px;left:10px;background:#1e293b;color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 8px rgba(0,0,0,0.25);">in ${days} day${days !== 1 ? 's' : ''}</div>`;
+  }
+  return '';
 }
 function buildCountdownNoImg(ev) {
   if (!ev.dateStart) return '';
@@ -1863,7 +1863,7 @@ function createCard(ev) {
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${isEventToday(ev)?'<div style="position:absolute;top:12px;left:12px;background:#ef4444;color:#fff;font-size:0.62rem;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:0.05em;text-transform:uppercase;">TODAY</div>':''}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
 
   const artistBadge = ev.artists
