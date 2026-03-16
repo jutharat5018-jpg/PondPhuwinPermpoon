@@ -33,10 +33,10 @@
   .card-img { width: 100%; height: 220px; object-fit: cover; display: block; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   /* ── CALENDAR ── */
-  .cal-day { width:56px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:background 0.15s;box-sizing:border-box;position:relative;border:none;padding:0; }
+  .cal-day { width:66px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:background 0.15s;box-sizing:border-box;position:relative;border:none;padding:0; }
   .cal-day:hover { background: #f3f4f6; }
   .cal-day-selected { background: #111 !important; }
-  .cal-day-has-event::after { content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#9ca3af; }
+  .cal-day-has-event::after { content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#6b7280; }
   .cal-day-selected.cal-day-has-event::after { background:#fff; }
   .cal-events-wrap { display:none; }
   .cal-event-dot { display:none; }
@@ -252,16 +252,16 @@
      <div id="cal-layout" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;">
 
       <!-- LEFT: Mini calendar -->
-      <div id="cal-left" style="width:420px;flex-shrink:0;">
+      <div id="cal-left" style="width:500px;flex-shrink:0;">
        <!-- day headers -->
        <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">S</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">M</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">T</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">W</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">T</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">F</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#d1d5db;padding:8px 0;">S</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">S</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">M</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">T</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">W</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">T</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">F</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">S</div>
        </div>
        <div id="cal-grid" class="cal-grid" style="border:none;"></div>
       </div>
@@ -1641,7 +1641,7 @@ function renderCalendar() {
   grid.innerHTML = '';
   grid.style.display = 'grid';
   const isMobile = window.innerWidth <= 700;
-  const cellSize = isMobile ? Math.floor((window.innerWidth - 48) / 7) + 'px' : '56px';
+  const cellSize = isMobile ? Math.floor((window.innerWidth - 48) / 7) + 'px' : '66px';
   grid.style.gridTemplateColumns = 'repeat(7,' + cellSize + ')';
   grid.style.gap = '3px';
   grid.style.border = 'none';
@@ -1698,8 +1698,8 @@ function renderCalendar() {
     const numStyle = isSelected
       ? 'font-size:'+fs+';font-weight:800;color:#fff;'
       : isToday
-        ? 'font-size:'+fs+';font-weight:800;color:#111;'
-        : 'font-size:'+fs+';font-weight:500;color:#9ca3af;';
+        ? 'font-size:'+fs+';font-weight:800;color:#111;text-decoration:underline;text-underline-offset:3px;'
+        : 'font-size:'+fs+';font-weight:600;color:#374151;';
 
     cell.innerHTML = `<span style="${numStyle}">${d}</span>`;
     cell.onclick = () => { calSelectedDate = dateStr; renderCalendar(); };
