@@ -1035,7 +1035,8 @@ function buildSocialIcons(ev) {
 
 function renderHome() {
   renderBirthdayBanners();
-  const events = allEvents.filter(ev => !isEventAutoHidden(ev));
+  // Rule 1: only events with a title
+  const events = allEvents.filter(ev => !isEventAutoHidden(ev) && ev.event_name && ev.event_name.trim());
   const grid = document.getElementById('events-grid');
   const noEv = document.getElementById('no-events');
   const count = document.getElementById('events-count');
@@ -1058,67 +1059,84 @@ function renderHome() {
     hdr.innerHTML=`<span class="month-group-header-label">${label}</span><span class="month-group-header-count">${me.length} event${me.length!==1?'s':''}</span><span class="month-group-header-line"></span>`;
     gw.appendChild(hdr);
     const cg = document.createElement('div'); cg.className='cards-grid'; cg.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;align-items:stretch;';
-    me.forEach(ev => cg.appendChild(createCard(ev)));
+    me.forEach(ev => {
+      const card = createCard(ev);
+      if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) cg.appendChild(card);
+    });
     gw.appendChild(cg); grid.appendChild(gw);
   });
   if (typeof lucide!=='undefined') lucide.createIcons();
 }
 
 function createCard(ev) {
+  // Rule 1: skip if no title
+  if (!ev.event_name || !ev.event_name.trim()) return document.createDocumentFragment();
+
   const color = getArtistColor(ev.artists);
   const card = document.createElement('div');
   card.className = 'event-card';
   card.dataset.eventId = ev.__backendId;
   card.onclick = () => openDetailModal(ev.__backendId);
+
+  // Rule 2: image only if url exists — no placeholder, no empty space
   const imgHtml = ev.image_url
-    ? `<img src="${escHtml(ev.image_url)}" alt="${escHtml(ev.event_name)}" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" loading="lazy"><div class="card-img-placeholder" style="display:none;"><i data-lucide="image" style="width:32px;height:32px;color:#d1d5db;stroke-width:1.5;"></i></div>`
-    : `<div class="card-img-placeholder"><i data-lucide="image" style="width:32px;height:32px;color:#d1d5db;stroke-width:1.5;"></i></div>`;
-  let dateBadgeHtml = '';
-  if (ev.date) {
-    const d = new Date(ev.date+'T00:00:00');
-    const dow = d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
-    if (ev.date_end && ev.date_end !== ev.date) {
-      const d2 = new Date(ev.date_end+'T00:00:00');
-      const dow2 = d2.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
-      dateBadgeHtml = `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.4rem 0.6rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.62rem;font-weight:700;letter-spacing:0.04em;">${dow} ${d.getDate()} – ${dow2} ${d2.getDate()}</div></div>`;
-    } else {
-      dateBadgeHtml = `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.5rem 0.75rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.7rem;font-weight:700;letter-spacing:0.05em;">${dow}</div><div style="font-size:1.3rem;font-weight:700;line-height:1;">${d.getDate()}</div></div>`;
-    }
-  }
-  const metaItems = [];
-  // timezone ต้องมาจาก GMT format เท่านั้น ป้องกันข้อมูลเสียหรือเก่า
+    ? `<div style="position:relative;"><img src="${escHtml(ev.image_url)}" alt="${escHtml(ev.event_name)}" class="card-img" onerror="this.parentElement.remove();" loading="lazy">${buildDateBadge(ev, color)}</div>`
+    : (ev.date ? `<div style="position:relative;height:0;">${buildDateBadge(ev, color)}</div>` : '');
+
+  // Rule 3-4: date row only if date exists; time+timezone only if time exists
   const rawTz = (ev.timezone||'').trim();
   const validTz = /^GMT[+-]\d{1,2}$/.test(rawTz) ? rawTz : '';
   const tzText = validTz ? ` (${validTz})` : '';
 
-  // Date row — แสดง date เฉยๆ ไม่ต่อ GMT ไม่ว่ากรณีไหน
+  const metaItems = [];
   if (ev.date) {
     const dateStr = getMonthDisplay(ev.date) + (ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : '');
-    metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateStr}</div>`);
+    metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateStr}</div>`);
   }
-  // Time row — GMT ต่อท้ายเวลาเท่านั้น ถ้าไม่มีเวลาไม่แสดง GMT เลย
+  // Rule 5: timezone only after time, never alone
   if (ev.start_time) {
-    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
+    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
   }
-  const lp = [ev.location_name,ev.city,ev.country].filter(x=>x);
-  if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
-  if (ev.description) metaItems.push(`<div style="font-size:0.8rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
+  // Rule 6: location only if exists
+  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim());
+  if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
+  if (ev.description) metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
+  if (ev.event_type) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.event_type)}</span></div>`);
+  // Rule 7: TV channel only if exists
+  if (ev.tv_channel) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv_channel)}</span></div>`);
+  if (ev.note) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
+
+  // Rule 7: social icons only if links exist
   const socialHtml = buildSocialIcons(ev);
-  const allMeta = [...metaItems];
-  if (ev.event_type) allMeta.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.event_type)}</span></div>`);
-  if (ev.tv_channel) allMeta.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;color:#374151;">${escHtml(ev.tv_channel)}</span></div>`);
-  if (ev.note) allMeta.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="file-text" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.note)}</span></div>`);
+
+  // Rule 8: artist badge only if artists exist
+  const artistBadge = (ev.artists && ev.artists.trim())
+    ? `<span class="artist-badge" style="background:${color}18;color:${color};margin-bottom:0.5rem;font-size:0.68rem;padding:2px 8px;"><i data-lucide="user" style="width:9px;height:9px;stroke-width:2.5;"></i>${getArtistLabel(ev.artists)}</span>`
+    : '';
+
   card.innerHTML = `
-    <div style="position:relative;">${imgHtml}${dateBadgeHtml}</div>
+    ${imgHtml}
     <div style="padding:0.85rem;display:flex;flex-direction:column;flex:1;">
-      ${ev.artists?`<span class="artist-badge" style="background:${color}18;color:${color};margin-bottom:0.5rem;font-size:0.68rem;padding:2px 8px;"><i data-lucide="user" style="width:9px;height:9px;stroke-width:2.5;"></i>${getArtistLabel(ev.artists)}</span>`:''}
-      <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:0.4rem;line-height:1.3;">${escHtml(ev.event_name)}</h3>
-      ${allMeta.length?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 6px;margin-bottom:0.6rem;">${allMeta.map(m=>m.replace('font-size:0.8rem','font-size:0.72rem').replace('font-size:0.78rem','font-size:0.72rem')).join('')}</div>`:''}
-      ${socialHtml?`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:0.6rem;" onclick="event.stopPropagation()">${socialHtml}</div>`:''}
+      ${artistBadge}
+      <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:${metaItems.length?'0.4rem':'0.6rem'};line-height:1.3;">${escHtml(ev.event_name)}</h3>
+      ${metaItems.length ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 6px;margin-bottom:0.6rem;">${metaItems.join('')}</div>` : ''}
+      ${socialHtml ? `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:0.6rem;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
       <div style="flex:1;"></div>
       <button style="width:100%;border:1.5px solid #111;background:#fff;border-radius:8px;padding:7px;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s;margin-top:0.6rem;" onmouseenter="this.style.background='#f5f5f5'" onmouseleave="this.style.background='#fff'">View Details</button>
     </div>`;
   return card;
+}
+
+function buildDateBadge(ev, color) {
+  if (!ev.date) return '';
+  const d = new Date(ev.date+'T00:00:00');
+  const dow = d.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+  if (ev.date_end && ev.date_end !== ev.date) {
+    const d2 = new Date(ev.date_end+'T00:00:00');
+    const dow2 = d2.toLocaleDateString('en-GB',{weekday:'short'}).toUpperCase();
+    return `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.4rem 0.6rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.62rem;font-weight:700;letter-spacing:0.04em;">${dow} ${d.getDate()} – ${dow2} ${d2.getDate()}</div></div>`;
+  }
+  return `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.5rem 0.75rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.7rem;font-weight:700;letter-spacing:0.05em;">${dow}</div><div style="font-size:1.3rem;font-weight:700;line-height:1;">${d.getDate()}</div></div>`;
 }
 
 function escHtml(str) {
@@ -1137,47 +1155,67 @@ function filterHome(artist) {
 
 function openDetailModal(id) {
   const ev = allEvents.find(e => e.__backendId === id);
-  if (!ev) return;
+  if (!ev || !ev.event_name) return;
   const color = getArtistColor(ev.artists);
 
+  // Image: only render if url exists, no placeholder
   const imgWrap = document.getElementById('detail-img-wrap');
-  if (ev.image_url) {
-    imgWrap.innerHTML = `<img src="${escHtml(ev.image_url)}" style="width:100%;height:auto;display:block;" alt="${escHtml(ev.event_name)}" loading="lazy">`;
-  } else {
-    imgWrap.innerHTML = `<div style="width:100%;height:220px;background:linear-gradient(135deg,#f3f4f6,#e5e7eb);display:flex;align-items:center;justify-content:center;"><i data-lucide="image" style="width:48px;height:48px;color:#d1d5db;stroke-width:1.5;"></i></div>`;
-  }
+  imgWrap.innerHTML = ev.image_url
+    ? `<img src="${escHtml(ev.image_url)}" style="width:100%;height:auto;display:block;" alt="${escHtml(ev.event_name)}" loading="lazy">`
+    : '';
 
-  document.getElementById('detail-artist-badge').innerHTML = ev.artists
-    ? `<span class="artist-badge" style="background:${color}18;color:${color};">${getArtistLabel(ev.artists)}</span>` : '';
+  // Artist badge: only if artists exist
+  document.getElementById('detail-artist-badge').innerHTML = (ev.artists && ev.artists.trim())
+    ? `<span class="artist-badge" style="background:${color}18;color:${color};">${getArtistLabel(ev.artists)}</span>`
+    : '';
+
   document.getElementById('detail-title').textContent = ev.event_name;
 
-  const lp = [ev.location_name, ev.city, ev.country].filter(x => x);
+  // Build meta rows — each only if data exists
   const rawTzD = (ev.timezone||'').trim();
   const validTzD = /^GMT[+-]\d{1,2}$/.test(rawTzD) ? rawTzD : '';
   const tzInline = validTzD ? ` (${validTzD})` : '';
-  document.getElementById('detail-meta').innerHTML = `
-    <div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – ' + getFullDateDisplay(ev.date_end) : ''}</span></div>
-    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzInline}</span></div>` : ''}
-    ${lp.length ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>` : ''}
-    ${ev.event_type ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.event_type}</span></div>` : ''}
-    ${ev.tv_channel ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv_channel)}</span></div>` : ''}
-    ${ev.note ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="file-text" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(ev.note)}</span></div>` : ''}`;
+  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim());
 
+  const metaRows = [];
+  if (ev.date) metaRows.push(`<div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>`);
+  if (ev.date) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – ' + getFullDateDisplay(ev.date_end) : ''}</span></div>`);
+  // Time+timezone: only if time exists; timezone never alone
+  if (ev.start_time) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzInline}</span></div>`);
+  if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
+  if (ev.event_type) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.event_type}</span></div>`);
+  if (ev.tv_channel) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv_channel)}</span></div>`);
+  if (ev.note) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="file-text" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(ev.note)}</span></div>`);
+
+  document.getElementById('detail-meta').innerHTML = metaRows.join('');
+
+  // Description: only if exists
   const descWrap = document.getElementById('detail-desc-wrap');
-  if (ev.description) { descWrap.style.display = 'block'; document.getElementById('detail-desc').textContent = ev.description; }
-  else descWrap.style.display = 'none';
+  if (ev.description) {
+    descWrap.style.display = 'block';
+    document.getElementById('detail-desc').textContent = ev.description;
+  } else {
+    descWrap.style.display = 'none';
+  }
 
+  // Map: only if embed code exists
   const mapWrap = document.getElementById('detail-map-wrap');
-  if (ev.map_embed) {
+  if (ev.map_embed && ev.map_embed.trim()) {
     mapWrap.style.display = 'block';
     document.getElementById('detail-map').innerHTML = ev.map_embed.replace(/width="[^"]*"/g, 'width="100%"').replace(/height="[^"]*"/g, 'height="300"');
-  } else mapWrap.style.display = 'none';
+  } else {
+    mapWrap.style.display = 'none';
+  }
 
+  // Links: only if any social link exists
   const linksWrap = document.getElementById('detail-links-wrap');
   const linksHtml = buildSocialIcons(ev);
-  if (linksHtml) { linksWrap.style.display = 'block'; document.getElementById('detail-links').innerHTML = linksHtml; }
-  else linksWrap.style.display = 'none';
+  if (linksHtml) {
+    linksWrap.style.display = 'block';
+    document.getElementById('detail-links').innerHTML = linksHtml;
+  } else {
+    linksWrap.style.display = 'none';
+  }
 
   document.getElementById('detail-modal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
