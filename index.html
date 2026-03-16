@@ -156,13 +156,6 @@
       <p style="color:#6b7280;font-size:0.9rem;">Track upcoming concerts, fan meets, and events.</p>
      </div>
      <div id="bday-banners" style="display:none;flex-direction:column;gap:8px;margin-bottom:1.5rem;"></div>
-     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;">
-      <span style="font-size:0.78rem;font-weight:600;color:#9ca3af;margin-right:4px;">FILTER</span>
-      <button class="artist-filter-btn" data-artist="all" style="padding:5px 14px;border-radius:99px;border:1.5px solid #111;font-size:0.78rem;font-weight:600;background:#111;color:#fff;cursor:pointer;" onclick="filterHome('all')">All</button>
-      <button class="artist-filter-btn" data-artist="Pond" style="padding:5px 14px;border-radius:99px;border:1.5px solid #f97316;font-size:0.78rem;font-weight:600;color:#f97316;background:#fff;cursor:pointer;" onclick="filterHome('Pond')">Pond</button>
-      <button class="artist-filter-btn" data-artist="Phuwin" style="padding:5px 14px;border-radius:99px;border:1.5px solid #6b7280;font-size:0.78rem;font-weight:600;color:#6b7280;background:#fff;cursor:pointer;" onclick="filterHome('Phuwin')">Phuwin</button>
-      <button class="artist-filter-btn" data-artist="Permpoon" style="padding:5px 14px;border-radius:99px;border:1.5px solid #22c55e;font-size:0.78rem;font-weight:600;color:#22c55e;background:#fff;cursor:pointer;" onclick="filterHome('Permpoon')">Permpoon</button>
-     </div>
      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <h2 class="section-header">Upcoming Events</h2>
       <span id="events-count" style="font-size:0.8rem;color:#9ca3af;"></span>
@@ -1004,12 +997,8 @@ function getFullDateDisplay(dateStr) {
   return new Date(dateStr+'T00:00:00').toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
 }
 
-const AUTO_HIDE_MINUTES = 10;
-function isEventAutoHidden(ev) {
-  if (!ev.date || !ev.start_time) return false;
-  const startDt = new Date(ev.date+'T'+ev.start_time);
-  return new Date() > new Date(startDt.getTime() + AUTO_HIDE_MINUTES*60000);
-}
+// Auto-hide disabled — all events show on public page regardless of time
+function isEventAutoHidden(ev) { return false; }
 function isEventPast(ev) {
   if (!ev.date) return false;
   const endTime = ev.end_time||ev.start_time||'23:59';
@@ -1046,10 +1035,7 @@ function buildSocialIcons(ev) {
 
 function renderHome() {
   renderBirthdayBanners();
-  let events = allEvents.filter(ev => !isEventAutoHidden(ev));
-  if (homeFilter && homeFilter !== 'all') {
-    events = events.filter(ev => (ev.artists||'').split(',').map(a=>a.trim()).includes(homeFilter));
-  }
+  const events = allEvents.filter(ev => !isEventAutoHidden(ev));
   const grid = document.getElementById('events-grid');
   const noEv = document.getElementById('no-events');
   const count = document.getElementById('events-count');
@@ -1373,7 +1359,7 @@ function closePreviewPopup(){const p=document.getElementById('preview-popup');if
 function updatePreview(){}
 function attachPreviewListeners(){}
 
-setInterval(()=>{ if(currentPage==='home')renderHome(); else renderBirthdayBanners(); },60000);
+setInterval(()=>{ if(currentPage==='home')renderHome(); else if(currentPage==='calendar')renderCalendar(); renderBirthdayBanners(); },60000);
 
 async function handleEventFormSubmit(e) {
   e.preventDefault();
