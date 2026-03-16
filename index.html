@@ -59,10 +59,39 @@
   ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
   .section-header { font-size: 1.5rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
   .artist-check { display: none; }
-  .artist-check-label { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 99px; border: 1.5px solid #e5e7eb; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; color: #6b7280; }
-  #ac-pond:checked + .artist-check-label { border-color: #f97316; background: #f97316; color: #fff; }
-  #ac-phuwin:checked + .artist-check-label { border-color: #4b5563; background: #4b5563; color: #fff; }
-  #ac-permpoon:checked + .artist-check-label { border-color: #16a34a; background: #16a34a; color: #fff; }
+  .artist-check-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 99px;
+    border: 2px solid #e5e7eb;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+    color: #9ca3af; background: #fff; user-select: none;
+    position: relative;
+  }
+  /* Pond — orange */
+  label[for="ac-pond"] { border-color: #fed7aa; color: #f97316; }
+  label[for="ac-pond"]:hover { border-color: #f97316; background: #fff7ed; color: #ea6500; }
+  #ac-pond:checked + label {
+    background: #f97316; border-color: #ea6500; color: #fff;
+    box-shadow: 0 2px 10px rgba(249,115,22,0.35);
+    font-weight: 700;
+  }
+  /* Phuwin — slate */
+  label[for="ac-phuwin"] { border-color: #d1d5db; color: #6b7280; }
+  label[for="ac-phuwin"]:hover { border-color: #6b7280; background: #f9fafb; color: #374151; }
+  #ac-phuwin:checked + label {
+    background: #4b5563; border-color: #374151; color: #fff;
+    box-shadow: 0 2px 10px rgba(75,85,99,0.35);
+    font-weight: 700;
+  }
+  /* Permpoon — green */
+  label[for="ac-permpoon"] { border-color: #bbf7d0; color: #22c55e; }
+  label[for="ac-permpoon"]:hover { border-color: #22c55e; background: #f0fdf4; color: #16a34a; }
+  #ac-permpoon:checked + label {
+    background: #16a34a; border-color: #15803d; color: #fff;
+    box-shadow: 0 2px 10px rgba(22,163,74,0.35);
+    font-weight: 700;
+  }
   .detail-hero { width: 100%; max-height: 520px; object-fit: contain; background: transparent; display: block; border-radius: 0; }
   .link-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.82rem; font-weight: 600; color: #374151; text-decoration: none; transition: all 0.15s; }
   .link-btn:hover { background: #f9f9f9; border-color: #d1d5db; }
@@ -366,11 +395,11 @@
         <label class="form-label" style="margin-bottom:0.5rem;">Artist(s) (optional)</label>
         <div style="display:flex;flex-wrap:wrap;gap:8px;">
          <input type="checkbox" class="artist-check" id="ac-pond" value="Pond">
-         <label class="artist-check-label" for="ac-pond" style="border-color:#f97316;color:#f97316;">Pond</label>
+         <label class="artist-check-label" for="ac-pond">Pond</label>
          <input type="checkbox" class="artist-check" id="ac-phuwin" value="Phuwin">
-         <label class="artist-check-label" for="ac-phuwin" style="border-color:#6b7280;color:#6b7280;">Phuwin</label>
+         <label class="artist-check-label" for="ac-phuwin">Phuwin</label>
          <input type="checkbox" class="artist-check" id="ac-permpoon" value="Permpoon">
-         <label class="artist-check-label" for="ac-permpoon" style="border-color:#22c55e;color:#22c55e;">Permpoon</label>
+         <label class="artist-check-label" for="ac-permpoon">Permpoon</label>
         </div>
        </div>
        <div>
@@ -1066,14 +1095,17 @@ function createCard(ev) {
     }
   }
   const metaItems = [];
-  // Date row — ถ้าไม่มีเวลาแต่มี timezone ให้ต่อท้าย date
-  const tzText = ev.timezone ? ` (${escHtml(ev.timezone)})` : '';
+  // timezone ต้องมาจาก GMT format เท่านั้น ป้องกันข้อมูลเสียหรือเก่า
+  const rawTz = (ev.timezone||'').trim();
+  const validTz = /^GMT[+-]\d{1,2}$/.test(rawTz) ? rawTz : '';
+  const tzText = validTz ? ` (${validTz})` : '';
+
+  // Date row — แสดง date เฉยๆ ไม่ต่อ GMT ไม่ว่ากรณีไหน
   if (ev.date) {
     const dateStr = getMonthDisplay(ev.date) + (ev.date_end && ev.date_end !== ev.date ? ' – '+getMonthDisplay(ev.date_end) : '');
-    const dateTz = (!ev.start_time && ev.timezone) ? dateStr + tzText : dateStr;
-    metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateTz}</div>`);
+    metaItems.push(`<div style="font-size:0.78rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateStr}</div>`);
   }
-  // Time row — แสดงเฉพาะถ้ามี start_time
+  // Time row — GMT ต่อท้ายเวลาเท่านั้น ถ้าไม่มีเวลาไม่แสดง GMT เลย
   if (ev.start_time) {
     metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
   }
@@ -1129,11 +1161,13 @@ function openDetailModal(id) {
   document.getElementById('detail-title').textContent = ev.event_name;
 
   const lp = [ev.location_name, ev.city, ev.country].filter(x => x);
-  const tzInline = ev.timezone ? ` (${escHtml(ev.timezone)})` : '';
+  const rawTzD = (ev.timezone||'').trim();
+  const validTzD = /^GMT[+-]\d{1,2}$/.test(rawTzD) ? rawTzD : '';
+  const tzInline = validTzD ? ` (${validTzD})` : '';
   document.getElementById('detail-meta').innerHTML = `
     <div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>
     <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.date)}${ev.date_end && ev.date_end !== ev.date ? ' – ' + getFullDateDisplay(ev.date_end) : ''}</span></div>
-    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzInline}</span></div>` : (ev.timezone ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="globe" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(ev.timezone)}</span></div>` : '')}
+    ${ev.start_time ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time ? ' – ' + ev.end_time : ''}${tzInline}</span></div>` : ''}
     ${lp.length ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>` : ''}
     ${ev.event_type ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.event_type}</span></div>` : ''}
     ${ev.tv_channel ? `<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv_channel)}</span></div>` : ''}
