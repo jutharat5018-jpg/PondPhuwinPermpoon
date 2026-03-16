@@ -1365,10 +1365,10 @@ function createCard(ev) {
 
   // ── Artist badge ──
   const artistBadge = (ev.artists && ev.artists.trim())
-    ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:7px;margin-bottom:7px;background:${color}18;color:${color};border:1px solid ${color}44;">
+    ? `<div style="margin-bottom:7px;"><span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:7px;background:${color}18;color:${color};border:1px solid ${color}44;">
         <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         ${getArtistLabel(ev.artists)}
-      </span>`
+      </span></div>`
     : '';
 
   // ── Date + Time row ──
