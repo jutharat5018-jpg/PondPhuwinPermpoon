@@ -413,37 +413,14 @@
         <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
         <input class="form-input" id="ev-dateEnd" name="dateEnd" type="date">
        </div>
-       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;grid-column:1/-1;">
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:1/-1;">
         <div>
          <label class="form-label" for="ev-startTime">Start Time</label>
-         <input class="form-input" id="ev-startTime" name="startTime" type="time">
+         <input class="form-input" id="ev-startTime" name="startTime" type="text" placeholder="e.g. 18:00 GMT+7, 6 PM, 20:30 JST">
         </div>
         <div>
          <label class="form-label" for="ev-endTime">End Time</label>
-         <input class="form-input" id="ev-endTime" name="endTime" type="time">
-        </div>
-        <div>
-         <label class="form-label" for="ev-timezone" style="display:flex;align-items:center;gap:4px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          Time Zone
-         </label>
-         <select class="form-input" id="ev-timezone" name="timezone" style="appearance:auto;">
-          <option value="">— not set —</option>
-          <option value="GMT-12">GMT-12</option><option value="GMT-11">GMT-11</option>
-          <option value="GMT-10">GMT-10</option><option value="GMT-9">GMT-9</option>
-          <option value="GMT-8">GMT-8</option><option value="GMT-7">GMT-7</option>
-          <option value="GMT-6">GMT-6</option><option value="GMT-5">GMT-5</option>
-          <option value="GMT-4">GMT-4</option><option value="GMT-3">GMT-3</option>
-          <option value="GMT-2">GMT-2</option><option value="GMT-1">GMT-1</option>
-          <option value="GMT+0">GMT+0</option><option value="GMT+1">GMT+1</option>
-          <option value="GMT+2">GMT+2</option><option value="GMT+3">GMT+3</option>
-          <option value="GMT+4">GMT+4</option><option value="GMT+5">GMT+5</option>
-          <option value="GMT+6">GMT+6</option><option value="GMT+7">GMT+7</option>
-          <option value="GMT+8">GMT+8</option><option value="GMT+9">GMT+9</option>
-          <option value="GMT+10">GMT+10</option><option value="GMT+11">GMT+11</option>
-          <option value="GMT+12">GMT+12</option><option value="GMT+13">GMT+13</option>
-          <option value="GMT+14">GMT+14</option>
-         </select>
+         <input class="form-input" id="ev-endTime" name="endTime" type="text" placeholder="e.g. 21:00 GMT+7, 9 PM">
         </div>
        </div>
        <div>
@@ -469,6 +446,15 @@
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-note" name="note" placeholder="e.g. live on YouTube, time not confirmed">
+       </div>
+       <div>
+        <label class="form-label" for="ev-status">Status</label>
+        <select class="form-input" id="ev-status" name="status" style="appearance:auto;">
+         <option value="upcoming">upcoming</option>
+         <option value="past">past</option>
+         <option value="cancelled">cancelled</option>
+         <option value="">— not set —</option>
+        </select>
        </div>
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-tv" style="display:flex;align-items:center;gap:5px;">
@@ -876,77 +862,78 @@ async function loadEventsFromSheets(isRetry) {
 
       // ── Helpers ────────────────────────────────────────────────────────
       // Strip Sheets empty-date sentinel 1899-12-30
-      const cleanDate = v => (!v || String(v).startsWith('1899-12-30')) ? '' : String(v).trim();
-      // Strip HTML/iframe from plain-text fields
-      const safeText  = v => (!v || /<[a-z][\s\S]*>/i.test(String(v))) ? '' : String(v).trim();
+      const cleanDate = v => {
+        if (!v) return '';
+        const s = String(v).trim();
+        return s.startsWith('1899-12-30') ? '' : s;
+      };
+      // Raw string — keep value exactly as-is, just ensure it's a string
+      // Used for time fields: never convert, never strip, never touch
+      const rawStr = v => (v != null && v !== '') ? String(v).trim() : '';
+      // Safe plain text — strip HTML tags (for title, location, etc.)
+      const safeText = v => {
+        if (!v) return '';
+        const s = String(v).trim();
+        return /<[a-z][\s\S]*>/i.test(s) ? '' : s;
+      };
 
       // ── Map each row — support BOTH simple schema and full PPP schema ──
       // Simple schema (current Sheet): date, title, type, location,
       //                                description, image, map, status
       // Full schema (PPP): dateStart, startTime, artists, etc.
       const mapped = raw.map((r, i) => {
-        // Normalise status — trim + lowercase so "Upcoming" == "upcoming"
-        const status    = safeText(r.status || '').toLowerCase();
+        // ── Status — normalise to lowercase for comparison ────────────────
+        const status    = rawStr(r.status || '').toLowerCase();
 
-        // Date — Sheet column "date" maps to dateStart
-        const dateStart = cleanDate(r.date || r.dateStart || r.date_start || '');
-        const dateEnd   = cleanDate(r.dateEnd || r.date_end || '');
+        // ── Dates — YYYY-MM-DD string, read strict key first ─────────────
+        const dateStart = cleanDate(r.dateStart || r.date || r.date_start || '');
+        const dateEnd   = cleanDate(r.dateEnd   || r.date_end  || '');
 
-        // Title
-        const title     = safeText(r.title || r.event_name || '');
+        // ── Time — keep EXACTLY as plain string HH:MM, never convert ─────
+        // rawStr() preserves "09:00", "14:30", "" — no HTML stripping,
+        // no Date() conversion, no timezone shift
+        const startTime = rawStr(r.startTime || r.start_time || '');
+        const endTime   = rawStr(r.endTime   || r.end_time   || '');
+        const timezone  = safeText(r.timezone || '');
 
-        // Type — allow ANY string, never filtered
-        const type      = safeText(r.type || r.event_type || '');
+        // ── Text fields ───────────────────────────────────────────────────
+        const title       = safeText(r.title       || r.event_name    || '');
+        const image       = rawStr(r.image         || r.image_url     || '');  // URL: keep as-is
+        const artists     = safeText(r.artists     || '');
+        const country     = safeText(r.country     || '');
+        const city        = safeText(r.city        || '');
+        const location    = safeText(r.location    || r.location_name || '');
+        const description = rawStr(r.description  || '');  // keep formatting
+        const type        = safeText(r.type        || r.event_type    || '');
+        const note        = safeText(r.note        || '');
+        const tv          = safeText(r.tv          || r.tv_channel    || '');
+        const map         = r.map || r.map_embed   || '';  // HTML allowed (iframe embed)
 
-        // Location
-        const location  = safeText(r.location || r.location_name || '');
-
-        // Description
-        const description = safeText(r.description || '');
-
-        // Image — URL, keep as-is
-        const image     = safeText(r.image || r.image_url || '');
-
-        // Map embed — allowed to have HTML (iframe)
-        const map       = r.map || r.map_embed || '';
-
-        // Time fields (full schema support)
-        const startTime = safeText(r.startTime || r.start_time || '');
-        const endTime   = safeText(r.endTime   || r.end_time   || '');
-        const timezone  = safeText(r.timezone  || '');
-
-        // Artist fields (full schema support)
-        const artists   = safeText(r.artists || '');
-
-        // Social links
-        const youtube   = safeText(r.youtube   || r.youtube_link   || '');
-        const instagram = safeText(r.instagram || r.instagram_link || '');
-        const facebook  = safeText(r.facebook  || r.facebook_link  || '');
-        const x         = safeText(r.x         || r.x_link         || '');
-        const tiktok    = safeText(r.tiktok    || r.tiktok_link    || '');
-        const website   = safeText(r.website   || '');
-        const whatsapp  = safeText(r.whatsapp  || r.whatsapp_link  || '');
-        const shopee    = safeText(r.shopee    || r.shopee_link    || '');
-        const live      = safeText(r.live      || r.live_link      || '');
-        const download  = safeText(r.download  || r.file_link      || '');
-
-        const note      = safeText(r.note || '');
-        const tv        = safeText(r.tv   || r.tv_channel || '');
-        const country   = safeText(r.country || '');
-        const city      = safeText(r.city    || '');
+        // ── Social links — URLs kept as-is ────────────────────────────────
+        const youtube   = rawStr(r.youtube   || r.youtube_link   || '');
+        const instagram = rawStr(r.instagram || r.instagram_link || '');
+        const facebook  = rawStr(r.facebook  || r.facebook_link  || '');
+        const x         = rawStr(r.x         || r.x_link         || '');
+        const tiktok    = rawStr(r.tiktok    || r.tiktok_link    || '');
+        const website   = rawStr(r.website   || '');
+        const whatsapp  = rawStr(r.whatsapp  || r.whatsapp_link  || '');
+        const shopee    = rawStr(r.shopee    || r.shopee_link    || '');
+        const live      = rawStr(r.live      || r.live_link      || '');
+        const download  = rawStr(r.download  || r.file_link      || '');
 
         const ev = {
           __backendId: r.id || r.__backendId || String(i),
-          status,
+          // ── Core fields in exact schema order ──
+          dateStart, dateEnd, startTime, endTime,
           title, image, artists,
-          dateStart, dateEnd, startTime, endTime, timezone,
           country, city, location, description,
-          type, note, tv, map,
-          website, youtube, instagram, facebook, tiktok, x,
-          whatsapp, shopee, live, download
+          type, note, tv, map, status,
+          timezone,
+          youtube, instagram, facebook, tiktok, x,
+          website, whatsapp, shopee, live, download
         };
 
-        console.log(`Row ${i}:`, { title, dateStart, status, type });
+        console.log(`Row ${i}:`, { title, dateStart, startTime, endTime, status });
         return ev;
       });
 
@@ -1142,9 +1129,10 @@ function getFullDateDisplay(dateStr) {
 // Auto-hide disabled — all events show on public page regardless of time
 function isEventAutoHidden(ev) { return false; }
 function isEventPast(ev) {
+  // Time is now a free-text string ("18:00 GMT+7", "6 PM", etc.) — cannot
+  // be safely concatenated into Date(). Compare by date only (end of day).
   if (!ev.dateStart) return false;
-  const endTime = ev.endTime || ev.startTime || '23:59';
-  return new Date(ev.dateStart+'T'+endTime) < new Date();
+  return new Date(ev.dateStart + 'T23:59:59') < new Date();
 }
 
 const SOCIAL_ICONS = {
@@ -1271,19 +1259,16 @@ function createCard(ev) {
     ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" onerror="this.parentElement.remove();" loading="lazy">${buildDateBadge(ev, color)}</div>`
     : (ev.dateStart ? `<div style="position:relative;height:0;">${buildDateBadge(ev, color)}</div>` : '');
 
-  // Rule 3-4: date row only if date exists; time+timezone only if time exists
-  const rawTz = (ev.timezone||'').trim();
-  const validTz = /^GMT[+-]\d{1,2}$/.test(rawTz) ? rawTz : '';
-  const tzText = validTz ? ` (${validTz})` : '';
-
+  // Date row — only if date exists
   const metaItems = [];
   if (ev.dateStart) {
     const dateStr = getMonthDisplay(ev.dateStart) + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – '+getMonthDisplay(ev.dateEnd) : '');
     metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${dateStr}</div>`);
   }
-  // Rule 5: timezone only after time, never alone
+  // Time — show exactly as typed, no conversion, no timezone append
   if (ev.startTime) {
-    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.startTime}${ev.endTime?' – '+ev.endTime:''}${tzText}</span></div>`);
+    const timeStr = ev.startTime + (ev.endTime ? ' – ' + ev.endTime : '');
+    metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${escHtml(timeStr)}</span></div>`);
   }
   // Rule 6: location only if exists — filter out any GMT values accidentally stored in location fields
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
@@ -1361,16 +1346,17 @@ function openDetailModal(id) {
   document.getElementById('detail-title').textContent = ev.title;
 
   // Build meta rows — each only if data exists
-  const rawTzD = (ev.timezone||'').trim();
-  const validTzD = /^GMT[+-]\d{1,2}$/.test(rawTzD) ? rawTzD : '';
-  const tzInline = validTzD ? ` (${validTzD})` : '';
-  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
+  const hasHtmlDetail = v => !!v && /<[a-z][\s\S]*>/i.test(v);
+  const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !hasHtmlDetail(x));
 
   const metaRows = [];
   if (ev.dateStart) metaRows.push(`<div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.dateStart)}</div>`);
   if (ev.dateStart) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="calendar" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${getFullDateDisplay(ev.dateStart)}${ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + getFullDateDisplay(ev.dateEnd) : ''}</span></div>`);
-  // Time+timezone: only if time exists; timezone never alone
-  if (ev.startTime) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.startTime}${ev.endTime ? ' – ' + ev.endTime : ''}${tzInline}</span></div>`);
+  // Time — show exactly as typed, no conversion, no timezone dropdown append
+  if (ev.startTime) {
+    const timeStr = ev.startTime + (ev.endTime ? ' – ' + ev.endTime : '');
+    metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="clock" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${escHtml(timeStr)}</span></div>`);
+  }
   if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="map-pin" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
   if (ev.type) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><i data-lucide="tag" style="width:15px;height:15px;stroke-width:2;color:#9ca3af;flex-shrink:0;"></i><span>${ev.type}</span></div>`);
   if (ev.tv) metaRows.push(`<div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;color:#374151;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="flex-shrink:0;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg><span style="font-weight:600;">${escHtml(ev.tv)}</span></div>`);
@@ -1584,13 +1570,12 @@ function clearForm(){const f=document.getElementById('event-form');if(f)f.reset(
 function fillForm(ev) {
   // Strict schema: input id = 'ev-' + schemaKey
   const set = (key, val) => { const el = document.getElementById('ev-' + key); if (el) el.value = val || ''; };
-  set('title',       ev.title);
-  set('image',       ev.image);
   set('dateStart',   ev.dateStart);
   set('dateEnd',     ev.dateEnd);
-  set('startTime',   ev.startTime);
-  set('endTime',     ev.endTime);
-  set('timezone',    ev.timezone);
+  set('startTime',   ev.startTime || '');   // free-text string — fill exactly as stored
+  set('endTime',     ev.endTime   || '');   // free-text string — fill exactly as stored
+  set('title',       ev.title);
+  set('image',       ev.image);
   set('country',     ev.country);
   set('city',        ev.city);
   set('location',    ev.location);
@@ -1599,6 +1584,8 @@ function fillForm(ev) {
   set('note',        ev.note);
   set('tv',          ev.tv);
   set('map',         ev.map);
+  set('status',      ev.status);
+  // timezone dropdown removed — timezone is now included in the time string
   set('youtube',     ev.youtube);
   set('instagram',   ev.instagram);
   set('facebook',    ev.facebook);
@@ -1616,18 +1603,17 @@ function fillForm(ev) {
 // Read a form field by schema key (id = 'ev-' + key)
 function fv(key) { const el = document.getElementById('ev-' + key); return el ? el.value.trim() : ''; }
 
-// Build strict schema object from form
+// Build strict schema object from form — keys match COLS_EVENTS exactly
 function readFormSchema() {
   const artists = [...document.querySelectorAll('.artist-check:checked')].map(c => c.value);
   return {
+    dateStart:   fv('dateStart'),
+    dateEnd:     fv('dateEnd'),
+    startTime:   fv('startTime'),   // free-text — saved exactly as typed, e.g. "18:00 GMT+7"
+    endTime:     fv('endTime'),     // free-text — saved exactly as typed, e.g. "21:00 GMT+7"
     title:       fv('title'),
     image:       fv('image'),
     artists:     artists.join(','),
-    dateStart:   fv('dateStart'),
-    dateEnd:     fv('dateEnd'),
-    startTime:   fv('startTime'),
-    endTime:     fv('endTime'),
-    timezone:    fv('timezone'),
     country:     fv('country'),
     city:        fv('city'),
     location:    fv('location'),
@@ -1636,6 +1622,8 @@ function readFormSchema() {
     note:        fv('note'),
     tv:          fv('tv'),
     map:         fv('map'),
+    status:      fv('status'),
+    timezone:    '',                // timezone dropdown removed — include timezone in time string
     youtube:     fv('youtube'),
     instagram:   fv('instagram'),
     facebook:    fv('facebook'),
@@ -1653,14 +1641,13 @@ function getFormPreviewData() {
   const d = readFormSchema();
   return {
     __backendId: '__preview__',
-    title:       d.title || 'Event Name',
-    image:       d.image,
-    artists:     d.artists,
     dateStart:   d.dateStart,
     dateEnd:     d.dateEnd,
     startTime:   d.startTime,
     endTime:     d.endTime,
-    timezone:    d.timezone,
+    title:       d.title || 'Event Name',
+    image:       d.image,
+    artists:     d.artists,
     country:     d.country,
     city:        d.city,
     location:    d.location,
@@ -1669,6 +1656,8 @@ function getFormPreviewData() {
     note:        d.note,
     tv:          d.tv,
     map:         d.map,
+    status:      d.status,
+    timezone:    d.timezone,
     youtube:     d.youtube,
     instagram:   d.instagram,
     facebook:    d.facebook,
@@ -1708,16 +1697,15 @@ async function handleEventFormSubmit() {
     return; // stay open — do NOT close
   }
 
-  // Build strict payload
+  // Build payload — keys MUST match COLS_EVENTS column names exactly
   const payload = {
+    dateStart:   schema.dateStart,
+    dateEnd:     schema.dateEnd,
+    startTime:   schema.startTime,   // plain HH:MM string, e.g. "09:00" or ""
+    endTime:     schema.endTime,     // plain HH:MM string, e.g. "18:00" or ""
     title:       schema.title,
     image:       schema.image,
     artists:     schema.artists,
-    dateStart:   schema.dateStart,
-    dateEnd:     schema.dateEnd,
-    startTime:   schema.startTime,
-    endTime:     schema.endTime,
-    timezone:    schema.timezone,
     country:     schema.country,
     city:        schema.city,
     location:    schema.location,
@@ -1726,6 +1714,8 @@ async function handleEventFormSubmit() {
     note:        schema.note,
     tv:          schema.tv,
     map:         schema.map,
+    status:      schema.status,
+    timezone:    schema.timezone,
     youtube:     schema.youtube,
     instagram:   schema.instagram,
     facebook:    schema.facebook,
