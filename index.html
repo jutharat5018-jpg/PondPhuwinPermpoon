@@ -1539,6 +1539,8 @@ async function adminRefresh() {
   }
   showToast('Refreshed from Sheet ✓');
 }
+
+function renderAdminList() {
   const list=document.getElementById('admin-events-list');
   const noEv=document.getElementById('admin-no-events');
   const limitWarn=document.getElementById('admin-limit-warn');
