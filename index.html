@@ -766,6 +766,13 @@
       <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">LINKS</p>
       <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
      </div>
+     <div id="detail-ticket-wrap" style="display:none;margin-bottom:1.25rem;">
+      <p style="font-size:0.75rem;font-weight:700;color:#f97316;letter-spacing:0.08em;margin-bottom:0.75rem;">
+       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="display:inline;vertical-align:-2px;margin-right:4px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+       TICKETS
+      </p>
+      <div id="detail-ticket-btns" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+     </div>
      <div id="detail-map-wrap" style="display:none;margin-bottom:1.25rem;">
       <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">MAP</p>
       <div id="detail-map" class="map-embed-wrap"></div>
@@ -936,6 +943,45 @@
        <div>
         <label class="form-label" for="ev-download">Download</label>
         <input class="form-input" id="ev-download" name="download" placeholder="https://...">
+       </div>
+      </div>
+
+      <!-- ── Ticket Links ── -->
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f97316;margin-bottom:0.4rem;">
+       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:4px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+       Ticket Links
+      </p>
+      <p style="font-size:0.72rem;color:#9ca3af;margin-bottom:0.85rem;">ThaiTicketMajor, AllTicket, Ticketmaster, Eventpop, LiveNation ฯลฯ — ถ้าใส่จะแสดงปุ่ม Buy Ticket หน้า event</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+       <div>
+        <label class="form-label" for="ev-ticket1">
+         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:3px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+         Ticket Link 1 <span style="font-size:0.7rem;font-weight:600;background:#fff7ed;color:#c2410c;padding:1px 6px;border-radius:4px;margin-left:3px;">Main</span>
+        </label>
+        <input class="form-input" id="ev-ticket1" name="ticket1" placeholder="https://www.thaiticketmajor.com/...">
+       </div>
+       <div>
+        <label class="form-label" for="ev-ticket2">Ticket Link 2 <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-ticket2" name="ticket2" placeholder="https://www.allticket.com/...">
+       </div>
+       <div>
+        <label class="form-label" for="ev-ticket3">Ticket Link 3 <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-ticket3" name="ticket3" placeholder="https://www.eventpop.me/...">
+       </div>
+       <div>
+        <label class="form-label" for="ev-ticket-live">
+         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#ef4444"/></svg>
+         Live Stream Ticket <span style="font-weight:400;color:#9ca3af;">(optional)</span>
+        </label>
+        <input class="form-input" id="ev-ticket-live" name="ticketLive" placeholder="https://...">
+       </div>
+       <div>
+        <label class="form-label" for="ev-ticket-fanclub">
+         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:3px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+         Fanclub Ticket <span style="font-weight:400;color:#9ca3af;">(optional)</span>
+        </label>
+        <input class="form-input" id="ev-ticket-fanclub" name="ticketFanclub" placeholder="https://...">
        </div>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;">
@@ -1234,6 +1280,11 @@ function processEvents(raw) {
     shopee:      rawStr(r.shopee    || r.shopee_link    || ''),
     live:        rawStr(r.live      || r.live_link      || ''),
     download:    rawStr(r.download  || r.file_link      || ''),
+    ticket1:     rawStr(r.ticket1   || r.ticket_link1   || ''),
+    ticket2:     rawStr(r.ticket2   || r.ticket_link2   || ''),
+    ticket3:     rawStr(r.ticket3   || r.ticket_link3   || ''),
+    ticketLive:  rawStr(r.ticketLive  || r.ticket_live  || ''),
+    ticketFanclub: rawStr(r.ticketFanclub || r.ticket_fanclub || ''),
   }));
   const filtered = mapped.filter(e => e.title);
   filtered.sort((a, b) => {
@@ -1901,6 +1952,31 @@ function openDetailModal(id) {
   if (linksHtml) { linksWrap.style.display = 'block'; document.getElementById('detail-links').innerHTML = linksHtml; }
   else linksWrap.style.display = 'none';
 
+  // Ticket buttons
+  const ticketWrap = document.getElementById('detail-ticket-wrap');
+  const ticketBtns = document.getElementById('detail-ticket-btns');
+  const tickets = [
+    { url: ev.ticket1,       label: 'Buy Ticket',         icon: '🎟', style: 'background:#f97316;color:#fff;border-color:#ea6500;' },
+    { url: ev.ticket2,       label: 'Ticket Info',        icon: '🎫', style: 'background:#fff7ed;color:#c2410c;border-color:#fed7aa;' },
+    { url: ev.ticket3,       label: 'Booking',            icon: '📋', style: 'background:#fff7ed;color:#c2410c;border-color:#fed7aa;' },
+    { url: ev.ticketLive,    label: 'Live Stream Ticket', icon: '📡', style: 'background:#fef2f2;color:#dc2626;border-color:#fca5a5;' },
+    { url: ev.ticketFanclub, label: 'Fanclub Ticket',     icon: '💜', style: 'background:#faf5ff;color:#7e22ce;border-color:#ddd6fe;' },
+  ].filter(t => isValidUrl(t.url));
+
+  if (tickets.length > 0) {
+    ticketWrap.style.display = 'block';
+    ticketBtns.innerHTML = tickets.map(t =>
+      `<button type="button" onclick="window.open('${t.url.replace(/'/g,"\\'")}','_blank','noopener,noreferrer')"
+        style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;border:1.5px solid;font-size:0.85rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;${t.style}"
+        onmouseenter="this.style.opacity='0.85'" onmouseleave="this.style.opacity='1'">
+        <span style="font-size:1rem;">${t.icon}</span>${t.label}
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="opacity:0.7;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </button>`
+    ).join('');
+  } else {
+    ticketWrap.style.display = 'none';
+  }
+
   // Lazy map — only inject iframe when modal opens, never on page load
   const mapWrap = document.getElementById('detail-map-wrap');
   if (ev.map && ev.map.trim()) {
@@ -2413,6 +2489,8 @@ function fillForm(ev) {
   set('facebook',ev.facebook); set('x',ev.x); set('tiktok',ev.tiktok);
   set('website',ev.website); set('whatsapp',ev.whatsapp);
   set('shopee',ev.shopee); set('live',ev.live); set('download',ev.download);
+  set('ticket1',ev.ticket1); set('ticket2',ev.ticket2); set('ticket3',ev.ticket3);
+  set('ticket-live',ev.ticketLive); set('ticket-fanclub',ev.ticketFanclub);
   const arr = ev.artists ? ev.artists.split(',').map(a=>a.trim()) : [];
   document.querySelectorAll('.artist-check').forEach(c => { c.checked = arr.includes(c.value); });
 }
@@ -2429,7 +2507,9 @@ function readFormSchema() {
     timezone:'',
     youtube:fv('youtube'), instagram:fv('instagram'), facebook:fv('facebook'),
     x:fv('x'), tiktok:fv('tiktok'), website:fv('website'),
-    whatsapp:fv('whatsapp'), shopee:fv('shopee'), live:fv('live'), download:fv('download')
+    whatsapp:fv('whatsapp'), shopee:fv('shopee'), live:fv('live'), download:fv('download'),
+    ticket1:fv('ticket1'), ticket2:fv('ticket2'), ticket3:fv('ticket3'),
+    ticketLive:fv('ticket-live'), ticketFanclub:fv('ticket-fanclub')
   };
 }
 function getFormPreviewData() {
@@ -2463,7 +2543,9 @@ async function handleEventFormSubmit() {
     tv:schema.tv, map:schema.map, timezone:schema.timezone,
     youtube:schema.youtube, instagram:schema.instagram, facebook:schema.facebook,
     x:schema.x, tiktok:schema.tiktok, website:schema.website,
-    whatsapp:schema.whatsapp, shopee:schema.shopee, live:schema.live, download:schema.download
+    whatsapp:schema.whatsapp, shopee:schema.shopee, live:schema.live, download:schema.download,
+    ticket1:schema.ticket1, ticket2:schema.ticket2, ticket3:schema.ticket3,
+    ticketLive:schema.ticketLive, ticketFanclub:schema.ticketFanclub
   };
   const btn  = document.getElementById('form-submit-btn');
   const txt  = document.getElementById('form-submit-text');
