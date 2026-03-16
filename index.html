@@ -493,13 +493,11 @@
         <input class="form-input" id="ev-dateStart" name="dateStart" type="date" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
        </div>
        <div>
-        <label class="form-label" for="ev-status" style="font-weight:700;">Status <span style="color:#ec4899;">*</span></label>
-        <select class="form-input" id="ev-status" name="status" style="appearance:auto;border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
-         <option value="upcoming">upcoming</option>
-         <option value="past">past</option>
-         <option value="cancelled">cancelled</option>
-         <option value="">— not set —</option>
-        </select>
+        <label class="form-label" style="font-weight:700;color:#9ca3af;">Status <span style="font-weight:400;font-size:0.78rem;">(auto)</span></label>
+        <div style="padding:0.6rem 0.95rem;border-radius:8px;background:#f9fafb;border:1px solid #e5e7eb;font-size:0.82rem;color:#6b7280;display:flex;align-items:center;gap:6px;">
+         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+         Past if date &lt; today · Upcoming if date ≥ today
+        </div>
        </div>
 
        <div>
