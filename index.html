@@ -517,7 +517,7 @@ let editingEventId = null;
 let deleteConfirmIds = new Set();
 const ADMIN_PASS = 'ppp1257pondphuwinpp';
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwefVWKxQSZ49mh95oWVcWbljAj_jos3jfpyVzsIfz0jA4qBy4_8--uka_EL4evTYRRog/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzc5_sUbh_KX7VndMpR2E9TFX-YW1c-XEPie1e5lunCcUeKjxEmjMl3FLCp1DKT9LuY/exec';
 let apiLoaded = false;
 
 function getLiveIcon(url) {
@@ -688,36 +688,9 @@ async function saveBirthday() {
 }
 
 async function apiRequest(payload) {
-  return new Promise((resolve, reject) => {
-    const cbName = '__pppCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-    let scriptEl = null;
-    const cleanup = () => {
-      delete window[cbName];
-      if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl);
-    };
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('API timeout'));
-    }, 12000);
-    window[cbName] = function(data) {
-      clearTimeout(timeout);
-      cleanup();
-      resolve(data);
-    };
-    const action = payload.action;
-    let url = API_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cbName;
-    if (payload.id)          url += '&id='   + encodeURIComponent(payload.id);
-    if (payload.event)       url += '&data=' + encodeURIComponent(JSON.stringify(payload.event));
-    if (payload.birthday)    url += '&data=' + encodeURIComponent(JSON.stringify(payload.birthday));
-    if (payload.anniversary) url += '&data=' + encodeURIComponent(JSON.stringify(payload.anniversary));
-    scriptEl = document.createElement('script');
-    scriptEl.onerror = function() {
-      clearTimeout(timeout); cleanup();
-      reject(new Error('Script load failed'));
-    };
-    scriptEl.src = url;
-    document.head.appendChild(scriptEl);
-  });
+  const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload) });
+  if (!res.ok) throw new Error('API error '+res.status);
+  return await res.json();
 }
 
 async function loadEventsFromSheets() {
