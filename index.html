@@ -831,22 +831,36 @@ async function loadEventsFromSheets(isRetry) {
     if (data.status === 'ok') {
       allEvents = (data.events||[]).map(r => ({
         __backendId: r.id||r.__backendId||'',
-        title: r.title||'', image: r.image||'',
-        artists: r.artists||'', date: r.date||'',
-        start_time: r.start_time||'', end_time: r.end_time||'',
-        location: r.location||'', city: r.city||'', country: r.country||'',
-        description: r.description||'', youtube: r.youtube||'',
-        instagram: r.instagram||'', facebook: r.facebook||'',
-        x: r.x||'', tiktok: r.tiktok||'',
-        website: r.website||'',
-        whatsapp: r.whatsapp||'', shopee: r.shopee||'',
-        live: r.live||'', download: r.download||'',
-        type: r.type||'', note: r.note||'',
-        map_embed: r.map_embed||'',
-        date_end: r.date_end||'',
-        timezone: r.timezone||'',
-        tv: r.tv||''
+        // title: accept new 'title' OR old 'event_name'
+        title:       r.title||r.event_name||'',
+        image:       r.image||r.image_url||'',
+        artists:     r.artists||'',
+        date:        r.date||'',
+        start_time:  r.start_time||'',
+        end_time:    r.end_time||'',
+        timezone:    r.timezone||'',
+        location:    r.location||r.location_name||'',
+        city:        r.city||'',
+        country:     r.country||'',
+        description: r.description||'',
+        type:        r.type||r.event_type||'',
+        note:        r.note||'',
+        tv:          r.tv||r.tv_channel||'',
+        youtube:     r.youtube||r.youtube_link||'',
+        instagram:   r.instagram||r.instagram_link||'',
+        facebook:    r.facebook||r.facebook_link||'',
+        x:           r.x||r.x_link||'',
+        tiktok:      r.tiktok||r.tiktok_link||'',
+        website:     r.website||'',
+        whatsapp:    r.whatsapp||r.whatsapp_link||'',
+        shopee:      r.shopee||r.shopee_link||'',
+        live:        r.live||r.live_link||'',
+        download:    r.download||r.file_link||'',
+        map_embed:   r.map_embed||'',
+        date_end:    r.date_end||''
       }));
+      // Filter: must have a title
+      allEvents = allEvents.filter(e => e.title && e.title.trim());
       allEvents.sort((a,b) => (a.date+a.start_time).localeCompare(b.date+b.start_time));
       apiLoaded = true;
       hideConnectionError();
@@ -1455,6 +1469,7 @@ async function handleEventFormSubmit(e) {
   const ca=[...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
   const gv=id=>(document.getElementById(id)?document.getElementById(id).value.trim():'');
   const data = {
+    // New strict field names
     title:name, image:gv('f-image'), artists:ca.join(','), date,
     start_time:gv('f-start'), end_time:gv('f-end'), timezone:gv('f-timezone'),
     country:gv('f-country'),
@@ -1462,7 +1477,14 @@ async function handleEventFormSubmit(e) {
     youtube:gv('f-yt'), instagram:gv('f-ig'), facebook:gv('f-fb'),
     x:gv('f-x'), tiktok:gv('f-tiktok'), website:gv('f-website'), whatsapp:gv('f-whatsapp'),
     shopee:gv('f-shopee'), live:gv('f-live'), download:gv('f-file'),
-    type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), tv:gv('f-tv')
+    type:gv('f-type'), note:gv('f-note'), map_embed:gv('f-map'), date_end:gv('f-date-end'), tv:gv('f-tv'),
+    // Backward-compatible aliases for existing Sheets that still have old column headers
+    event_name:name, image_url:gv('f-image'), location_name:gv('f-location'),
+    event_type:gv('f-type'), tv_channel:gv('f-tv'),
+    youtube_link:gv('f-yt'), instagram_link:gv('f-ig'), facebook_link:gv('f-fb'),
+    x_link:gv('f-x'), tiktok_link:gv('f-tiktok'),
+    whatsapp_link:gv('f-whatsapp'), shopee_link:gv('f-shopee'),
+    live_link:gv('f-live'), file_link:gv('f-file')
   };
   const btn=document.getElementById('form-submit-btn');
   const txt=document.getElementById('form-submit-text');
