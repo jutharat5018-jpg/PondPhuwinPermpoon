@@ -1142,9 +1142,7 @@ async function deleteAnniversaryInSheets(id) {
   if (res.status !== 'ok') throw new Error(res.message||'Delete failed');
 }
 
-(async () => {
-  await Promise.all([ loadEventsFromSheets(), loadBirthdaysFromSheets(), loadAnniversariesFromSheets() ]);
-})();
+// load triggered inside DOMContentLoaded below
 
 try {
   if (window.elementSdk) {
@@ -2251,6 +2249,14 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
   debounceLucide();
+
+  // ── Load all data — รันหลัง DOM พร้อมแล้วเสมอ ──────────────────────────
+  homeFilter = 'all';
+  Promise.all([
+    loadEventsFromSheets(),
+    loadBirthdaysFromSheets(),
+    loadAnniversariesFromSheets()
+  ]);
 });
   </script>
  </body>
