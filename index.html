@@ -160,6 +160,18 @@
       <p style="color:#6b7280;font-size:0.9rem;">Track upcoming concerts, fan meets, and events.</p>
      </div>
      <div id="bday-banners" style="display:none;flex-direction:column;gap:8px;margin-bottom:1.5rem;"></div>
+     <!-- FILTER BAR -->
+     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;">
+      <span style="font-size:0.72rem;font-weight:700;color:#9ca3af;letter-spacing:0.1em;text-transform:uppercase;margin-right:4px;">FILTER</span>
+      <button class="artist-filter-btn" data-artist="all" onclick="filterHome('all')"
+        style="padding:5px 16px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
+      <button class="artist-filter-btn" data-artist="Pond" onclick="filterHome('Pond')"
+        style="padding:5px 16px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
+      <button class="artist-filter-btn" data-artist="Phuwin" onclick="filterHome('Phuwin')"
+        style="padding:5px 16px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
+      <button class="artist-filter-btn" data-artist="Permpoon" onclick="filterHome('Permpoon')"
+        style="padding:5px 16px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
+     </div>
      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <h2 class="section-header">Upcoming Events</h2>
       <span id="events-count" style="font-size:0.8rem;color:#9ca3af;"></span>
@@ -390,17 +402,18 @@
     </div>
     <div style="padding:0 1.5rem 1.5rem;">
      <form id="event-form" novalidate>
+
+      <!-- ── ข้อมูลหลัก ── -->
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">ข้อมูลหลัก</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-title">Event Name</label>
-        <input class="form-input" id="ev-title" name="title" placeholder="e.g. Pond Concert Night">
+        <label class="form-label" for="ev-title" style="font-weight:700;">Event Name <span style="color:#ec4899;">*</span></label>
+        <input class="form-input" id="ev-title" name="title" placeholder="e.g. Pond Concert Night" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
        </div>
+
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-image">Image URL</label>
-        <input class="form-input" id="ev-image" name="image" placeholder="https://...jpg">
-       </div>
-       <div style="grid-column:1/-1;">
-        <label class="form-label" style="margin-bottom:0.5rem;">Artist(s) (optional)</label>
+        <label class="form-label" style="margin-bottom:0.5rem;font-weight:700;">Artist(s) <span style="color:#ec4899;">*</span></label>
         <div style="display:flex;flex-wrap:wrap;gap:8px;">
          <input type="checkbox" class="artist-check" id="ac-pond" value="Pond">
          <label class="artist-check-label" for="ac-pond">Pond</label>
@@ -410,64 +423,83 @@
          <label class="artist-check-label" for="ac-permpoon">Permpoon</label>
         </div>
        </div>
+
        <div>
-        <label class="form-label" for="ev-dateStart">Date Start</label>
-        <input class="form-input" id="ev-dateStart" name="dateStart" type="date">
-       </div>
-       <div>
-        <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
-        <input class="form-input" id="ev-dateEnd" name="dateEnd" type="date">
-       </div>
-       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:1/-1;">
-        <div>
-         <label class="form-label" for="ev-startTime">Start Time</label>
-         <input class="form-input" id="ev-startTime" name="startTime" type="text" placeholder="e.g. 18:00 GMT+7, 6 PM, 20:30 JST">
-        </div>
-        <div>
-         <label class="form-label" for="ev-endTime">End Time</label>
-         <input class="form-input" id="ev-endTime" name="endTime" type="text" placeholder="e.g. 21:00 GMT+7, 9 PM">
-        </div>
+        <label class="form-label" for="ev-dateStart" style="font-weight:700;">Date Start <span style="color:#ec4899;">*</span></label>
+        <input class="form-input" id="ev-dateStart" name="dateStart" type="date" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
        </div>
        <div>
-        <label class="form-label" for="ev-country">Country</label>
-        <input class="form-input" id="ev-country" name="country" placeholder="e.g. Thailand">
-       </div>
-       <div>
-        <label class="form-label" for="ev-city">City</label>
-        <input class="form-input" id="ev-city" name="city" placeholder="e.g. Bangkok">
-       </div>
-       <div>
-        <label class="form-label" for="ev-location">Location Name</label>
-        <input class="form-input" id="ev-location" name="location" placeholder="e.g. Impact Arena">
-       </div>
-       <div>
-        <label class="form-label" for="ev-type">Event Type</label>
-        <input class="form-input" id="ev-type" name="type" placeholder="e.g. Fanmeet, Concert, Live, Online">
-       </div>
-       <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-description">Description</label>
-        <textarea class="form-input" id="ev-description" name="description" rows="3" placeholder="Event details..."></textarea>
-       </div>
-       <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
-        <input class="form-input" id="ev-note" name="note" placeholder="e.g. live on YouTube, time not confirmed">
-       </div>
-       <div>
-        <label class="form-label" for="ev-status">Status</label>
-        <select class="form-input" id="ev-status" name="status" style="appearance:auto;">
+        <label class="form-label" for="ev-status" style="font-weight:700;">Status <span style="color:#ec4899;">*</span></label>
+        <select class="form-input" id="ev-status" name="status" style="appearance:auto;border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
          <option value="upcoming">upcoming</option>
          <option value="past">past</option>
          <option value="cancelled">cancelled</option>
          <option value="">— not set —</option>
         </select>
        </div>
+
+       <div>
+        <label class="form-label" for="ev-startTime" style="font-weight:700;">Start Time <span style="color:#ec4899;">*</span></label>
+        <input class="form-input" id="ev-startTime" name="startTime" type="text" placeholder="e.g. 18:00 GMT+7" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
+       </div>
+       <div>
+        <label class="form-label" for="ev-endTime">End Time <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-endTime" name="endTime" type="text" placeholder="e.g. 21:00 GMT+7">
+       </div>
+
+      </div>
+
+      <!-- ── รายละเอียด ── -->
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">รายละเอียด <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(optional)</span></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-tv" style="display:flex;align-items:center;gap:5px;">
-         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:#6b7280;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
+        <label class="form-label" for="ev-image">Image URL <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-image" name="image" placeholder="https://...jpg">
+       </div>
+
+       <div>
+        <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
+        <input class="form-input" id="ev-dateEnd" name="dateEnd" type="date">
+       </div>
+       <div>
+        <label class="form-label" for="ev-type">Event Type <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-type" name="type" placeholder="e.g. Fanmeet, Concert, Live">
+       </div>
+
+       <div>
+        <label class="form-label" for="ev-country">Country <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-country" name="country" placeholder="e.g. Thailand">
+       </div>
+       <div>
+        <label class="form-label" for="ev-city">City <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-city" name="city" placeholder="e.g. Bangkok">
+       </div>
+
+       <div style="grid-column:1/-1;">
+        <label class="form-label" for="ev-location">Location Name <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-location" name="location" placeholder="e.g. Impact Arena">
+       </div>
+
+       <div style="grid-column:1/-1;">
+        <label class="form-label" for="ev-description">Description <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <textarea class="form-input" id="ev-description" name="description" rows="3" placeholder="Event details..."></textarea>
+       </div>
+
+       <div style="grid-column:1/-1;">
+        <label class="form-label" for="ev-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+        <input class="form-input" id="ev-note" name="note" placeholder="e.g. live on YouTube, time not confirmed">
+       </div>
+
+       <div style="grid-column:1/-1;">
+        <label class="form-label" for="ev-tv">
+         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-2px;margin-right:3px;color:#6b7280;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
          TV Channel <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
         <input class="form-input" id="ev-tv" name="tv" placeholder="e.g. GMM25, ONE31, PPTV, NHK, Netflix...">
        </div>
+
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-map">
          <svg width="13" height="13" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:3px;" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -475,9 +507,12 @@
         </label>
         <textarea class="form-input" id="ev-map" name="map" rows="2" placeholder='วาง iframe embed จาก Google Maps'></textarea>
        </div>
+
       </div>
 
-      <p style="font-size:0.8rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;margin-bottom:0.75rem;">LINKS (optional)</p>
+      <!-- ── Links ── -->
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Links <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(optional ทั้งหมด)</span></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
        <div>
         <label class="form-label" for="ev-youtube">YouTube</label>
@@ -1200,7 +1235,13 @@ function renderHome() {
   renderBirthdayBanners();
 
   // Show ALL events in allEvents — already filtered to upcoming by loadEventsFromSheets
-  const events = allEvents.filter(ev => ev.title && ev.title.trim());
+  // Apply artist filter if set
+  const events = allEvents.filter(ev => {
+    if (!ev.title || !ev.title.trim()) return false;
+    if (homeFilter === 'all') return true;
+    if (!ev.artists) return false;
+    return ev.artists.split(',').map(a => a.trim()).includes(homeFilter);
+  });
 
 
 
