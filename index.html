@@ -309,31 +309,27 @@
    </div>
   </div>
 
-  <!-- DETAIL MODAL -->
-  <div class="modal-backdrop" id="detail-modal" style="display:none;" onclick="closeDetailModalBackdrop(event)">
-   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:680px;width:100%;background:#fff;border-radius:20px;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
-    <div style="position:relative;line-height:0;margin:0;padding:0;">
-     <div id="detail-img-wrap"></div>
-     <button onclick="closeDetailModal()" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);border:none;border-radius:99px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
-      <i data-lucide="x" style="width:16px;height:16px;color:#fff;stroke-width:2.5;"></i>
-     </button>
+  <!-- DETAIL PAGE -->
+  <div class="page" id="page-detail">
+   <div id="detail-img-wrap" style="width:100%;margin:0;padding:0;line-height:0;"></div>
+   <div style="max-width:680px;padding:1.5rem 1.25rem 3rem;margin:0 auto;width:100%;box-sizing:border-box;">
+    <button onclick="navigateBack()" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-size:0.85rem;font-weight:600;color:#9ca3af;padding:0;margin-bottom:1.25rem;">
+     <i data-lucide="arrow-left" style="width:15px;height:15px;stroke-width:2.5;"></i> Back
+    </button>
+    <div id="detail-artist-badge" style="margin-bottom:0.6rem;"></div>
+    <h1 id="detail-title" style="font-size:1.7rem;font-weight:700;letter-spacing:-0.02em;margin:0 0 1rem;line-height:1.25;"></h1>
+    <div id="detail-meta" style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;"></div>
+    <div id="detail-desc-wrap" style="display:none;margin-bottom:1.5rem;">
+     <p style="font-size:0.72rem;font-weight:700;color:#9ca3af;letter-spacing:0.1em;margin-bottom:0.5rem;text-transform:uppercase;">Description</p>
+     <p id="detail-desc" style="font-size:0.95rem;line-height:1.7;color:#374151;margin:0;"></p>
     </div>
-    <div style="padding:1.25rem;">
-     <div id="detail-artist-badge" style="margin-bottom:0.6rem;"></div>
-     <h2 id="detail-title" style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;line-height:1.3;"></h2>
-     <div id="detail-meta" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;"></div>
-     <div id="detail-desc-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.4rem;">DESCRIPTION</p>
-      <p id="detail-desc" style="font-size:0.88rem;line-height:1.6;color:#374151;"></p>
-     </div>
-     <div id="detail-map-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">MAP</p>
-      <div id="detail-map" class="map-embed-wrap"></div>
-     </div>
-     <div id="detail-links-wrap" style="display:none;">
-      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">LINKS</p>
-      <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-     </div>
+    <div id="detail-map-wrap" style="display:none;margin-bottom:1.5rem;">
+     <p style="font-size:0.72rem;font-weight:700;color:#9ca3af;letter-spacing:0.1em;margin-bottom:0.75rem;text-transform:uppercase;">Map</p>
+     <div id="detail-map" style="width:100%;border-radius:12px;overflow:hidden;"></div>
+    </div>
+    <div id="detail-links-wrap" style="display:none;">
+     <p style="font-size:0.72rem;font-weight:700;color:#9ca3af;letter-spacing:0.1em;margin-bottom:0.75rem;text-transform:uppercase;">Links</p>
+     <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
     </div>
    </div>
   </div>
@@ -517,7 +513,7 @@ let editingEventId = null;
 let deleteConfirmIds = new Set();
 const ADMIN_PASS = 'ppp1257pondphuwinpp';
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbx6zuMCUTLdCw0AoKuwDo0Kr3mS3V2ywNx-EB_wF5RPZBwUCQTXuXID7AMT1LZUGTE/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwOqV8FAzHRl4jlNTebwOqzm5Si34J8IEW8UijV2grusYeF7TcilC9Lp5E40d-1cwf5/exec';
 let apiLoaded = false;
 
 function getLiveIcon(url) {
@@ -808,7 +804,10 @@ try {
   }
 } catch(e) { console.warn('elementSdk not available:', e); }
 
+let prevPage = 'home';
+
 function navigate(page) {
+  if (page !== 'detail') prevPage = currentPage;
   currentPage = page;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -817,7 +816,12 @@ function navigate(page) {
   const navEl = document.querySelector(`.nav-link[data-page="${page}"]`);
   if (navEl) navEl.classList.add('active');
   renderCurrentPage();
+  window.scrollTo(0, 0);
   if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function navigateBack() {
+  navigate(prevPage || 'home');
 }
 
 function renderCurrentPage() {
@@ -991,9 +995,9 @@ function openDetailModal(id) {
 
   const imgWrap = document.getElementById('detail-img-wrap');
   if (ev.image_url) {
-    imgWrap.innerHTML = `<img src="${escHtml(ev.image_url)}" style="width:100%;height:380px;object-fit:cover;display:block;margin:0;padding:0;border-radius:0;vertical-align:top;" alt="${escHtml(ev.event_name)}" loading="lazy">`;
+    imgWrap.innerHTML = `<img src="${escHtml(ev.image_url)}" style="width:100%;height:420px;object-fit:cover;display:block;margin:0;padding:0;border-radius:0;" alt="${escHtml(ev.event_name)}" loading="lazy">`;
   } else {
-    imgWrap.innerHTML = `<div style="width:100%;height:280px;background:linear-gradient(135deg,#f3f4f6,#e5e7eb);display:flex;align-items:center;justify-content:center;margin:0;padding:0;"><i data-lucide="image" style="width:48px;height:48px;color:#d1d5db;stroke-width:1.5;"></i></div>`;
+    imgWrap.innerHTML = `<div style="width:100%;height:260px;background:linear-gradient(135deg,#f3f4f6,#e5e7eb);display:flex;align-items:center;justify-content:center;"><i data-lucide="image" style="width:48px;height:48px;color:#d1d5db;stroke-width:1.5;"></i></div>`;
   }
 
   document.getElementById('detail-artist-badge').innerHTML = ev.artists
@@ -1024,17 +1028,10 @@ function openDetailModal(id) {
   if (linksHtml) { linksWrap.style.display = 'block'; document.getElementById('detail-links').innerHTML = linksHtml; }
   else linksWrap.style.display = 'none';
 
-  document.getElementById('detail-modal').style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  if (typeof lucide !== 'undefined') lucide.createIcons();
+  navigate('detail');
 }
 
-function closeDetailModal() {
-  const modal = document.getElementById('detail-modal');
-  if (modal) modal.style.display = 'none';
-  document.body.style.overflow = '';
-}
-function closeDetailModalBackdrop(e) { if (e.target === document.getElementById('detail-modal')) closeDetailModal(); }
+
 
 function renderCalendar() {
   const year = calYear, month = calMonth;
