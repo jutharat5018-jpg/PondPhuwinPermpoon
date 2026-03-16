@@ -64,32 +64,37 @@
     padding: 6px 14px; border-radius: 99px;
     border: 2px solid #e5e7eb;
     font-size: 0.8rem; font-weight: 600; cursor: pointer;
-    transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+    transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
     color: #9ca3af; background: #fff; user-select: none;
-    position: relative;
   }
   /* Pond — orange */
-  label[for="ac-pond"] { border-color: #fed7aa; color: #f97316; }
-  label[for="ac-pond"]:hover { border-color: #f97316; background: #fff7ed; color: #ea6500; }
-  #ac-pond:checked + label {
-    background: #f97316; border-color: #ea6500; color: #fff;
-    box-shadow: 0 2px 10px rgba(249,115,22,0.35);
+  label.artist-check-label[for="ac-pond"] { border-color: #fed7aa; color: #f97316; }
+  label.artist-check-label[for="ac-pond"]:hover { border-color: #f97316; background: #fff7ed; }
+  #ac-pond:checked + label.artist-check-label {
+    background: #f97316 !important;
+    border-color: #ea6500 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(249,115,22,0.4);
     font-weight: 700;
   }
   /* Phuwin — slate */
-  label[for="ac-phuwin"] { border-color: #d1d5db; color: #6b7280; }
-  label[for="ac-phuwin"]:hover { border-color: #6b7280; background: #f9fafb; color: #374151; }
-  #ac-phuwin:checked + label {
-    background: #4b5563; border-color: #374151; color: #fff;
-    box-shadow: 0 2px 10px rgba(75,85,99,0.35);
+  label.artist-check-label[for="ac-phuwin"] { border-color: #d1d5db; color: #6b7280; }
+  label.artist-check-label[for="ac-phuwin"]:hover { border-color: #6b7280; background: #f9fafb; }
+  #ac-phuwin:checked + label.artist-check-label {
+    background: #4b5563 !important;
+    border-color: #374151 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(75,85,99,0.4);
     font-weight: 700;
   }
   /* Permpoon — green */
-  label[for="ac-permpoon"] { border-color: #bbf7d0; color: #22c55e; }
-  label[for="ac-permpoon"]:hover { border-color: #22c55e; background: #f0fdf4; color: #16a34a; }
-  #ac-permpoon:checked + label {
-    background: #16a34a; border-color: #15803d; color: #fff;
-    box-shadow: 0 2px 10px rgba(22,163,74,0.35);
+  label.artist-check-label[for="ac-permpoon"] { border-color: #bbf7d0; color: #16a34a; }
+  label.artist-check-label[for="ac-permpoon"]:hover { border-color: #22c55e; background: #f0fdf4; }
+  #ac-permpoon:checked + label.artist-check-label {
+    background: #16a34a !important;
+    border-color: #15803d !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(22,163,74,0.4);
     font-weight: 700;
   }
   .detail-hero { width: 100%; max-height: 520px; object-fit: contain; background: transparent; display: block; border-radius: 0; }
