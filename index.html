@@ -1112,8 +1112,8 @@ function createCard(ev) {
   if (ev.start_time) {
     metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="clock" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${ev.start_time}${ev.end_time?' – '+ev.end_time:''}${tzText}</span></div>`);
   }
-  // Rule 6: location only if exists
-  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim());
+  // Rule 6: location only if exists — filter out any GMT values accidentally stored in location fields
+  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
   if (lp.length) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="map-pin" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;"></i><span>${lp.join(', ')}</span></div>`);
   if (ev.description) metaItems.push(`<div style="font-size:0.72rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.description)}</div>`);
   if (ev.event_type) metaItems.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#6b7280;"><i data-lucide="tag" style="width:13px;height:13px;stroke-width:2;flex-shrink:0;color:#9ca3af;"></i><span>${escHtml(ev.event_type)}</span></div>`);
@@ -1190,7 +1190,7 @@ function openDetailModal(id) {
   const rawTzD = (ev.timezone||'').trim();
   const validTzD = /^GMT[+-]\d{1,2}$/.test(rawTzD) ? rawTzD : '';
   const tzInline = validTzD ? ` (${validTzD})` : '';
-  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim());
+  const lp = [ev.location_name, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()));
 
   const metaRows = [];
   if (ev.date) metaRows.push(`<div style="font-size:0.82rem;color:#9ca3af;font-weight:600;letter-spacing:0.05em;">${getMonthDisplay(ev.date)}</div>`);
