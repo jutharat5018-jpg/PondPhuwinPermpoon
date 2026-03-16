@@ -1343,8 +1343,8 @@ function buildTypePill(type, size) {
   const s = getTypeStyle(type);
   const fs = size === 'lg' ? '0.82rem' : '0.72rem';
   const pad = size === 'lg' ? '5px 12px' : '3px 9px';
-  const dot = s.dot ? \`<span style="width:6px;height:6px;border-radius:50%;background:\${s.dot};margin-right:5px;flex-shrink:0;display:inline-block;animation:pill-pulse 1.2s ease-in-out infinite;"></span>\` : '';
-  return \`<span style="display:inline-flex;align-items:center;font-size:\${fs};font-weight:700;border-radius:6px;padding:\${pad};background:\${s.bg};color:\${s.color};border:1px solid \${s.border};">\${dot}\${escHtml(type)}</span>\`;
+  const dot = s.dot ? '<span style="width:6px;height:6px;border-radius:50%;background:' + s.dot + ';margin-right:5px;flex-shrink:0;display:inline-block;animation:pill-pulse 1.2s ease-in-out infinite;"></span>' : '';
+  return '<span style="display:inline-flex;align-items:center;font-size:' + fs + ';font-weight:700;border-radius:6px;padding:' + pad + ';background:' + s.bg + ';color:' + s.color + ';border:1px solid ' + s.border + ';">' + dot + escHtml(type) + '</span>';
 }
 
 function createCard(ev) {
