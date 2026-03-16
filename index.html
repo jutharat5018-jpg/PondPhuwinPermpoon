@@ -173,12 +173,278 @@
   /* Map embed */
   .map-embed-wrap { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
+
+  /* ═══════════════════════════════════════════════════════════
+     RESPONSIVE SYSTEM — mobile-first, desktop unchanged
+     Breakpoints:
+       xs  : 320–480px   (small phones)
+       sm  : 480–768px   (large phones)
+       md  : 768–1024px  (tablets)
+       lg  : 1024px+     (desktop — original layout, untouched)
+  ═══════════════════════════════════════════════════════════ */
+
+  /* ── Global safety (all screens) ── */
+  *, *::before, *::after { box-sizing: border-box; }
+  body { overflow-x: hidden !important; }
+  img, iframe, video { max-width: 100%; }
+
+  /* ══════════════════════════════════════════════
+     TABLET  768px – 1023px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 1023px) {
+    /* Calendar: stack vertically */
+    #cal-layout {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+    }
+    #cal-left { width: 100% !important; max-width: 100% !important; }
+    #cal-event-list { max-height: none !important; }
+
+    /* Cards: 2 columns on tablet */
+    .cards-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    /* Home title */
+    #home-title { font-size: 1.9rem !important; }
+
+    /* Page padding */
+    #page-home > div,
+    #page-calendar > div,
+    #admin-panel > div {
+      padding: 1.5rem 1.25rem !important;
+    }
+
+    /* Admin form preview */
+    #form-preview-layout { grid-template-columns: 1fr !important; }
+    #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
+  }
+
+  /* ══════════════════════════════════════════════
+     MOBILE  max 767px  (phones — all sizes)
+  ══════════════════════════════════════════════ */
+  @media (max-width: 767px) {
+
+    /* ── Layout containers ── */
+    #page-home > div,
+    #page-calendar > div,
+    #admin-panel > div {
+      padding: 1rem 14px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    #admin-login { padding: 1rem !important; }
+    #admin-login > div { padding: 1.5rem 1.25rem !important; max-width: 100% !important; }
+
+    /* ── NAV ──
+       Logo left, nav links right — all in one line, compact */
+    nav > div {
+      height: 52px !important;
+      padding: 0 14px !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+    #nav-site-title {
+      font-size: 0.78rem !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    #nav-links { gap: 2px !important; flex-shrink: 0; }
+    .nav-link {
+      font-size: 0.72rem !important;
+      padding: 5px 8px !important;
+      border-radius: 6px !important;
+      white-space: nowrap;
+    }
+
+    /* ── Home hero text ── */
+    #home-tagline { font-size: 0.68rem !important; letter-spacing: 0.08em !important; }
+    #home-title   { font-size: 1.4rem !important; line-height: 1.25 !important; letter-spacing: -0.02em !important; }
+    #page-home > div > div:first-child { margin-bottom: 1.25rem !important; }
+    #page-home > div > div:first-child > p:last-child { font-size: 0.82rem !important; }
+
+    /* ── Section headers ── */
+    .section-header { font-size: 1.15rem !important; }
+    .month-group-header-label { font-size: 0.95rem !important; }
+    .month-group { margin-bottom: 1.5rem !important; }
+
+    /* ── Filter buttons — wrap, never overflow ── */
+    .artist-filter-btn, .cal-filter-btn {
+      font-size: 0.72rem !important;
+      padding: 4px 11px !important;
+    }
+
+    /* ── Event cards: single column ── */
+    .cards-grid {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+
+    /* Card image height reduced on mobile */
+    .card-img { height: 180px !important; }
+
+    /* ── Calendar page header ── */
+    #page-calendar > div > div:first-child {
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      align-items: flex-start !important;
+    }
+    #cal-month-label {
+      font-size: 0.82rem !important;
+      min-width: 100px !important;
+    }
+    /* Calendar layout: stack */
+    #cal-layout {
+      grid-template-columns: 1fr !important;
+      gap: 14px !important;
+    }
+    #cal-left { width: 100% !important; max-width: 100% !important; }
+    /* Day-of-week headers */
+    #cal-left > div:first-child > div {
+      font-size: 0.62rem !important;
+      padding: 5px 0 !important;
+    }
+    /* Calendar day cells */
+    .cal-day { width: 100% !important; height: 36px !important; border-radius: 6px !important; }
+    .cal-day span { font-size: 0.75rem !important; }
+    /* Event list below calendar */
+    #cal-event-list {
+      max-height: none !important;
+      overflow-y: visible !important;
+      padding-right: 0 !important;
+      gap: 6px !important;
+    }
+    .cal-list-item { gap: 8px !important; padding: 9px 10px !important; }
+    .cal-list-title { font-size: 0.8rem !important; white-space: normal !important; }
+    .cal-list-num   { font-size: 1rem !important; }
+    .cal-list-dow   { font-size: 0.58rem !important; }
+    .cal-list-time  { font-size: 0.75rem !important; }
+    .cal-list-meta  { font-size: 0.68rem !important; }
+
+    /* ── Birthday banners ── */
+    .bday-banner {
+      flex-wrap: wrap !important;
+      gap: 6px !important;
+      padding: 8px 12px !important;
+      font-size: 0.75rem !important;
+    }
+    .bday-countdown { margin-left: 0 !important; }
+
+    /* ── Detail modal — bottom sheet style ── */
+    .modal-backdrop {
+      padding: 0 !important;
+      align-items: flex-end !important;
+    }
+    .modal-box {
+      border-radius: 20px 20px 0 0 !important;
+      max-height: 92vh !important;
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+    #detail-title { font-size: 1.15rem !important; }
+
+    /* ── Admin form modal grids ── */
+    .modal-box form > div[style*="grid-template-columns:1fr 1fr"],
+    div[style*="grid-template-columns:1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+    #form-preview-layout { grid-template-columns: 1fr !important; }
+    #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
+
+    /* ── Admin list items ── */
+    #admin-events-list > div { flex-wrap: wrap !important; gap: 8px !important; }
+
+    /* ── Map embed ── */
+    .map-embed-wrap iframe { height: 220px !important; }
+
+    /* ── Toast full-width ── */
+    #toast {
+      width: calc(100% - 28px) !important;
+      left: 14px !important;
+      transform: none !important;
+      text-align: center !important;
+      font-size: 0.85rem !important;
+      bottom: 1rem !important;
+    }
+
+    /* ── Preview popup bottom sheet ── */
+    #preview-popup > div {
+      max-width: 100% !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Footer ── */
+    footer > div { padding: 1rem 14px !important; font-size: 0.72rem !important; }
+  }
+
+  /* ══════════════════════════════════════════════
+     SMALL PHONES  max 480px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 480px) {
+    #nav-site-title { max-width: 120px; font-size: 0.72rem !important; }
+    .nav-link { font-size: 0.68rem !important; padding: 4px 6px !important; }
+
+    #home-title { font-size: 1.25rem !important; }
+    .section-header { font-size: 1.05rem !important; }
+
+    /* Cards: single column, tighter */
+    .cards-grid { gap: 8px !important; }
+    .card-img { height: 160px !important; }
+
+    /* Calendar cells even smaller */
+    .cal-day { height: 32px !important; }
+    .cal-day span { font-size: 0.68rem !important; }
+
+    /* Admin login box */
+    #admin-login > div { padding: 1.25rem 1rem !important; }
+
+    /* Tighter month group spacing */
+    .month-group { margin-bottom: 1.25rem !important; }
+    .month-group-header { gap: 8px !important; margin-bottom: 0.6rem !important; }
+
+    /* Section header + count row */
+    #page-home > div > div[style*="justify-content:space-between"] {
+      flex-wrap: wrap !important;
+      gap: 4px !important;
+    }
+
+    /* Map height */
+    .map-embed-wrap iframe { height: 180px !important; }
+
+    /* Detail modal title smaller */
+    #detail-title { font-size: 1.05rem !important; }
+  }
+
+  /* ══════════════════════════════════════════════
+     VERY SMALL  max 360px  (SE, Galaxy A series)
+  ══════════════════════════════════════════════ */
+  @media (max-width: 360px) {
+    nav > div { padding: 0 10px !important; }
+    #nav-site-title { max-width: 100px; font-size: 0.68rem !important; }
+    .nav-link { font-size: 0.62rem !important; padding: 4px 5px !important; }
+
+    #home-title { font-size: 1.1rem !important; }
+    #page-home > div,
+    #page-calendar > div,
+    #admin-panel > div { padding: 0.75rem 10px !important; }
+
+    .artist-filter-btn, .cal-filter-btn {
+      font-size: 0.65rem !important;
+      padding: 3px 9px !important;
+    }
+
+    .cal-list-item { gap: 6px !important; padding: 8px !important; }
+    .cal-list-date { width: 36px !important; }
+  }
   </style>
  </head>
  <body>
   <div id="app">
    <nav>
-    <div style="max-width:1400px;margin:auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;">
+    <div style="max-width:1400px;margin:auto;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:56px;min-width:0;overflow:hidden;">
      <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="navigate('home')">
       <span id="nav-site-title" style="font-weight:700;font-size:0.95rem;letter-spacing:-0.02em;">PondPhuwin and Permpoon Schedule</span>
      </div>
@@ -192,7 +458,7 @@
 
    <!-- HOME PAGE -->
    <div class="page active" id="page-home">
-    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
      <div style="margin-bottom:2.5rem;">
       <p id="home-tagline" style="font-size:0.8rem;font-weight:600;color:#a855f7;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem;">Pond · Phuwin · Permpoon</p>
       <h1 id="home-title" style="font-size:2.3rem;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:0.5rem;">PondPhuwinPermpoon Schedule</h1>
@@ -226,10 +492,10 @@
 
    <!-- CALENDAR PAGE -->
    <div class="page" id="page-calendar">
-    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
 
      <!-- Header -->
-     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;">
       <div>
        <h2 class="section-header" id="cal-section-title">Calendar</h2>
        <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;">All scheduled events</p>
@@ -258,7 +524,7 @@
      <div id="cal-layout" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;">
 
       <!-- LEFT: Mini calendar -->
-      <div id="cal-left" style="width:500px;flex-shrink:0;">
+      <div id="cal-left" style="width:500px;flex-shrink:0;min-width:0;max-width:100%;">
        <!-- day headers -->
        <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
         <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">S</div>
@@ -309,7 +575,7 @@
      </div>
     </div>
     <div id="admin-panel" style="display:none;flex:1;flex-direction:column;">
-     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;">
+     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
        <div>
         <h2 class="section-header">Admin Panel</h2>
