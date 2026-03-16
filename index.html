@@ -761,57 +761,106 @@ async function saveBirthday() {
   } catch(e) { showToast('Error: '+(e.message||'save failed')); }
 }
 
-// ── READ: GET with JSONP fallback (handles CORS on Google Apps Script) ────────
-function buildGetUrl(action, cbName) {
-  let url = API_URL + '?action=' + encodeURIComponent(action);
-  if (cbName) url += '&callback=' + encodeURIComponent(cbName);
-  return url;
-}
+// ══════════════════════════════════════════════════════════════════════════════
+// API LAYER — Google Apps Script backend
+// Strategy:
+//   READ  → GET fetch → JSONP fallback
+//   WRITE → POST fetch → GET JSONP fallback (Apps Script supports both)
+// ══════════════════════════════════════════════════════════════════════════════
 
-async function apiGet(action) {
-  // Try fetch first
+// ── GET via fetch (reads) ─────────────────────────────────────────────────────
+async function apiGetFetch(action) {
+  const url = `${API_URL}?action=${encodeURIComponent(action)}`;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
-    try {
-      const res = await fetch(buildGetUrl(action, null), { signal: controller.signal });
-      clearTimeout(timer);
-      return await res.json();
-    } finally {
-      clearTimeout(timer);
-    }
-  } catch(fetchErr) {
-    // CORS / network error — fall back to JSONP
-    console.warn('GET fetch failed, trying JSONP:', fetchErr.message);
-    return new Promise((resolve, reject) => {
-      const cbName = '__pppCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-      let scriptEl = null;
-      const cleanup = () => { delete window[cbName]; if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl); };
-      const timeout = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 15000);
-      window[cbName] = data => { clearTimeout(timeout); cleanup(); resolve(data); };
-      scriptEl = document.createElement('script');
-      scriptEl.onerror = () => { clearTimeout(timeout); cleanup(); reject(new Error('JSONP failed')); };
-      scriptEl.src = buildGetUrl(action, cbName);
-      document.head.appendChild(scriptEl);
-    });
-  }
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(t);
+    const text = await res.text();
+    return JSON.parse(text);
+  } finally { clearTimeout(t); }
 }
 
-// ── WRITE: POST only — sends full JSON body, no URL param size limits ─────────
-async function apiPost(body) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20000);
+// ── GET via JSONP (CORS fallback for reads) ───────────────────────────────────
+function apiGetJSONP(action) {
+  return new Promise((resolve, reject) => {
+    const cb = '__pppCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+    const url = `${API_URL}?action=${encodeURIComponent(action)}&callback=${encodeURIComponent(cb)}`;
+    let el;
+    const cleanup = () => { delete window[cb]; el && el.parentNode && el.parentNode.removeChild(el); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 15000);
+    window[cb] = d => { clearTimeout(timer); cleanup(); resolve(d); };
+    el = document.createElement('script');
+    el.onerror = () => { clearTimeout(timer); cleanup(); reject(new Error('JSONP error')); };
+    el.src = url;
+    document.head.appendChild(el);
+  });
+}
+
+// ── POST via fetch (writes) ───────────────────────────────────────────────────
+async function apiPostFetch(body) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 20000);
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' }, // Apps Script requires text/plain for doPost
+      // Apps Script requires text/plain — application/json triggers CORS preflight which GAS can't handle
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(body),
-      signal: controller.signal
+      signal: ctrl.signal
     });
-    clearTimeout(timer);
-    return await res.json();
-  } finally {
-    clearTimeout(timer);
+    clearTimeout(t);
+    const text = await res.text();
+    return JSON.parse(text);
+  } finally { clearTimeout(t); }
+}
+
+// ── GET JSONP write fallback (when POST is blocked) ───────────────────────────
+// Apps Script doGet handles write actions too as a CORS-safe fallback
+function apiWriteJSONP(action, payload) {
+  return new Promise((resolve, reject) => {
+    const cb = '__pppCb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+    let url = `${API_URL}?action=${encodeURIComponent(action)}&callback=${encodeURIComponent(cb)}`;
+    if (payload.id)          url += '&id='   + encodeURIComponent(payload.id);
+    if (payload.event)       url += '&data=' + encodeURIComponent(JSON.stringify(payload.event));
+    if (payload.birthday)    url += '&data=' + encodeURIComponent(JSON.stringify(payload.birthday));
+    if (payload.anniversary) url += '&data=' + encodeURIComponent(JSON.stringify(payload.anniversary));
+    let el;
+    const cleanup = () => { delete window[cb]; el && el.parentNode && el.parentNode.removeChild(el); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP write timeout')); }, 15000);
+    window[cb] = d => { clearTimeout(timer); cleanup(); resolve(d); };
+    el = document.createElement('script');
+    el.onerror = () => { clearTimeout(timer); cleanup(); reject(new Error('JSONP write error')); };
+    el.src = url;
+    document.head.appendChild(el);
+  });
+}
+
+// ── Public API: read ──────────────────────────────────────────────────────────
+async function apiGet(action) {
+  try { return await apiGetFetch(action); }
+  catch(e) {
+    console.warn(`GET fetch failed (${action}), trying JSONP:`, e.message);
+    return await apiGetJSONP(action);
+  }
+}
+
+// ── Public API: write ─────────────────────────────────────────────────────────
+async function apiPost(body) {
+  try {
+    const result = await apiPostFetch(body);
+    // If Apps Script returned an HTML redirect page instead of JSON, fall through
+    if (result && result.status) return result;
+    throw new Error('Invalid response');
+  } catch(e) {
+    console.warn(`POST failed (${body.action}), trying GET JSONP fallback:`, e.message);
+    // Map POST body to GET JSONP call
+    const payload = {};
+    if (body.id)          payload.id          = body.id;
+    if (body.event)       payload.event       = body.event;
+    if (body.birthday)    payload.birthday    = body.birthday;
+    if (body.anniversary) payload.anniversary = body.anniversary;
+    return await apiWriteJSONP(body.action, payload);
   }
 }
 
@@ -862,7 +911,9 @@ async function loadEventsFromSheets(isRetry) {
       allEvents.sort((a,b) => (a.dateStart+a.startTime).localeCompare(b.dateStart+b.startTime));
       apiLoaded = true;
       hideConnectionError();
-      renderCurrentPage();
+      // Always render home (public view) + current page
+      renderHome();
+      if (currentPage !== 'home') renderCurrentPage();
     }
   } catch(e) {
     console.warn('Sheets API error:', e);
@@ -1406,7 +1457,7 @@ function openAddModal() {
   clearForm();
   document.getElementById('event-form-modal').style.display='flex';
   document.body.style.overflow='hidden';
-  setTimeout(()=>{const n=document.getElementById('f-name');if(n)n.focus();},50);
+  setTimeout(()=>{const n=document.getElementById('ev-title');if(n)n.focus();},50);
   if(typeof lucide!=='undefined')lucide.createIcons();
 }
 function openEditModal(id) {
@@ -1544,6 +1595,13 @@ async function handleEventFormSubmit(e) {
   e.preventDefault();
   const schema = readFormSchema();
 
+  // Validate required fields
+  if (!schema.title || !schema.title.trim()) {
+    showToast('❌ กรุณาใส่ชื่อ Event ก่อน');
+    document.getElementById('ev-title').focus();
+    return;
+  }
+
   // Build Sheets payload — strict schema keys only
   const payload = {
     title:       schema.title,
@@ -1583,12 +1641,15 @@ async function handleEventFormSubmit(e) {
     else await createEventInSheets(payload);
     btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
     closeEventFormModal();
-    showToast(editingEventId ? 'Event updated!' : 'Event added!');
+    showToast(editingEventId ? 'Event updated! ✓' : 'Event added! ✓');
     clearForm();
     await loadEventsFromSheets();
+    // Always re-render admin list after save
+    if (isAdmin) renderAdminList();
   } catch(err) {
     btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
-    showToast('Error: ' + (err.message || 'Failed to save'));
+    showToast('❌ Error: ' + (err.message || 'Failed to save'));
+    console.error('Save error:', err);
   }
 }
 
