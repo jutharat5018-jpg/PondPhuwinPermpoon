@@ -534,13 +534,13 @@
 
   /* Mobile dropdown menu */
   .nav-mobile-menu {
-    display: none;
+    display: none !important;
     background: #fff;
     border-top: 1px solid #f3f4f6;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   }
   .nav-mobile-menu.is-open {
-    display: block;
+    display: block !important;
   }
   .nav-mobile-inner {
     max-width: 1400px;
@@ -2530,7 +2530,7 @@ function toggleMobileMenu() {
   const menu = document.getElementById('nav-mobile-menu');
   const btn  = document.getElementById('nav-hamburger');
   if (!menu || !btn) return;
-  const isOpen = menu.classList.contains('is-open');
+  const isOpen = menu.style.display === 'block';
   if (isOpen) closeMobileMenu();
   else        openMobileMenu();
 }
@@ -2538,13 +2538,13 @@ function openMobileMenu() {
   const menu = document.getElementById('nav-mobile-menu');
   const btn  = document.getElementById('nav-hamburger');
   if (!menu || !btn) return;
-  menu.classList.add('is-open');
+  // Use inline style — beats every CSS rule including !important from Tailwind
+  menu.style.setProperty('display', 'block', 'important');
   btn.classList.add('is-open');
   btn.setAttribute('aria-expanded', 'true');
   menu.setAttribute('aria-hidden', 'false');
   syncMobileAdminLink();
   syncMobileNavActive();
-  // Force Lucide icons to render inside the now-visible dropdown
   if (typeof lucide !== 'undefined') {
     try { lucide.createIcons(); } catch(e) {}
   }
@@ -2553,7 +2553,7 @@ function closeMobileMenu() {
   const menu = document.getElementById('nav-mobile-menu');
   const btn  = document.getElementById('nav-hamburger');
   if (!menu || !btn) return;
-  menu.classList.remove('is-open');
+  menu.style.setProperty('display', 'none', 'important');
   btn.classList.remove('is-open');
   btn.setAttribute('aria-expanded', 'false');
   menu.setAttribute('aria-hidden', 'true');
@@ -2576,7 +2576,7 @@ function syncMobileNavActive() {
 document.addEventListener('click', function(e) {
   const nav  = document.getElementById('main-nav');
   const menu = document.getElementById('nav-mobile-menu');
-  if (!menu || !menu.classList.contains('is-open')) return;
+  if (!menu || menu.style.display !== 'block') return;
   if (nav && !nav.contains(e.target)) closeMobileMenu();
 });
 
