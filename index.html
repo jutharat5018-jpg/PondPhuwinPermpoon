@@ -165,16 +165,48 @@ self.addEventListener('fetch', e => {
   .cal-list-time { font-size:0.88rem;font-weight:600;color:#9ca3af;flex-shrink:0; }
   #cal-event-list::-webkit-scrollbar { width:4px; }
   #cal-event-list::-webkit-scrollbar-thumb { background:#e5e7eb;border-radius:99px; }
-  /* mobile: stack cal top, list bottom */
+  /* mobile */
   @media (max-width: 700px) {
     #cal-layout { grid-template-columns: 1fr !important; }
     #cal-left { width: 100% !important; }
     #cal-grid { grid-template-columns: repeat(7,1fr) !important; width:100% !important; }
     .cal-day { width:100% !important; height:40px !important; }
     #cal-event-list { max-height: none !important; }
+    .cal-month-strip { gap:6px !important; }
+    .cal-month-pill { padding:5px 10px !important; font-size:0.75rem !important; }
+    .cal-date-strip { gap:4px !important; }
+    .cal-date-chip { min-width:38px !important; padding:6px 4px !important; }
+    .cal-card-grid { grid-template-columns:1fr !important; }
   }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+  /* ── Month strip layout ── */
+  .cal-month-strip { display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none; }
+  .cal-month-strip::-webkit-scrollbar { display:none; }
+  .cal-month-pill { padding:6px 16px;border-radius:99px;font-size:0.82rem;font-weight:600;color:#9ca3af;background:#f3f4f6;cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;font-family:inherit; }
+  .cal-month-pill:hover { background:#e5e7eb;color:#111; }
+  .cal-month-pill.active { background:#111;color:#fff;font-weight:700; }
+  /* date strip */
+  .cal-date-strip { display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none; }
+  .cal-date-strip::-webkit-scrollbar { display:none; }
+  .cal-date-chip { min-width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border-radius:12px;cursor:pointer;transition:all 0.15s;border:none;background:transparent;font-family:inherit;position:relative;flex-shrink:0; }
+  .cal-date-chip:hover { background:#f3f4f6; }
+  .cal-date-chip.today { background:#111; }
+  .cal-date-chip.today .cal-date-chip-dow { color:rgba(255,255,255,0.5); }
+  .cal-date-chip.today .cal-date-chip-num { color:#fff; }
+  .cal-date-chip.has-event-chip { /* handled inline with accent color */ }
+  .cal-date-chip-dow { font-size:0.6rem;font-weight:700;color:#9ca3af;letter-spacing:0.06em;text-transform:uppercase; }
+  .cal-date-chip-num { font-size:0.95rem;font-weight:700;color:#111; }
+  .cal-date-chip-dot { width:5px;height:5px;border-radius:50%;position:absolute;bottom:4px; }
+  /* card grid */
+  .cal-card-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px; }
+  .cal-ev-card { background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);overflow:hidden;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s; }
+  .cal-ev-card:hover { transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.10); }
+  .cal-ev-card-img { width:100%;height:120px;object-fit:cover;object-position:top;display:block;background:#f3f4f6; }
+  .cal-ev-card-img-placeholder { width:100%;height:120px;display:flex;align-items:center;justify-content:center; }
+  .cal-ev-card-body { padding:10px 12px; }
+  .cal-ev-card-title { font-size:0.82rem;font-weight:700;color:#111;line-height:1.35;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical; }
+  .cal-ev-card-meta { font-size:0.68rem;color:#9ca3af;display:flex;align-items:center;gap:5px;flex-wrap:wrap; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
   .modal-box { background: #fafaf8; border-radius: var(--radius-card); max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.12); margin: auto; }
   .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.7rem 0.95rem; font-size: 1rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
@@ -811,26 +843,6 @@ self.addEventListener('fetch', e => {
       </div>
      </div>
 
-     <!-- Month nav -->
-     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;">
-      <button onclick="prevMonth()" class="btn-secondary" style="padding:6px 10px;"><i data-lucide="chevron-left" style="width:16px;height:16px;"></i></button>
-      <span id="cal-month-label" style="font-weight:700;font-size:0.95rem;min-width:130px;text-align:center;"></span>
-      <button onclick="nextMonth()" class="btn-secondary" style="padding:6px 10px;"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></button>
-     </div>
-
-     <!-- Filter bar -->
-     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;">
-      
-      <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;" >All</button>
-      <button class="cal-filter-btn" data-artist="Pond" onclick="filterCalendar('Pond')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
-      <button class="cal-filter-btn" data-artist="Phuwin" onclick="filterCalendar('Phuwin')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
-      <button class="cal-filter-btn" data-artist="Permpoon" onclick="filterCalendar('Permpoon')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
-     </div>
-
      <!-- NEXT EVENT BANNER -->
      <div id="cal-next-event-banner" style="display:none;background:#fff;border:none;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:14px 16px;margin-bottom:1.25rem;align-items:center;gap:14px;cursor:pointer;" onclick="openDetailModal(this.dataset.eventId)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openDetailModal(this.dataset.eventId)">
       <div id="cal-next-event-icon" style="width:44px;height:44px;border-radius:12px;background:#fff7ed;border:1.5px solid #fed7aa;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -844,35 +856,39 @@ self.addEventListener('fetch', e => {
       <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
      </div>
 
-     <!-- Layout: mini calendar left + event list right -->
-     <div id="cal-layout" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;">
-
-      <!-- LEFT: Mini calendar -->
-      <div id="cal-left" style="width:500px;flex-shrink:0;min-width:0;max-width:100%;">
-       <!-- day headers -->
-       <div id="cal-dow-headers" style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="0">S</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="1">M</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="2">T</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="3">W</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="4">T</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="5">F</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="6">S</div>
-       </div>
-       <div id="cal-grid" class="cal-grid" style="border:none;"></div>
-      </div>
-
-      <!-- RIGHT: Event list (scrollable) -->
-      <div style="min-width:0;">
-       <div id="cal-event-list" style="display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto;padding-right:4px;">
-        <div style="text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;">Loading...</div>
-       </div>
-       <div id="cal-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
-        <p style="font-weight:600;">No events this month</p>
-       </div>
-      </div>
-
+     <!-- ── Month strip ── -->
+     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;margin-bottom:1.25rem;">
+      <div id="cal-month-strip" class="cal-month-strip"></div>
      </div>
+
+     <!-- ── Filter + Date strip ── -->
+     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;margin-bottom:1.25rem;">
+      <!-- Filter pills -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+       <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
+         style="padding:4px 14px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
+       <button class="cal-filter-btn" data-artist="Pond" onclick="filterCalendar('Pond')"
+         style="padding:4px 14px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
+       <button class="cal-filter-btn" data-artist="Phuwin" onclick="filterCalendar('Phuwin')"
+         style="padding:4px 14px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
+       <button class="cal-filter-btn" data-artist="Permpoon" onclick="filterCalendar('Permpoon')"
+         style="padding:4px 14px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
+       <span id="cal-month-label" style="margin-left:auto;font-weight:700;font-size:0.9rem;color:#111;"></span>
+      </div>
+      <!-- Date strip -->
+      <div id="cal-date-strip" class="cal-date-strip"></div>
+     </div>
+
+     <!-- ── Event card grid ── -->
+     <div id="cal-card-grid" class="cal-card-grid" style="margin-bottom:1rem;">
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;">Loading...</div>
+     </div>
+     <div id="cal-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
+      <p style="font-weight:600;">No events this month</p>
+     </div>
+
+     <!-- hidden but keep for JS compatibility -->
+     <div id="cal-layout" style="display:none;"><div id="cal-left"><div id="cal-dow-headers"></div><div id="cal-grid" class="cal-grid"></div></div><div id="cal-event-list"></div></div>
     </div>
     <footer><div style="max-width:1400px;margin:auto;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
    </div>
@@ -1107,38 +1123,11 @@ self.addEventListener('fetch', e => {
         <div style="display:flex;align-items:center;gap:8px;">
           <input class="form-input" id="ev-startTime" name="startTime" type="time" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;flex:1;">
           <select id="ev-startTimezone" style="padding:0.65rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;color:#374151;background:#f9fafb;cursor:pointer;outline:none;font-family:inherit;">
-            <option value="GMT-12">GMT-12</option>
-            <option value="GMT-11">GMT-11</option>
-            <option value="GMT-10">GMT-10</option>
-            <option value="GMT-9">GMT-9</option>
-            <option value="GMT-8">GMT-8</option>
-            <option value="GMT-7">GMT-7</option>
-            <option value="GMT-6">GMT-6</option>
-            <option value="GMT-5">GMT-5</option>
-            <option value="GMT-4">GMT-4</option>
-            <option value="GMT-3">GMT-3</option>
-            <option value="GMT-2">GMT-2</option>
-            <option value="GMT-1">GMT-1</option>
-            <option value="GMT+0">GMT+0</option>
-            <option value="GMT+1">GMT+1</option>
-            <option value="GMT+2">GMT+2</option>
-            <option value="GMT+3">GMT+3</option>
-            <option value="GMT+4">GMT+4</option>
-            <option value="GMT+5">GMT+5</option>
-            <option value="GMT+5:30">GMT+5:30</option>
-            <option value="GMT+5:45">GMT+5:45</option>
-            <option value="GMT+6">GMT+6</option>
-            <option value="GMT+6:30">GMT+6:30</option>
-            <option value="GMT+7" selected>GMT+7</option>
+            <option value="GMT+7">GMT+7</option>
             <option value="GMT+8">GMT+8</option>
             <option value="GMT+9">GMT+9</option>
-            <option value="GMT+9:30">GMT+9:30</option>
-            <option value="GMT+10">GMT+10</option>
-            <option value="GMT+10:30">GMT+10:30</option>
-            <option value="GMT+11">GMT+11</option>
-            <option value="GMT+12">GMT+12</option>
-            <option value="GMT+13">GMT+13</option>
-            <option value="GMT+14">GMT+14</option>
+            <option value="GMT+0">GMT+0</option>
+            <option value="GMT+1">GMT+1</option>
           </select>
         </div>
         <div style="font-size:0.72rem;color:#9ca3af;margin-top:4px;">ไม่เลือกก็ได้ — กรอกหรือปล่อยว่างไว้</div>
@@ -1148,38 +1137,11 @@ self.addEventListener('fetch', e => {
         <div style="display:flex;align-items:center;gap:8px;">
           <input class="form-input" id="ev-endTime" name="endTime" type="time" style="flex:1;">
           <select id="ev-endTimezone" style="padding:0.65rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;color:#374151;background:#f9fafb;cursor:pointer;outline:none;font-family:inherit;">
-            <option value="GMT-12">GMT-12</option>
-            <option value="GMT-11">GMT-11</option>
-            <option value="GMT-10">GMT-10</option>
-            <option value="GMT-9">GMT-9</option>
-            <option value="GMT-8">GMT-8</option>
-            <option value="GMT-7">GMT-7</option>
-            <option value="GMT-6">GMT-6</option>
-            <option value="GMT-5">GMT-5</option>
-            <option value="GMT-4">GMT-4</option>
-            <option value="GMT-3">GMT-3</option>
-            <option value="GMT-2">GMT-2</option>
-            <option value="GMT-1">GMT-1</option>
-            <option value="GMT+0">GMT+0</option>
-            <option value="GMT+1">GMT+1</option>
-            <option value="GMT+2">GMT+2</option>
-            <option value="GMT+3">GMT+3</option>
-            <option value="GMT+4">GMT+4</option>
-            <option value="GMT+5">GMT+5</option>
-            <option value="GMT+5:30">GMT+5:30</option>
-            <option value="GMT+5:45">GMT+5:45</option>
-            <option value="GMT+6">GMT+6</option>
-            <option value="GMT+6:30">GMT+6:30</option>
-            <option value="GMT+7" selected>GMT+7</option>
+            <option value="GMT+7">GMT+7</option>
             <option value="GMT+8">GMT+8</option>
             <option value="GMT+9">GMT+9</option>
-            <option value="GMT+9:30">GMT+9:30</option>
-            <option value="GMT+10">GMT+10</option>
-            <option value="GMT+10:30">GMT+10:30</option>
-            <option value="GMT+11">GMT+11</option>
-            <option value="GMT+12">GMT+12</option>
-            <option value="GMT+13">GMT+13</option>
-            <option value="GMT+14">GMT+14</option>
+            <option value="GMT+0">GMT+0</option>
+            <option value="GMT+1">GMT+1</option>
           </select>
         </div>
        </div>
@@ -2902,17 +2864,10 @@ function renderCalendar() {
   const labelEl = document.getElementById('cal-month-label');
   if (labelEl) labelEl.textContent = monthNames[month] + ' ' + year;
 
-  const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const monthStr  = `${year}-${String(month+1).padStart(2,'0')}`;
-
-  const grid = document.getElementById('cal-grid');
-  if (!grid) return;
-
-  const isMobile = window.innerWidth <= 700;
-  const cellSize = isMobile ? Math.floor((window.innerWidth - 48) / 7) + 'px' : '66px';
 
   // Build month events index
   const monthEvents = {};
@@ -2927,49 +2882,58 @@ function renderCalendar() {
       }
     }
   });
-  for (let d = 1; d <= daysInMonth; d++) {
-    const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
-    if (getBirthdaysOnDate(month+1, d).length && !monthEvents[ds]) monthEvents[ds] = [];
-  }
 
   if (!calSelectedDate || !calSelectedDate.startsWith(monthStr)) {
     if (today.getFullYear() === year && today.getMonth() === month) calSelectedDate = todayStr;
     else { const first = Object.keys(monthEvents).sort()[0]; calSelectedDate = first || `${monthStr}-01`; }
   }
 
-  // Build grid via fragment
-  const frag = document.createDocumentFragment();
-  for (let i = 0; i < firstDay; i++) {
-    const e = document.createElement('div'); e.className = 'cal-day'; frag.appendChild(e);
+  // ── Month strip ──
+  const stripEl = document.getElementById('cal-month-strip');
+  if (stripEl) {
+    const allMonthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    stripEl.innerHTML = allMonthNames.map((mn, mi) => {
+      const active = mi === month ? ' active' : '';
+      return `<button class="cal-month-pill${active}" onclick="calMonth=${mi};calSelectedDate=null;renderCalendar();">${mn}</button>`;
+    }).join('');
   }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr  = `${monthStr}-${String(d).padStart(2,'0')}`;
-    const isToday  = dateStr === todayStr;
-    const isSelect = dateStr === calSelectedDate;
-    const eventsOnDay = monthEvents[dateStr] || [];
-    const hasEvent = eventsOnDay.length > 0;
-    const evCount  = eventsOnDay.length;
-    const cell = document.createElement('div');
-    cell.className = 'cal-day' + (hasEvent ? ' cal-day-has-event' : '') + (isSelect ? ' cal-day-selected' : '');
-    const fs = isMobile ? '0.82rem' : '1rem';
-    const numStyle = isSelect ? `font-size:${fs};font-weight:800;color:#fff;`
-      : isToday  ? `font-size:${fs};font-weight:800;color:#111;text-decoration:underline;text-underline-offset:3px;`
-      : `font-size:${fs};font-weight:600;color:#374151;`;
-    let dotsHtml = '';
-    if (hasEvent) {
-      const colors = (eventsOnDay.slice(0,3)).map(ev => getArtistColor(ev.artists));
-      dotsHtml = `<div style="position:absolute;bottom:3px;left:50%;transform:translateX(-50%);display:flex;gap:2px;">${colors.map(c=>`<div style="width:4px;height:4px;border-radius:50%;background:${isSelect?'#fff':c};"></div>`).join('')}${evCount>3?`<div style="width:4px;height:4px;border-radius:50%;background:${isSelect?'rgba(255,255,255,0.6)':'#d1d5db'};"></div>`:''}</div>`;
+
+  // ── Date strip — only days with events + today ──
+  const dateStripEl = document.getElementById('cal-date-strip');
+  if (dateStripEl) {
+    const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    // Show days that have events, plus today if in this month
+    const daysToShow = new Set();
+    Object.keys(monthEvents).forEach(ds => { const d = parseInt(ds.split('-')[2]); daysToShow.add(d); });
+    if (today.getFullYear() === year && today.getMonth() === month) daysToShow.add(today.getDate());
+    // Sort and render
+    const sortedDays = Array.from(daysToShow).sort((a,b)=>a-b);
+    if (sortedDays.length === 0) {
+      // No events — show full month strip compactly
+      for (let d = 1; d <= daysInMonth; d++) daysToShow.add(d);
     }
-    cell.innerHTML = `<span style="${numStyle}">${d}</span>${dotsHtml}`;
-    cell.onclick = () => { calSelectedDate = dateStr; renderCalendar(); };
-    frag.appendChild(cell);
+    const days = sortedDays.length > 0 ? sortedDays : Array.from(daysToShow).sort((a,b)=>a-b);
+    dateStripEl.innerHTML = days.map(d => {
+      const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
+      const isToday = ds === todayStr;
+      const isSelected = ds === calSelectedDate;
+      const evs = monthEvents[ds] || [];
+      const hasEv = evs.length > 0;
+      const dow = dowNames[new Date(ds+'T00:00:00').getDay()];
+      const accentColor = hasEv ? getArtistColor(evs[0].artists) : null;
+      let chipStyle = '';
+      if (isSelected && accentColor) chipStyle = `background:${accentColor};`;
+      else if (isSelected) chipStyle = 'background:#111;';
+      else if (isToday) chipStyle = 'background:#111;';
+      const dowColor = (isSelected || isToday) ? 'color:rgba(255,255,255,0.55);' : 'color:#9ca3af;';
+      const numColor = (isSelected || isToday) ? 'color:#fff;' : 'color:#111;';
+      const dot = hasEv && !isSelected ? `<div class="cal-date-chip-dot" style="background:${accentColor};"></div>` : '';
+      return `<button class="cal-date-chip" style="${chipStyle}" onclick="calSelectedDate='${ds}';renderCalendarCardGrid(buildMonthEvents());"><span class="cal-date-chip-dow" style="${dowColor}">${dow}</span><span class="cal-date-chip-num" style="${numColor}">${d}</span>${dot}</button>`;
+    }).join('');
   }
 
-  grid.innerHTML = '';
-  grid.style.cssText = `display:grid;grid-template-columns:repeat(7,${cellSize});gap:3px;border:none;`;
-  grid.appendChild(frag);
-
-  renderCalendarEventList(monthEvents, daysInMonth);
+  // ── Card grid ──
+  renderCalendarCardGrid(monthEvents);
 
   // ── Next event banner ──
   const upcomingAll = allEvents.filter(ev => ev.title && !isEventPast(ev));
@@ -2996,115 +2960,108 @@ function renderCalendar() {
   debounceLucide();
 }
 
-function renderCalendarEventList(monthEvents, daysInMonth) {
-  const list = document.getElementById('cal-event-list');
-  const noEv = document.getElementById('cal-no-events');
-  if (!list) return;
-  if (!monthEvents) { renderCalendar(); return; }
+function buildMonthEvents() {
+  const year = calYear, month = calMonth;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthStr = `${year}-${String(month+1).padStart(2,'0')}`;
+  const monthEvents = {};
+  const filteredEvs = calFilter === 'all' ? allEvents : allEvents.filter(ev => ev.artists && ev.artists.split(',').map(a=>a.trim()).includes(calFilter));
+  filteredEvs.forEach(ev => {
+    if (!ev.dateStart) return;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
+      if (ds >= ev.dateStart && ds <= (ev.dateEnd || ev.dateStart)) {
+        if (!monthEvents[ds]) monthEvents[ds] = [];
+        if (!monthEvents[ds].find(e => e.__backendId === ev.__backendId)) monthEvents[ds].push(ev);
+      }
+    }
+  });
+  return monthEvents;
+}
 
+function renderCalendarCardGrid(monthEvents) {
+  const grid = document.getElementById('cal-card-grid');
+  const noEv = document.getElementById('cal-no-events');
+  if (!grid) return;
   const monthStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
 
-  // Add birthdays/anniversaries to groups
-  for (let d = 1; d <= daysInMonth; d++) {
-    const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
-    getBirthdaysOnDate(calMonth+1, d).forEach(b => {
-      if (!monthEvents[ds]) monthEvents[ds] = [];
-      monthEvents[ds].push({ __bday: true, ...b });
+  // Determine events to show — if a date is selected show that day's events, else show all month
+  let eventsToShow = [];
+  if (calSelectedDate && calSelectedDate.startsWith(monthStr) && monthEvents[calSelectedDate]) {
+    eventsToShow = monthEvents[calSelectedDate];
+  } else {
+    // All events in month, deduplicated
+    const seen = new Set();
+    Object.keys(monthEvents).sort().forEach(ds => {
+      (monthEvents[ds]||[]).forEach(ev => {
+        if (ev.__backendId && !seen.has(ev.__backendId)) { seen.add(ev.__backendId); eventsToShow.push(ev); }
+      });
     });
   }
 
-  const sortedDates = Object.keys(monthEvents).sort();
-  if (sortedDates.length === 0) {
-    list.style.display = 'none'; if (noEv) noEv.style.display = 'block'; return;
+  if (eventsToShow.length === 0) {
+    grid.innerHTML = '';
+    grid.style.display = 'none';
+    if (noEv) noEv.style.display = 'block';
+    return;
   }
-  list.style.display = 'flex'; if (noEv) noEv.style.display = 'none';
+  grid.style.display = 'grid';
+  if (noEv) noEv.style.display = 'none';
 
-  const dayNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
-  const parts = sortedDates.map(ds => {
-    const d = new Date(ds + 'T00:00:00');
-    const dow = dayNames[d.getDay()];
-    const dayNum = d.getDate();
-    const mon = monthNames[d.getMonth()];
-    const evs = monthEvents[ds];
-    const realEvs = evs.filter(e => !e.__bday);
-    const isPast = realEvs.length > 0 && realEvs.every(e => isEventPast(e));
-    const evCount = realEvs.length;
-    const bdayEvs = evs.filter(e => e.__bday);
+  grid.innerHTML = eventsToShow.map(ev => {
+    const color = getArtistColor(ev.artists);
+    const past = isEventPast(ev);
+    const days2 = daysUntilEvent(ev.dateStart);
+    const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
+    const artistDots = artistArr.map(a => {
+      const ac = getArtistColor(a);
+      return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;font-weight:700;color:${past?'#9ca3af':ac};"><span style="width:5px;height:5px;border-radius:50%;background:${past?'#d1d5db':ac};display:inline-block;"></span>${a}</span>`;
+    }).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
+    const badge = past
+      ? `<span style="font-size:0.55rem;font-weight:700;padding:2px 7px;border-radius:99px;background:#f3f4f6;color:#9ca3af;">past</span>`
+      : (days2 !== null && days2 >= 0 && days2 <= 7)
+        ? `<span style="font-size:0.55rem;font-weight:800;padding:2px 7px;border-radius:99px;background:${color};color:#fff;">${days2===0?'TODAY':days2===1?'1 DAY':days2+' DAYS'}</span>`
+        : '';
+    const loc = [ev.location, ev.city].filter(Boolean).join(', ');
+    // Image or gradient placeholder
+    const gradients = {
+      '#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)',
+      '#6b7280':'linear-gradient(135deg,#f9fafb,#f3f4f6)',
+      '#22c55e':'linear-gradient(135deg,#f0fdf4,#dcfce7)',
+      '#a855f7':'linear-gradient(135deg,#faf5ff,#f3e8ff)',
+      '#3b82f6':'linear-gradient(135deg,#eff6ff,#dbeafe)',
+      '#ef4444':'linear-gradient(135deg,#fef2f2,#fee2e2)',
+      '#ec4899':'linear-gradient(135deg,#fdf2f8,#fce7f3)',
+    };
+    const grad = gradients[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
+    const imgHtml = ev.imageUrl
+      ? `<img class="cal-ev-card-img" src="${escHtml(ev.imageUrl)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cal-ev-card-img-placeholder" style="display:none;background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`
+      : `<div class="cal-ev-card-img-placeholder" style="background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
 
-    // Day header
-    const headerStyle = isPast
-      ? `font-size:0.7rem;font-weight:600;color:#9ca3af;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center;gap:8px;`
-      : `font-size:0.7rem;font-weight:700;color:#374151;letter-spacing:0.05em;margin-bottom:6px;display:flex;align-items:center;gap:8px;`;
-
-    const countLabel = evCount > 0
-      ? `<span style="font-size:0.62rem;color:${isPast?'#d1d5db':'#9ca3af'};">${evCount} event${evCount!==1?'s':''}</span>`
-      : '';
-
-    const dayHeader = `<div style="${headerStyle}">
-      <span>${dow}, ${mon} ${dayNum}</span>
-      ${countLabel}
-    </div>`;
-
-    // Event rows
-    const eventRows = realEvs.map(ev => {
-      const color = getArtistColor(ev.artists);
-      const loc = [ev.location, ev.city, ev.country].filter(Boolean).join(', ');
-      const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
-      const past = isEventPast(ev);
-      const days2 = daysUntilEvent(ev.dateStart);
-      const countdownBadge = (!past && days2 !== null && days2 >= 0 && days2 <= 7)
-        ? `<span style="font-size:0.6rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${color};color:#fff;flex-shrink:0;">${days2===0?'TODAY':days2===1?'1 DAY':days2+' DAYS'}</span>` : '';
-      const pastBadge = past
-        ? `<span style="font-size:0.6rem;font-weight:600;padding:2px 7px;border-radius:99px;background:#f3f4f6;color:#9ca3af;flex-shrink:0;">past</span>` : '';
-      const artistDots = artistArr.map(a => {
-        const ac = getArtistColor(a);
-        const tc = a==='Pond'?'#ea580c':a==='Phuwin'?'#4b5563':'#16a34a';
-        return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;font-weight:600;color:${past?'#9ca3af':tc};">
-          <span style="width:5px;height:5px;border-radius:50%;background:${past?'#d1d5db':ac};display:inline-block;flex-shrink:0;"></span>${a}
-        </span>`;
-      }).join('<span style="color:#e5e7eb;margin:0 1px;">·</span>');
-
-      return `<div class="cal-list-item-row" onclick="openDetailModal('${ev.__backendId}')"
-        style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${past?'#fafafa':'#fff'};border-radius:10px;border-left:3px solid ${past?'#e5e7eb':color};cursor:pointer;transition:background 0.15s;margin-bottom:5px;min-width:0;"
-        onmouseover="this.style.background='${past?'#f5f5f5':'#f9fafb'}'"
-        onmouseout="this.style.background='${past?'#fafafa':'#fff'}'">
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:4px;">
-            ${artistDots}
-          </div>
-          <div style="font-size:0.82rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(ev.title)}</div>
-          ${(ev.startTime||loc)?`<div style="font-size:0.65rem;color:#9ca3af;margin-top:2px;">${[ev.startTime?fmtTime(ev.startTime):null,loc?escHtml(loc):null].filter(Boolean).join(' · ')}</div>`:''}
+    return `<div class="cal-ev-card" style="opacity:${past?0.6:1};" onclick="openDetailModal('${ev.__backendId}')">
+      ${imgHtml}
+      <div class="cal-ev-card-body">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;flex-wrap:wrap;">${artistDots}${badge?`<span style="margin-left:auto;">${badge}</span>`:''}</div>
+        <div class="cal-ev-card-title" style="color:${past?'#9ca3af':'#111'};">${escHtml(ev.title)}</div>
+        <div class="cal-ev-card-meta">
+          ${ev.dateStart?`<span>${fmtDate(ev.dateStart)}</span>`:''}
+          ${ev.startTime?`<span style="color:#d1d5db;">·</span><span>${fmtTime(ev.startTime)}</span>`:''}
+          ${loc?`<span style="color:#d1d5db;">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(loc)}</span>`:''}
         </div>
-        <div style="flex-shrink:0;">${countdownBadge}${pastBadge}</div>
-      </div>`;
-    }).join('');
-
-    // Birthday/anniversary rows
-    const bdayRows = bdayEvs.map(ev => {
-      const isAnniv = ev.type === 'anniversary';
-      const color = ev.color || '#9ca3af';
-      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#fafafa;border-radius:10px;border-left:3px solid ${color};margin-bottom:5px;opacity:0.85;">
-        <div style="font-size:0.78rem;font-weight:600;color:#374151;">${isAnniv ? ev.label+' 🥂' : (ev.name||ev.artist_name)+' 🎂'}</div>
-      </div>`;
-    }).join('');
-
-    return `<div class="cal-day-group" data-date="${ds}" style="margin-bottom:12px;">
-      ${dayHeader}
-      ${eventRows}
-      ${bdayRows}
+      </div>
     </div>`;
-  });
-
-  list.innerHTML = `<div style="padding:2px 0;">${parts.join('')}</div>`;
-
-  // Scroll to selected date
-  if (calSelectedDate) {
-    const group = list.querySelector(`[data-date="${calSelectedDate}"]`);
-    if (group) requestAnimationFrame(() => group.scrollIntoView({ behavior:'smooth', block:'nearest' }));
-  }
+  }).join('');
 }
+
+function renderCalendarEventList(monthEvents, daysInMonth) {
+  // Legacy function — now handled by renderCalendarCardGrid
+  renderCalendarCardGrid(monthEvents || buildMonthEvents());
+}
+
+
 
 let _calStatYear = 2026;
 
