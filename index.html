@@ -290,6 +290,9 @@ self.addEventListener('fetch', e => {
   @media (min-width: 1101px) and (max-width: 1300px) {
     .cards-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
   }
+  @media (min-width: 1301px) {
+    .cards-grid { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+  }
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
     #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
