@@ -2749,9 +2749,8 @@ function renderCalendar() {
     if (getBirthdaysOnDate(month+1, d).length && !monthEvents[ds]) monthEvents[ds] = [];
   }
 
-  if (!calSelectedDate || !calSelectedDate.startsWith(monthStr)) {
-    if (today.getFullYear() === year && today.getMonth() === month) calSelectedDate = todayStr;
-    else { const first = Object.keys(monthEvents).sort()[0]; calSelectedDate = first || `${monthStr}-01`; }
+  if (calSelectedDate && !calSelectedDate.startsWith(monthStr)) {
+    calSelectedDate = null;
   }
 
   // Build grid via fragment
