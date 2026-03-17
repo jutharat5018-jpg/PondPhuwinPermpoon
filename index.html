@@ -23,94 +23,76 @@
     --color-pondpermpoon: #3b82f6;
     --color-phuwinpermpoon: #ef4444;
     --color-pondphuwinpermpoon: #ec4899;
-    --radius-card: 14px;
-    --shadow-card: 0 4px 24px rgba(0,0,0,0.08);
+    --radius-card: 12px;
+    --shadow-card: 0 2px 8px rgba(0,0,0,0.07);
     --border-card: none;
-    --color-accent: #0a0a0a;
-    --nav-height: 60px;
-    --bg: #0a0a0a;
-    --bg-card: #141414;
-    --bg-surface: #1a1a1a;
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255,255,255,0.55);
-    --text-muted: rgba(255,255,255,0.3);
-    --border: rgba(255,255,255,0.08);
-    --fluid-pad: clamp(16px, 4vw, 48px);
+    --color-accent: #111;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   * { font-family: 'Inter', sans-serif; }
-  html { height: 100%; overflow: hidden; font-size: 100%; -webkit-text-size-adjust: 100%; }
-  body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text-primary);
-    margin: 0; padding: 0;
-    overflow: hidden;
-    overflow-x: hidden;
-  }
-  #app { display: flex; flex-direction: column; height: 100%; overflow: hidden; width: 100%; }
-  .page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; width: 100%; }
+  html { height: 100%; overflow: hidden; font-size: 105%; }
+  body { height: 100%; background: #fafaf8; color: #111; margin: 0; padding: 0; overflow: hidden; }
+  #app { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+  .page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; }
   .page.active { display: flex; flex-direction: column; }
-  .nav-link { cursor: pointer; transition: all 0.2s; font-size: 0.82rem; font-weight: 500; padding: 0.45rem 0.85rem; border-radius: 8px; color: var(--text-secondary); letter-spacing: 0.01em; }
-  .nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.07); }
-  .nav-link.active { color: var(--text-primary); background: rgba(255,255,255,0.1); }
-  .event-card { background: var(--bg-card); border-radius: var(--radius-card); overflow: hidden; transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease; cursor: pointer; display: flex; flex-direction: column; border: 1px solid var(--border); box-shadow: var(--shadow-card); height: 100%; position: relative; }
-  .event-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 16px 48px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.15); }
-  .card-hover-overlay { position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.4) 50%,rgba(0,0,0,0) 100%);border-radius:calc(var(--radius-card) - 1px);display:flex;flex-direction:column;justify-content:flex-end;padding:16px;opacity:0;transition:opacity 0.25s;pointer-events:none;z-index:5; }
+  .nav-link { cursor: pointer; transition: all 0.15s; font-size: 0.88rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 99px; color: #9ca3af; letter-spacing: 0.01em; }
+  .nav-link:hover { color: #111; background: rgba(0,0,0,0.06); }
+  .nav-link.active { color: #111; background: #e5e7eb; border-radius: 99px; font-weight: 600; }
+  .event-card { background: #fff; border-radius: var(--radius-card); overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease; cursor: pointer; display: flex; flex-direction: column; border: none; box-shadow: var(--shadow-card); height: 100%; position: relative; }
+  .event-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
+  .card-hover-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.75);border-radius:11px;display:flex;flex-direction:column;justify-content:center;padding:16px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:5; }
   .event-card:hover .card-hover-overlay { opacity:1; }
-  .card-hover-overlay .oh-title { font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:5px;line-height:1.4; }
-  .card-hover-overlay .oh-desc { font-size:0.7rem;color:rgba(255,255,255,0.65);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical; }
-  .card-hover-overlay .oh-cta { margin-top:10px;font-size:0.68rem;font-weight:700;color:rgba(255,255,255,0.7); }
+  .card-hover-overlay .oh-title { font-size:0.8rem;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.4; }
+  .card-hover-overlay .oh-desc { font-size:0.68rem;color:rgba(255,255,255,0.7);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical; }
+  .card-hover-overlay .oh-cta { margin-top:10px;font-size:0.65rem;font-weight:700;color:#fff;opacity:0.6; }
   @media (hover: none) { .card-hover-overlay { display:none !important; } }
   /* Timeline view */
   .timeline-wrap { display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px; }
-  .timeline-line { position:absolute;left:27px;top:0;bottom:0;width:2px;background:var(--border);border-radius:99px; }
+  .timeline-line { position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px; }
   .timeline-item { display:flex;gap:14px;align-items:flex-start;padding-bottom:18px;position:relative; }
   .timeline-dot-wrap { position:absolute;left:-56px;display:flex;flex-direction:column;align-items:center;gap:2px;width:56px; }
-  .timeline-dow { font-size:0.58rem;font-weight:700;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase; }
+  .timeline-dow { font-size:0.58rem;font-weight:700;color:#9ca3af;letter-spacing:0.05em;text-transform:uppercase; }
   .timeline-circle { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1; }
   .timeline-circle span { font-size:0.82rem;font-weight:900;color:#fff; }
-  .timeline-card { flex:1;background:var(--bg-card);border-radius:var(--radius-card);padding:12px 14px;box-shadow:var(--shadow-card);cursor:pointer;transition:all 0.2s;border:1px solid var(--border);border-left:3px solid rgba(255,255,255,0.2); }
-  .timeline-card:hover { box-shadow:0 8px 32px rgba(0,0,0,0.3);background:var(--bg-surface); }
+  .timeline-card { flex:1;background:#fff;border-radius:var(--radius-card);padding:12px 14px;box-shadow:var(--shadow-card);cursor:pointer;transition:box-shadow 0.15s;border-left:3px solid #e5e7eb; }
+  .timeline-card:hover { box-shadow:0 4px 14px rgba(0,0,0,0.10); }
   .timeline-card-top { display:flex;align-items:center;gap:6px;margin-bottom:5px; }
-  .timeline-card-title { font-size:0.85rem;font-weight:700;color:var(--text-primary);line-height:1.35;margin-bottom:4px; }
-  .timeline-card-meta { font-size:0.68rem;color:var(--text-secondary);display:flex;gap:8px;flex-wrap:wrap; }
+  .timeline-card-title { font-size:0.85rem;font-weight:700;color:#111;line-height:1.35;margin-bottom:4px; }
+  .timeline-card-meta { font-size:0.68rem;color:#9ca3af;display:flex;gap:8px;flex-wrap:wrap; }
   /* list view */
-  .list-card { background:var(--bg-card);border-radius:var(--radius-card);border:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;transition:all 0.2s; }
-  .list-card:hover { background:var(--bg-surface);border-color:rgba(255,255,255,0.15);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,0.3); }
-  .list-card-img { width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#222; }
+  .list-card { background:#fff;border-radius:var(--radius-card);border:none;box-shadow:var(--shadow-card);display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:all 0.15s; }
+  .list-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.10);transform:translateY(-1px); }
+  .list-card-img { width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#f3f4f6; }
   .list-card-body { flex:1;min-width:0; }
-  .list-card-title { font-size:0.88rem;font-weight:700;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px; }
-  .list-card-meta { font-size:0.7rem;color:var(--text-secondary);display:flex;gap:8px;flex-wrap:wrap; }
-  .event-card:active { transform: translateY(-2px) scale(1.005); }
-  .card-img-placeholder { width: 100%; height: 220px; background: linear-gradient(135deg, #1a1a1a, #222); display: flex; align-items: center; justify-content: center; }
-  .card-img { width: 100%; height: 220px; object-fit: cover; object-position: top; display: block; background: #1a1a1a; }
+  .list-card-title { font-size:0.85rem;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px; }
+  .list-card-meta { font-size:0.68rem;color:#9ca3af;display:flex;gap:8px;flex-wrap:wrap; }
+  .event-card:active { transform: translateY(-1px) scale(1.002); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .card-img-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
+  .card-img { width: 100%; height: 200px; object-fit: cover; object-position: top; display: block; background: #f3f4f6; }
   .card-img.img-loading { filter: blur(8px); transform: scale(1.04); transition: filter 0.4s ease, transform 0.4s ease; }
   .card-img.img-loaded  { filter: none; transform: scale(1); }
-  .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+  .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   /* ── CALENDAR ── */
-  .cal-day { width:66px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:all 0.15s;box-sizing:border-box;position:relative;border:none;padding:0; color:var(--text-primary); }
-  .cal-day:hover { background: rgba(255,255,255,0.07); }
-  .cal-day-selected { background: rgba(255,255,255,0.95) !important; }
-  .cal-day-selected span { color: #0a0a0a !important; }
-  .cal-day-has-event::after { content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.4); }
-  .cal-day-selected.cal-day-has-event::after { background:rgba(0,0,0,0.4); }
+  .cal-day { width:66px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:background 0.15s;box-sizing:border-box;position:relative;border:none;padding:0; }
+  .cal-day:hover { background: #f3f4f6; }
+  .cal-day-selected { background: #111 !important; }
+  .cal-day-has-event::after { content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#6b7280; }
+  .cal-day-selected.cal-day-has-event::after { background:#fff; }
   .cal-events-wrap { display:none; }
   .cal-event-dot { display:none; }
   .cal-event-dot-circle { display:none; }
   /* event list right side */
-  .cal-list-item { display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:var(--radius-card);background:var(--bg-card);border:1px solid var(--border);cursor:pointer;transition:all 0.2s; }
-  .cal-list-item:hover { background:var(--bg-surface);border-color:rgba(255,255,255,0.15);transform:translateX(2px); }
+  .cal-list-item { display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:var(--radius-card);background:#fff;box-shadow:var(--shadow-card);cursor:pointer;transition:box-shadow 0.15s; }
+  .cal-list-item:hover { box-shadow:0 4px 14px rgba(0,0,0,0.10); }
   .cal-list-date { flex-shrink:0;width:48px;text-align:center; }
-  .cal-list-dow { font-size:0.65rem;font-weight:700;color:var(--text-muted);letter-spacing:0.07em;text-transform:uppercase; }
-  .cal-list-num { font-size:1.4rem;font-weight:800;color:var(--text-primary);line-height:1.1; }
+  .cal-list-dow { font-size:0.68rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;text-transform:uppercase; }
+  .cal-list-num { font-size:1.3rem;font-weight:700;color:#111;line-height:1.1; }
   .cal-list-bar { width:3px;border-radius:99px;align-self:stretch;flex-shrink:0; }
   .cal-list-body { flex:1;min-width:0; }
-  .cal-list-title { font-size:0.9rem;font-weight:700;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-  .cal-list-meta { font-size:0.75rem;color:var(--text-secondary);margin-top:3px;display:flex;align-items:center;gap:8px; }
-  .cal-list-time { font-size:0.88rem;font-weight:600;color:var(--text-secondary);flex-shrink:0; }
+  .cal-list-title { font-size:0.88rem;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .cal-list-meta { font-size:0.75rem;color:#9ca3af;margin-top:2px;display:flex;align-items:center;gap:8px; }
+  .cal-list-time { font-size:0.88rem;font-weight:600;color:#9ca3af;flex-shrink:0; }
   #cal-event-list::-webkit-scrollbar { width:4px; }
-  #cal-event-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1);border-radius:99px; }
+  #cal-event-list::-webkit-scrollbar-thumb { background:#e5e7eb;border-radius:99px; }
   /* mobile: stack cal top, list bottom */
   @media (max-width: 700px) {
     #cal-layout { grid-template-columns: 1fr !important; }
@@ -119,24 +101,23 @@
     .cal-day { width:100% !important; height:40px !important; }
     #cal-event-list { max-height: none !important; }
   }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid var(--border); border-top: 1px solid var(--border); width: 100%; }
-  .cal-grid > div { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
-  .modal-box { background: #181818; border-radius: 20px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.6); margin: auto; border: 1px solid var(--border); }
-  .form-input { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.95rem; outline: none; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.05); color: var(--text-primary); box-sizing: border-box; }
-  .form-input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); }
-  .form-input::placeholder { color: var(--text-muted); }
-  .form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.35rem; display: block; }
-  .btn-primary { background: #fff; color: #0a0a0a; border: none; border-radius: 10px; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-  .btn-primary:hover:not(:disabled) { background: #e5e5e5; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-primary); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-  .btn-secondary:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); }
-  .btn-danger { background: rgba(220,38,38,0.15); color: #f87171; border: 1px solid rgba(220,38,38,0.25); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-  .btn-danger:hover { background: rgba(220,38,38,0.25); }
-  #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); color: #0a0a0a; padding: 0.85rem 1.6rem; border-radius: 12px; font-size: 0.9rem; font-weight: 600; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
+  .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+  .modal-box { background: #fafaf8; border-radius: var(--radius-card); max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.12); margin: auto; }
+  .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.7rem 0.95rem; font-size: 1rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
+  .form-input:focus { border-color: #111; }
+  .form-label { font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 0.3rem; display: block; }
+  .btn-primary { background: #111; color: #fff; border: none; border-radius: 8px; padding: 0.7rem 1.35rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .btn-primary:hover:not(:disabled) { background: #333; }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary { background: #f3f4f6; color: #374151; border: none; border-radius: 8px; padding: 0.7rem 1.35rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .btn-secondary:hover { background: #e5e7eb; }
+  .btn-danger { background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+  .btn-danger:hover { background: #fecaca; }
+  #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #111; color: #fff; padding: 0.85rem 1.6rem; border-radius: 10px; font-size: 1rem; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   #toast.show { opacity: 1; pointer-events: auto; }
-  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; margin-right: 4px; }
+  .spinner { width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; margin-right: 4px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes shimmer {
     0%   { background-position: 200% 0; }
@@ -145,51 +126,51 @@
   @keyframes pill-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
-  .section-header { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+  .section-header { font-size: 1.5rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
   .artist-check { display: none; }
   .artist-check-label {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 16px; border-radius: 99px;
-    border: 1.5px solid var(--border);
+    padding: 6px 14px; border-radius: 99px;
+    border: 2px solid #e5e7eb;
     font-size: 0.8rem; font-weight: 600; cursor: pointer;
-    transition: all 0.2s;
-    color: var(--text-secondary); background: rgba(255,255,255,0.05); user-select: none;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+    color: #9ca3af; background: #fff; user-select: none;
   }
   /* Pond — orange */
-  label.artist-check-label[for="ac-pond"] { border-color: rgba(249,115,22,0.3); color: #f97316; }
-  label.artist-check-label[for="ac-pond"]:hover { border-color: #f97316; background: rgba(249,115,22,0.1); }
+  label.artist-check-label[for="ac-pond"] { border-color: #fed7aa; color: #f97316; }
+  label.artist-check-label[for="ac-pond"]:hover { border-color: #f97316; background: #fff7ed; }
   #ac-pond:checked + label.artist-check-label {
     background: #f97316 !important;
-    border-color: #f97316 !important;
-    color: #fff !important;
-    box-shadow: 0 0 20px rgba(249,115,22,0.35);
+    border-color: #ea6500 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(249,115,22,0.4);
     font-weight: 700;
   }
   /* Phuwin — slate */
-  label.artist-check-label[for="ac-phuwin"] { border-color: rgba(107,114,128,0.3); color: #9ca3af; }
-  label.artist-check-label[for="ac-phuwin"]:hover { border-color: #6b7280; background: rgba(107,114,128,0.1); }
+  label.artist-check-label[for="ac-phuwin"] { border-color: #d1d5db; color: #6b7280; }
+  label.artist-check-label[for="ac-phuwin"]:hover { border-color: #6b7280; background: #f9fafb; }
   #ac-phuwin:checked + label.artist-check-label {
     background: #4b5563 !important;
-    border-color: #4b5563 !important;
-    color: #fff !important;
-    box-shadow: 0 0 20px rgba(75,85,99,0.35);
+    border-color: #374151 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(75,85,99,0.4);
     font-weight: 700;
   }
   /* Permpoon — green */
-  label.artist-check-label[for="ac-permpoon"] { border-color: rgba(34,197,94,0.3); color: #22c55e; }
-  label.artist-check-label[for="ac-permpoon"]:hover { border-color: #22c55e; background: rgba(34,197,94,0.1); }
+  label.artist-check-label[for="ac-permpoon"] { border-color: #bbf7d0; color: #16a34a; }
+  label.artist-check-label[for="ac-permpoon"]:hover { border-color: #22c55e; background: #f0fdf4; }
   #ac-permpoon:checked + label.artist-check-label {
     background: #16a34a !important;
-    border-color: #16a34a !important;
-    color: #fff !important;
-    box-shadow: 0 0 20px rgba(22,163,74,0.35);
+    border-color: #15803d !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(22,163,74,0.4);
     font-weight: 700;
   }
   .detail-hero { width: 100%; max-height: 520px; object-fit: contain; background: transparent; display: block; border-radius: 0; }
-  .link-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; background: rgba(255,255,255,0.05); }
-  .link-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: var(--text-primary); }
-  footer { background: rgba(255,255,255,0.02); border-top: 1px solid var(--border); margin-top: auto; flex-shrink: 0; }
+  .link-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb; font-size: 0.82rem; font-weight: 600; color: #374151; text-decoration: none; transition: all 0.15s; }
+  .link-btn:hover { background: #f9f9f9; border-color: #d1d5db; }
+  footer { background: #fff; border-top: 1px solid #f0f0f0; margin-top: auto; flex-shrink: 0; }
   @media (max-width: 640px) {
     .cal-event-dot { font-size: 0.68rem; padding: 2px 4px; }
     .cal-day { height: 80px; padding: 4px; }
@@ -207,11 +188,11 @@
   }
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
-    #form-preview-col { border-left: none !important; border-top: 1px solid var(--border); }
+    #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
   }
-  .bday-banner { display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:12px;font-size:0.82rem;position:relative; }
+  .bday-banner { display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:0.82rem;position:relative; }
   .bday-today { animation: bday-pulse 2s ease-in-out infinite; }
-  @keyframes bday-pulse { 0%,100%{opacity:1} 50%{opacity:0.8} }
+  @keyframes bday-pulse { 0%,100%{opacity:1} 50%{opacity:0.85} }
   .bday-icon { font-size:1.3rem;flex-shrink:0; }
   .bday-countdown { font-size:0.7rem;font-weight:800;padding:3px 8px;border-radius:99px;margin-left:auto;flex-shrink:0;letter-spacing:0.05em; }
   .month-group { margin-bottom: 2.5rem; padding-top: 1.5rem; }
@@ -220,66 +201,116 @@
   .month-group-header-box { display: inline-flex; align-items: center; gap: 8px; }
   .month-group-header-dots { display: flex; gap: 4px; align-items: center; }
   .month-group-header-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .month-group-header-label { font-size: 1.3rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; }
-  .month-group-header-line { flex: 1; height: 1px; background: var(--border); border-radius: 99px; }
-  .month-group-header-count { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); background: rgba(255,255,255,0.1); border-radius: 6px; padding: 3px 10px; }
+  .month-group-header-label { font-size: 0.88rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
+  .month-group-header-line { flex: 1; height: 1px; background: #f3f4f6; border-radius: 99px; }
+  .month-group-header-count { font-size: 0.68rem; font-weight: 600; color: #fff; background: #111; border-radius: 6px; padding: 2px 8px; }
   /* Map embed */
   .map-embed-wrap { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
 
-
   /* ═══════════════════════════════════════════════════════════
-     MODERN FLUID RESPONSIVE SYSTEM
-     Netflix / Apple / Spotify style — full width, no fixed containers
+     RESPONSIVE SYSTEM — mobile-first, desktop unchanged
+     Breakpoints:
+       xs  : 320–480px   (small phones)
+       sm  : 480–768px   (large phones)
+       md  : 768–1024px  (tablets)
+       lg  : 1024px+     (desktop — original layout, untouched)
   ═══════════════════════════════════════════════════════════ */
 
-  /* ── Global safety ── */
+  /* ── Global safety (all screens) ── */
   *, *::before, *::after { box-sizing: border-box; }
   body { overflow-x: hidden !important; }
   img, iframe, video { max-width: 100%; }
 
-  /* ── Full-width page layout ── */
-  .page, .page > div, section { width: 100%; max-width: 100%; }
-  .fluid-wrap {
-    width: 100%;
-    padding-left: var(--fluid-pad);
-    padding-right: var(--fluid-pad);
-    box-sizing: border-box;
-  }
-
-  /* ── Auto responsive grid ── */
-  .cards-grid {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
-    gap: clamp(12px, 2vw, 20px) !important;
-    align-items: stretch !important;
-    width: 100% !important;
-  }
-
-  /* ── TABLET 768px – 1023px ── */
+  /* ══════════════════════════════════════════════
+     TABLET  768px – 1023px
+  ══════════════════════════════════════════════ */
   @media (max-width: 1023px) {
-    #cal-layout { grid-template-columns: 1fr !important; gap: 20px !important; }
+    /* Calendar: stack vertically */
+    #cal-layout {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+    }
     #cal-left { width: 100% !important; max-width: 100% !important; }
     #cal-event-list { max-height: none !important; }
+
+    /* Cards: 2 columns on tablet */
+    .cards-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    /* Home title */
     #home-title { font-size: 1.9rem !important; }
+
+    /* Page padding */
+    #page-home > div,
+    #page-calendar > div,
+    #admin-panel > div {
+      padding: 1.5rem 1.25rem !important;
+    }
+
+    /* Admin form preview */
     #form-preview-layout { grid-template-columns: 1fr !important; }
-    #form-preview-col { border-left: none !important; border-top: 1px solid var(--border); }
-    .cards-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
+    #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
   }
 
-  /* ── MOBILE max 767px ── */
+  /* ══════════════════════════════════════════════
+     MOBILE  max 767px  (phones — all sizes)
+  ══════════════════════════════════════════════ */
   @media (max-width: 767px) {
-    :root { --fluid-pad: 16px; }
+
+    /* ── Layout containers ── */
+    #page-home > div,
+    #page-calendar > div,
+    #admin-panel > div {
+      padding: 1rem 14px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
     #admin-login { padding: 1rem !important; }
     #admin-login > div { padding: 1.5rem 1.25rem !important; max-width: 100% !important; }
 
+    /* ── NAV ──
+       Logo left, nav links right — all in one line, compact */
+    nav > div {
+      height: 52px !important;
+      padding: 0 14px !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+    #nav-site-title {
+      font-size: 0.78rem !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    #nav-links { gap: 2px !important; flex-shrink: 0; }
+    .nav-link {
+      font-size: 0.72rem !important;
+      padding: 5px 8px !important;
+      border-radius: 6px !important;
+      white-space: nowrap;
+    }
+
+    /* ── Home hero text ── */
     #home-tagline { font-size: 0.68rem !important; letter-spacing: 0.08em !important; }
-    #home-title   { font-size: 1.4rem !important; line-height: 1.25 !important; letter-spacing: -0.03em !important; }
-    .section-header { font-size: 1.2rem !important; }
+    #home-title   { font-size: 1.4rem !important; line-height: 1.25 !important; letter-spacing: -0.02em !important; }
+    #page-home > div > div:first-child { margin-bottom: 1.25rem !important; }
+    #page-home > div > div:first-child > p:last-child { font-size: 0.82rem !important; }
+
+    /* ── Section headers ── */
+    .section-header { font-size: 1.15rem !important; }
     .month-group-header-label { font-size: 1.1rem !important; }
     .month-group { margin-bottom: 1.5rem !important; }
-    #bento-next { grid-row: span 1 !important; grid-column: span 2 !important; min-height: 140px !important; }
+    #page-home > div > div[style*="grid-template-columns:2fr"] { grid-template-columns: 1fr 1fr !important; }
+    #bento-next { grid-row: span 1 !important; grid-column: span 2 !important; min-height: 120px !important; }
+    /* If bento-ev2 is hidden, bento-next takes full width */
+    #bento-ev2[style*="display: none"] ~ #bento-next,
+    #bento-ev2[style*="display:none"] ~ #bento-next { grid-column: span 2 !important; }
 
+    /* ── Filter bar — horizontal scroll on mobile ── */
     #home-filter-bar {
       flex-wrap: nowrap !important;
       overflow-x: auto !important;
@@ -293,93 +324,203 @@
     #home-filter-bar > .flex-spacer { display: none !important; }
     #events-count { flex-shrink: 0 !important; }
     #home-filter-bar > div:last-child { flex-shrink: 0 !important; }
-    .artist-filter-btn, .cal-filter-btn { font-size: 0.72rem !important; padding: 5px 12px !important; flex-shrink: 0 !important; white-space: nowrap !important; }
 
-    .cards-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-    .card-img { height: 150px !important; }
+    /* ── Filter buttons — wrap, never overflow ── */
+    .artist-filter-btn, .cal-filter-btn {
+      font-size: 0.72rem !important;
+      padding: 4px 11px !important;
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+    }
 
-    #page-calendar > div > div:first-child { flex-wrap: wrap !important; gap: 8px !important; align-items: flex-start !important; }
-    #cal-month-label { font-size: 0.82rem !important; min-width: 100px !important; }
-    #cal-layout { grid-template-columns: 1fr !important; gap: 14px !important; }
+    /* ── Event cards: single column ── */
+    .cards-grid {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+
+    /* Card image height reduced on mobile */
+    .card-img { height: 170px !important; }
+
+    /* ── Calendar page header ── */
+    #page-calendar > div > div:first-child {
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      align-items: flex-start !important;
+    }
+    #cal-month-label {
+      font-size: 0.82rem !important;
+      min-width: 100px !important;
+    }
+    /* Calendar layout: stack */
+    #cal-layout {
+      grid-template-columns: 1fr !important;
+      gap: 14px !important;
+    }
     #cal-left { width: 100% !important; max-width: 100% !important; }
-    #cal-left > div:first-child > div { font-size: 0.62rem !important; padding: 5px 0 !important; }
+    /* Day-of-week headers */
+    #cal-left > div:first-child > div {
+      font-size: 0.62rem !important;
+      padding: 5px 0 !important;
+    }
+    /* Calendar day cells */
     .cal-day { width: 100% !important; height: 36px !important; border-radius: 6px !important; }
     .cal-day span { font-size: 0.75rem !important; }
-    #cal-event-list { max-height: none !important; overflow-y: visible !important; padding-right: 0 !important; gap: 6px !important; }
-    .cal-list-item { gap: 8px !important; padding: 10px 12px !important; }
-    .cal-list-title { font-size: 0.82rem !important; white-space: normal !important; }
+    /* Event list below calendar */
+    #cal-event-list {
+      max-height: none !important;
+      overflow-y: visible !important;
+      padding-right: 0 !important;
+      gap: 6px !important;
+    }
+    .cal-list-item { gap: 8px !important; padding: 9px 10px !important; }
+    .cal-list-title { font-size: 0.8rem !important; white-space: normal !important; }
     .cal-list-num   { font-size: 1rem !important; }
     .cal-list-dow   { font-size: 0.58rem !important; }
     .cal-list-time  { font-size: 0.75rem !important; }
     .cal-list-meta  { font-size: 0.68rem !important; }
-    .bday-banner { flex-wrap: wrap !important; gap: 6px !important; padding: 8px 12px !important; font-size: 0.75rem !important; }
+
+    /* ── Birthday banners ── */
+    .bday-banner {
+      flex-wrap: wrap !important;
+      gap: 6px !important;
+      padding: 8px 12px !important;
+      font-size: 0.75rem !important;
+    }
     .bday-countdown { margin-left: 0 !important; }
 
-    .modal-backdrop { padding: 0 !important; align-items: flex-end !important; }
-    .modal-box { border-radius: 20px 20px 0 0 !important; max-height: 92vh !important; max-width: 100% !important; width: 100% !important; }
+    /* ── Detail modal — bottom sheet style ── */
+    .modal-backdrop {
+      padding: 0 !important;
+      align-items: flex-end !important;
+    }
+    .modal-box {
+      border-radius: 20px 20px 0 0 !important;
+      max-height: 92vh !important;
+      max-width: 100% !important;
+      width: 100% !important;
+    }
     #detail-title { font-size: 1.15rem !important; }
-    .modal-box form > div[style*="grid-template-columns:1fr 1fr"], div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+
+    /* ── Admin form modal grids ── */
+    .modal-box form > div[style*="grid-template-columns:1fr 1fr"],
+    div[style*="grid-template-columns:1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
     #form-preview-layout { grid-template-columns: 1fr !important; }
+    #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
+
+    /* ── Admin list items ── */
     #admin-events-list > div { flex-wrap: wrap !important; gap: 8px !important; }
+
+    /* ── Map embed ── */
     .map-embed-wrap iframe { height: 220px !important; }
-    #toast { width: calc(100% - 28px) !important; left: 14px !important; transform: none !important; text-align: center !important; font-size: 0.85rem !important; bottom: 1rem !important; }
-    #preview-popup > div { max-width: 100% !important; border-radius: 20px 20px 0 0 !important; }
-    footer > div { padding: 1rem 16px !important; font-size: 0.72rem !important; }
+
+    /* ── Toast full-width ── */
+    #toast {
+      width: calc(100% - 28px) !important;
+      left: 14px !important;
+      transform: none !important;
+      text-align: center !important;
+      font-size: 0.85rem !important;
+      bottom: 1rem !important;
+    }
+
+    /* ── Preview popup bottom sheet ── */
+    #preview-popup > div {
+      max-width: 100% !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Footer ── */
+    footer > div { padding: 1rem 14px !important; font-size: 0.72rem !important; }
   }
 
-  /* ── SMALL PHONES max 480px ── */
+  /* ══════════════════════════════════════════════
+     SMALL PHONES  max 480px
+  ══════════════════════════════════════════════ */
   @media (max-width: 480px) {
-    :root { --fluid-pad: 14px; }
     #nav-site-title { max-width: 120px; font-size: 0.72rem !important; }
-    .nav-link { font-size: 0.68rem !important; padding: 4px 7px !important; }
-    #home-title { font-size: 1.2rem !important; }
-    .section-header { font-size: 1rem !important; }
-    .cards-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
-    .card-img { height: 130px !important; }
+    .nav-link { font-size: 0.68rem !important; padding: 4px 6px !important; }
+
+    #home-title { font-size: 1.25rem !important; }
+    .section-header { font-size: 1.05rem !important; }
+
+    /* Cards: single column, tighter */
+    .cards-grid { gap: 8px !important; }
+    .card-img { height: 150px !important; }
+
+    /* Calendar cells even smaller */
     .cal-day { height: 32px !important; }
     .cal-day span { font-size: 0.68rem !important; }
+
+    /* Admin login box */
     #admin-login > div { padding: 1.25rem 1rem !important; }
+
+    /* Tighter month group spacing */
     .month-group { margin-bottom: 1.25rem !important; }
+    .month-group-header { gap: 8px !important; margin-bottom: 0.8rem !important; }
+    .month-group-header-box { padding: 6px 14px !important; border-radius: 10px !important; }
+
+    /* Section header + count row */
+    #page-home > div > div[style*="justify-content:space-between"] {
+      flex-wrap: wrap !important;
+      gap: 4px !important;
+    }
+
+    /* Map height */
     .map-embed-wrap iframe { height: 180px !important; }
+
+    /* Detail modal title smaller */
     #detail-title { font-size: 1.05rem !important; }
   }
 
-  /* ── VERY SMALL max 360px ── */
+  /* ══════════════════════════════════════════════
+     VERY SMALL  max 360px  (SE, Galaxy A series)
+  ══════════════════════════════════════════════ */
   @media (max-width: 360px) {
-    :root { --fluid-pad: 12px; }
+    nav > div { padding: 0 10px !important; }
+    #nav-site-title { max-width: 100px; font-size: 0.68rem !important; }
     .nav-link { font-size: 0.62rem !important; padding: 4px 5px !important; }
+
     #home-title { font-size: 1.1rem !important; }
-    .cards-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+    #page-home > div,
+    #page-calendar > div,
+    #admin-panel > div { padding: 0.75rem 10px !important; }
+
+    .artist-filter-btn, .cal-filter-btn {
+      font-size: 0.65rem !important;
+      padding: 3px 9px !important;
+    }
+
     .cal-list-item { gap: 6px !important; padding: 8px !important; }
     .cal-list-date { width: 36px !important; }
+
+    /* Timeline: reduce left padding so it doesn't overflow */
     .timeline-wrap { padding-left: 44px !important; }
     .timeline-line { left: 20px !important; }
     .timeline-dot-wrap { left: -44px !important; width: 44px !important; }
     .timeline-circle { width: 28px !important; height: 28px !important; }
   }
 
-  /* ── NAV — full width, dark, glass effect ── */
+  /* ══════════════════════════════════════════════
+     NAV — responsive, no hamburger, CSS only
+  ══════════════════════════════════════════════ */
   #main-nav {
-    background: rgba(10,10,10,0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
+    background: #fafaf8;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
     flex-shrink: 0;
-    width: 100%;
-    position: sticky;
-    top: 0;
-    z-index: 100;
   }
   .nav-inner {
-    width: 100%;
-    padding: 0 var(--fluid-pad);
+    max-width: 1400px;
+    margin: auto;
+    padding: 0 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: var(--nav-height);
+    min-height: 48px;
     gap: 8px;
     flex-wrap: nowrap;
-    box-sizing: border-box;
   }
   .nav-logo {
     display: flex;
@@ -390,24 +531,24 @@
   }
   #nav-site-title {
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     letter-spacing: -0.03em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--text-primary);
+    color: #111;
   }
   .nav-links-wrap {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 0;
     flex-shrink: 0;
   }
 
-  /* Mobile nav */
+  /* Mobile: shrink label text, keep icons */
   @media (max-width: 480px) {
     #nav-site-title { font-size: 0.75rem; max-width: 130px; }
-    .nav-link { font-size: 0.72rem !important; padding: 6px 8px !important; }
+    .nav-link { font-size: 0.75rem !important; padding: 6px 8px !important; }
     .nav-label { display: none; }
   }
   @media (max-width: 360px) {
@@ -434,7 +575,7 @@
 
    <!-- HOME PAGE -->
    <div class="page active" id="page-home">
-    <div class="fluid-wrap" style="padding-top:2rem;padding-bottom:2rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
      <div id="bday-banners" style="display:none;flex-direction:column;gap:8px;margin-bottom:1.5rem;"></div>
 
      <!-- HERO -->
@@ -478,40 +619,40 @@
      <!-- FILTER BAR -->
      <div id="home-filter-bar" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:0.75rem;">
       <button class="artist-filter-btn" data-artist="all" onclick="filterHome('all')"
-        style="padding:5px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.9);color:#0a0a0a;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;" >All</button>
+        style="padding:5px 14px;border-radius:6px;border:1px solid #111;background:#111;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;" >All</button>
       <button class="artist-filter-btn" data-artist="Pond" onclick="filterHome('Pond')"
-        style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:8px;border:1px solid rgba(249,115,22,0.4);background:transparent;color:#f97316;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;"><span style="width:6px;height:6px;border-radius:50%;background:#f97316;display:inline-block;"></span>Pond</button>
+        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#f97316;display:inline-block;"></span>Pond</button>
       <button class="artist-filter-btn" data-artist="Phuwin" onclick="filterHome('Phuwin')"
-        style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:8px;border:1px solid rgba(107,114,128,0.4);background:transparent;color:var(--text-secondary);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;"><span style="width:6px;height:6px;border-radius:50%;background:#6b7280;display:inline-block;"></span>Phuwin</button>
+        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#6b7280;display:inline-block;"></span>Phuwin</button>
       <button class="artist-filter-btn" data-artist="Permpoon" onclick="filterHome('Permpoon')"
-        style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:8px;border:1px solid rgba(34,197,94,0.4);background:transparent;color:#22c55e;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>Permpoon</button>
+        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>Permpoon</button>
       <div style="flex:1;"></div>
-      <span id="events-count" style="font-size:0.68rem;font-weight:700;color:#0a0a0a;background:rgba(255,255,255,0.9);border-radius:6px;padding:2px 10px;"></span>
-      <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0;">
-       <button id="view-grid-btn" onclick="setViewMode('grid')" style="width:30px;height:28px;border-radius:6px;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Grid view">
-        <svg width="13" height="13" fill="none" stroke="#0a0a0a" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span id="events-count" style="font-size:0.68rem;font-weight:600;color:#fff;background:#111;border-radius:6px;padding:2px 10px;"></span>
+      <div style="display:flex;align-items:center;gap:2px;background:#f3f4f6;border-radius:8px;padding:3px;flex-shrink:0;">
+       <button id="view-grid-btn" onclick="setViewMode('grid')" style="width:30px;height:28px;border-radius:6px;background:#111;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Grid view">
+        <svg width="13" height="13" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
        </button>
        <button id="view-list-btn" onclick="setViewMode('list')" style="width:30px;height:28px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="List view">
-        <svg width="13" height="13" fill="none" stroke="var(--text-secondary)" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
        </button>
       </div>
      </div>
      <!-- SEARCH BAR -->
      <div style="position:relative;margin-bottom:1.25rem;">
-      <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;" width="15" height="15" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="home-search" type="text" placeholder="Search events, venues, artists..." oninput="onHomeSearch(this.value)" style="width:100%;box-sizing:border-box;padding:11px 40px 11px 40px;border:1px solid var(--border);border-radius:10px;font-size:0.88rem;outline:none;background:rgba(255,255,255,0.05);color:var(--text-primary);transition:border-color 0.2s,background 0.2s;" onfocus="this.style.borderColor='rgba(255,255,255,0.25)';this.style.background='rgba(255,255,255,0.08)'" onblur="this.style.borderColor='var(--border)';this.style.background='rgba(255,255,255,0.05)'">
-      <button id="home-search-clear" onclick="clearHomeSearch()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;cursor:pointer;padding:2px;color:var(--text-secondary);">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;" width="15" height="15" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="home-search" type="text" placeholder="Search events, venues, artists..." oninput="onHomeSearch(this.value)" style="width:100%;box-sizing:border-box;padding:9px 36px 9px 36px;border:1px solid #f0f0f0;border-radius:6px;font-size:0.85rem;outline:none;background:#f9fafb;color:#111;transition:border-color 0.2s;" onfocus="this.style.borderColor='#111'" onblur="this.style.borderColor='#f0f0f0'">
+      <button id="home-search-clear" onclick="clearHomeSearch()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;cursor:pointer;padding:2px;color:#9ca3af;">
        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
      </div>
      <div id="events-grid"></div>
      <div id="no-events" style="display:none;padding:3rem 1rem;">
-      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:48px 20px;text-align:center;max-width:440px;margin:auto;">
-       <div style="width:56px;height:56px;border-radius:16px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+      <div style="background:#fff;border:1px solid #f0f0f0;border-radius:16px;padding:48px 20px;text-align:center;max-width:400px;margin:auto;">
+       <div style="width:56px;height:56px;border-radius:16px;background:#f5f3ff;border:1.5px solid #e9d5ff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
         <i data-lucide="calendar-x" style="width:24px;height:24px;color:#a855f7;stroke-width:1.8;"></i>
        </div>
-       <p style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;" >No upcoming events</p>
-       <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:16px;" >Stay tuned for updates from Pond · Phuwin · Permpoon</p>
+       <p style="font-size:1rem;font-weight:700;color:#111;margin-bottom:6px;" >No upcoming events</p>
+       <p style="font-size:0.82rem;color:#9ca3af;margin-bottom:16px;" >Stay tuned for updates from Pond · Phuwin · Permpoon</p>
        <div style="display:flex;justify-content:center;gap:6px;">
         <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
         <div style="width:7px;height:7px;border-radius:50%;background:#6b7280;"></div>
@@ -520,23 +661,23 @@
       </div>
      </div>
     </div>
-    <footer><div class="fluid-wrap" style="padding-top:0.75rem;padding-bottom:0.75rem;text-align:center;font-size:0.65rem;color:var(--text-muted);letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
+    <footer><div style="max-width:1400px;margin:auto;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
    </div>
 
    <!-- CALENDAR PAGE -->
    <div class="page" id="page-calendar">
-    <div class="fluid-wrap" style="padding-top:2rem;padding-bottom:2rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
 
      <!-- Header -->
      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.25rem;">
       <div>
-       <h2 style="font-size:1.9rem;font-weight:800;letter-spacing:-0.04em;line-height:1.2;margin-bottom:4px;color:var(--text-primary);" id="cal-section-title">Calendar</h2>
-       <p style="color:var(--text-secondary);font-size:0.85rem;">concerts · fan meets · events</p>
+       <h2 style="font-size:1.9rem;font-weight:800;letter-spacing:-0.04em;line-height:1.2;margin-bottom:4px;color:#111;" id="cal-section-title">Calendar</h2>
+       <p style="color:#9ca3af;font-size:0.85rem;">concerts · fan meets · events</p>
       </div>
       <!-- Year selector -->
       <div style="display:flex;align-items:center;gap:6px;">
        <svg width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-       <select id="cal-year-select" onchange="onCalYearChange(this.value)" style="font-size:0.82rem;font-weight:700;color:var(--text-primary);background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;outline:none;">
+       <select id="cal-year-select" onchange="onCalYearChange(this.value)" style="font-size:0.82rem;font-weight:700;color:#111;background:#f9fafb;border:1px solid #f0f0f0;border-radius:6px;padding:5px 10px;cursor:pointer;outline:none;">
         <option value="2026">2026</option>
         <option value="2027">2027</option>
         <option value="2028">2028</option>
@@ -547,7 +688,7 @@
      <!-- Yearly stats — compact -->
      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem;">
       <!-- Dark summary row -->
-      <div style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="background:#111;border-radius:12px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
        <div style="display:flex;align-items:baseline;gap:10px;">
         <div id="cal-stat-total" style="font-size:2.2rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.04em;">-</div>
         <div id="cal-stat-year-label" style="font-size:0.62rem;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:0.08em;">2026 · Total</div>
@@ -571,29 +712,29 @@
       </div>
       <!-- Artist row -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-       <div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
+       <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
          <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
-         <span style="font-size:0.6rem;font-weight:700;color:#f97316;letter-spacing:0.08em;">POND</span>
+         <span style="font-size:0.6rem;font-weight:700;color:#ea580c;letter-spacing:0.08em;">POND</span>
         </div>
         <div id="cs-pond-total" style="font-size:1.6rem;font-weight:900;color:#f97316;line-height:1;letter-spacing:-0.02em;">-</div>
-        <div style="font-size:0.65rem;color:var(--text-muted);margin-left:auto;">Done <strong id="cs-pond-past" style="color:var(--text-secondary);">-</strong> · Left <strong id="cs-pond-up" style="color:#f97316;">-</strong></div>
+        <div style="font-size:0.65rem;color:#9ca3af;margin-left:auto;">Done <strong id="cs-pond-past" style="color:#111;">-</strong> · Left <strong id="cs-pond-up" style="color:#f97316;">-</strong></div>
        </div>
-       <div style="background:rgba(107,114,128,0.08);border:1px solid rgba(107,114,128,0.2);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
+       <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
          <div style="width:7px;height:7px;border-radius:50%;background:#6b7280;"></div>
-         <span style="font-size:0.6rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.08em;">PHUWIN</span>
+         <span style="font-size:0.6rem;font-weight:700;color:#4b5563;letter-spacing:0.08em;">PHUWIN</span>
         </div>
-        <div id="cs-phuwin-total" style="font-size:1.6rem;font-weight:900;color:var(--text-secondary);line-height:1;letter-spacing:-0.02em;">-</div>
-        <div style="font-size:0.65rem;color:var(--text-muted);margin-left:auto;">Done <strong id="cs-phuwin-past" style="color:var(--text-secondary);">-</strong> · Left <strong id="cs-phuwin-up" style="color:var(--text-secondary);">-</strong></div>
+        <div id="cs-phuwin-total" style="font-size:1.6rem;font-weight:900;color:#6b7280;line-height:1;letter-spacing:-0.02em;">-</div>
+        <div style="font-size:0.65rem;color:#9ca3af;margin-left:auto;">Done <strong id="cs-phuwin-past" style="color:#111;">-</strong> · Left <strong id="cs-phuwin-up" style="color:#6b7280;">-</strong></div>
        </div>
-       <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
+       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
          <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;"></div>
-         <span style="font-size:0.6rem;font-weight:700;color:#22c55e;letter-spacing:0.08em;">PERMPOON</span>
+         <span style="font-size:0.6rem;font-weight:700;color:#16a34a;letter-spacing:0.08em;">PERMPOON</span>
         </div>
         <div id="cs-permpoon-total" style="font-size:1.6rem;font-weight:900;color:#22c55e;line-height:1;letter-spacing:-0.02em;">-</div>
-        <div style="font-size:0.65rem;color:var(--text-muted);margin-left:auto;">Done <strong id="cs-permpoon-past" style="color:var(--text-secondary);">-</strong> · Left <strong id="cs-permpoon-up" style="color:#22c55e;">-</strong></div>
+        <div style="font-size:0.65rem;color:#9ca3af;margin-left:auto;">Done <strong id="cs-permpoon-past" style="color:#111;">-</strong> · Left <strong id="cs-permpoon-up" style="color:#22c55e;">-</strong></div>
        </div>
       </div>
      </div>
@@ -609,26 +750,34 @@
      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;">
       
       <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
-        style="padding:5px 16px;border-radius:99px;border:1.5px solid rgba(255,255,255,0.9);background:rgba(255,255,255,0.9);color:#0a0a0a;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;" >All</button>
+        style="padding:5px 16px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;" >All</button>
       <button class="cal-filter-btn" data-artist="Pond" onclick="filterCalendar('Pond')"
-        style="padding:5px 16px;border-radius:99px;border:1.5px solid rgba(249,115,22,0.5);background:transparent;color:#f97316;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;">Pond</button>
+        style="padding:5px 16px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
       <button class="cal-filter-btn" data-artist="Phuwin" onclick="filterCalendar('Phuwin')"
-        style="padding:5px 16px;border-radius:99px;border:1.5px solid rgba(107,114,128,0.5);background:transparent;color:var(--text-secondary);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;">Phuwin</button>
+        style="padding:5px 16px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
       <button class="cal-filter-btn" data-artist="Permpoon" onclick="filterCalendar('Permpoon')"
-        style="padding:5px 16px;border-radius:99px;border:1.5px solid rgba(34,197,94,0.5);background:transparent;color:#22c55e;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;">Permpoon</button>
+        style="padding:5px 16px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
+
+      <div style="width:1px;height:20px;background:#e5e7eb;flex-shrink:0;margin:0 2px;"></div>
+
+      <button id="cal-show-all-btn" onclick="calSelectedDate=null;renderCalendar();updateCalShowAllBtn();"
+        style="padding:5px 14px;border-radius:99px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px;">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        All dates
+      </button>
      </div>
 
      <!-- NEXT EVENT BANNER -->
-     <div id="cal-next-event-banner" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-card);padding:14px 16px;margin-bottom:1.25rem;align-items:center;gap:14px;cursor:pointer;" onclick="openDetailModal(this.dataset.eventId)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openDetailModal(this.dataset.eventId)">
-      <div id="cal-next-event-icon" style="width:44px;height:44px;border-radius:12px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+     <div id="cal-next-event-banner" style="display:none;background:#fff;border:none;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:14px 16px;margin-bottom:1.25rem;align-items:center;gap:14px;cursor:pointer;" onclick="openDetailModal(this.dataset.eventId)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openDetailModal(this.dataset.eventId)">
+      <div id="cal-next-event-icon" style="width:44px;height:44px;border-radius:12px;background:#fff7ed;border:1.5px solid #fed7aa;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
        <svg width="20" height="20" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
       <div style="flex:1;min-width:0;">
        <div id="cal-next-event-label" style="font-size:0.68rem;font-weight:700;color:#f97316;margin-bottom:2px;letter-spacing:0.04em;"></div>
-       <div id="cal-next-event-title" style="font-size:0.88rem;font-weight:700;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-       <div id="cal-next-event-meta" style="font-size:0.72rem;color:var(--text-secondary);margin-top:2px;"></div>
+       <div id="cal-next-event-title" style="font-size:0.88rem;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+       <div id="cal-next-event-meta" style="font-size:0.72rem;color:#9ca3af;margin-top:2px;"></div>
       </div>
-      <svg width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
      </div>
 
      <!-- Layout: mini calendar left + event list right -->
@@ -638,60 +787,61 @@
       <div id="cal-left" style="width:500px;flex-shrink:0;min-width:0;max-width:100%;">
        <!-- day headers -->
        <div id="cal-dow-headers" style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
-        <div style="text-align:center;font-size:0.78rem;font-weight:700;color:var(--text-muted);padding:8px 0;" data-dow="0">S</div>
-        <div style="text-align:center;font-size:0.78rem;font-weight:700;color:var(--text-muted);padding:8px 0;" data-dow="1">M</div>
-        <div style="text-align:center;font-size:0.78rem;font-weight:700;color:var(--text-muted);padding:8px 0;" data-dow="2">T</div>
-        <div style="text-align:center;font-size:0.78rem;font-weight:700;color:var(--text-muted);padding:8px 0;" data-dow="3">W</div>
-        <div style="text-align:center;font-size:0.78rem;font-weight:700;color:var(--text-muted);padding:8px 0;" data-dow="4">T</div>
-        <div style="text-align:center;font-size:0.78rem;font-weight:700;color:var(--text-muted);padding:8px 0;" data-dow="5">F</div>
-        <div style="text-align:center;font-size:0.78rem;font-weight:700;color:var(--text-muted);padding:8px 0;" data-dow="6">S</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="0">S</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="1">M</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="2">T</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="3">W</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="4">T</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="5">F</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="6">S</div>
        </div>
        <div id="cal-grid" class="cal-grid" style="border:none;"></div>
       </div>
 
       <!-- RIGHT: Event list (scrollable) -->
       <div style="min-width:0;">
-       <div id="cal-event-list" style="display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto;padding-right:4px;">
-        <div style="text-align:center;padding:3rem;color:var(--text-secondary);font-size:0.85rem;">Loading...</div>
+       <div id="cal-list-header"></div>
+       <div id="cal-event-list" style="display:flex;flex-direction:column;gap:8px;max-height:480px;overflow-y:auto;padding-right:4px;">
+        <div style="text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;">Loading...</div>
        </div>
-       <div id="cal-no-events" style="display:none;text-align:center;padding:3rem;color:var(--text-secondary);">
+       <div id="cal-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
         <p style="font-weight:600;">No events this month</p>
        </div>
       </div>
 
      </div>
     </div>
-    <footer><div class="fluid-wrap" style="padding-top:0.75rem;padding-bottom:0.75rem;text-align:center;font-size:0.65rem;color:var(--text-muted);letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
+    <footer><div style="max-width:1400px;margin:auto;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
    </div>
 
    <!-- ADMIN PAGE -->
    <div class="page" id="page-admin">
     <div id="admin-login" style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;">
-     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.4);padding:2.5rem;max-width:380px;width:100%;">
+     <div style="background:#fff;border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:2.5rem;max-width:380px;width:100%;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;">
-       <div style="width:36px;height:36px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-        <i data-lucide="lock" style="width:18px;height:18px;color:#0a0a0a;stroke-width:2;"></i>
+       <div style="width:36px;height:36px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <i data-lucide="lock" style="width:18px;height:18px;color:#fff;stroke-width:2;"></i>
        </div>
        <div>
-        <h2 style="font-weight:700;font-size:1.1rem;margin:0;color:var(--text-primary);" >Admin Login</h2>
-        <p style="font-size:0.72rem;color:var(--text-secondary);margin:2px 0 0;">PondPhuwin &amp; Permpoon Schedule Management</p>
+        <h2 style="font-weight:700;font-size:1.1rem;margin:0;" >Admin Login</h2>
+        <p style="font-size:0.72rem;color:#9ca3af;margin:2px 0 0;">PondPhuwin &amp; Permpoon Schedule Management</p>
        </div>
       </div>
       <label class="form-label" for="login-pw-field" >Password</label>
       <input class="form-input" id="login-pw-field" type="password" placeholder="Enter admin password" style="margin-bottom:0.75rem;" autocomplete="current-password">
-      <div id="login-pw-err" style="font-size:0.8rem;color:#f87171;margin-bottom:0.75rem;display:none;background:rgba(220,38,38,0.15);padding:8px 12px;border-radius:6px;border:1px solid rgba(220,38,38,0.25);" >Incorrect password. Try again.</div>
+      <div id="login-pw-err" style="font-size:0.8rem;color:#dc2626;margin-bottom:0.75rem;display:none;background:#fee2e2;padding:8px 12px;border-radius:6px;" >Incorrect password. Try again.</div>
       <button class="btn-primary" onclick="doAdminLogin()" style="width:100%;" >Log In</button>
       <div style="margin-top:1.25rem;text-align:center;">
-       <button style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--text-secondary);" onclick="navigate('home')" >← Back to schedule</button>
+       <button style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:#9ca3af;" onclick="navigate('home')" >← Back to schedule</button>
       </div>
      </div>
     </div>
     <div id="admin-panel" style="display:none;flex:1;flex-direction:column;">
-     <div class="fluid-wrap" style="padding-top:2rem;padding-bottom:2rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
        <div>
         <h2 class="section-header" >Admin Panel</h2>
-        <p style="font-size:0.82rem;color:var(--text-secondary);margin-top:2px;" >Manage events</p>
+        <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;" >Manage events</p>
        </div>
        <button class="btn-secondary" onclick="adminLogout()"><i data-lucide="log-out" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span >Logout</span></button>
       </div>
@@ -700,29 +850,29 @@
        <button class="btn-secondary" onclick="adminRefresh()" id="admin-refresh-btn" style="display:flex;align-items:center;gap:5px;"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i><span >Refresh</span></button>
       </div>
       <div id="admin-events-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-      <div id="admin-no-events" style="display:none;text-align:center;padding:3rem;color:var(--text-secondary);">
+      <div id="admin-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
        <i data-lucide="inbox" style="width:36px;height:36px;display:block;margin:0 auto 0.75rem;stroke-width:1.5;"></i>
        <p style="font-weight:600;" >No events yet.</p>
        <p style="font-size:0.82rem;margin-top:3px;">Click "Add Event" to get started.</p>
       </div>
-      <div id="admin-limit-warn" style="display:none;margin-top:1rem;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.25);border-radius:8px;padding:0.75rem 1rem;font-size:0.82rem;color:#fbbf24;">
+      <div id="admin-limit-warn" style="display:none;margin-top:1rem;background:#fef3c7;border-radius:8px;padding:0.75rem 1rem;font-size:0.82rem;color:#92400e;">
        <i data-lucide="alert-triangle" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:4px;"></i>Maximum of 999 events reached.
       </div>
 
       <!-- BIRTHDAY MANAGER -->
-      <div style="margin-top:2.5rem;border-top:1px solid var(--border);padding-top:2rem;">
+      <div style="margin-top:2.5rem;border-top:1px solid #f0f0f0;padding-top:2rem;">
        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <div>
          <h3 style="font-weight:700;font-size:1rem;letter-spacing:-0.01em;">
-          <i data-lucide="cake" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:var(--text-secondary);stroke-width:2;"></i>Artist Birthdays
+          <i data-lucide="cake" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;stroke-width:2;"></i>Artist Birthdays
          </h3>
-         <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:2px;">Artist birthdays — shows countdown banner on Home and Calendar</p>
+         <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">Artist birthdays — shows countdown banner on Home and Calendar</p>
         </div>
         <button class="btn-secondary" style="font-size:0.82rem;padding:6px 12px;" onclick="openBdayForm()">
          <i data-lucide="plus" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Add
         </button>
        </div>
-       <div id="bday-form-wrap" style="display:none;background:var(--bg-surface);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border:1px solid var(--border);">
+       <div id="bday-form-wrap" style="display:none;background:#f9fafb;border-radius:12px;padding:1.25rem;margin-bottom:1rem;border:1px solid #e5e7eb;">
         <p style="font-weight:700;font-size:0.85rem;margin-bottom:1rem;">Add Artist Birthday</p>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
          <div style="grid-column:1/-1;">
@@ -740,8 +890,8 @@
          <div style="grid-column:3/-1;">
           <label class="form-label">Color</label>
           <div style="display:flex;align-items:center;gap:8px;">
-           <input type="color" id="bday-color" value="#6b7280" style="width:40px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px;">
-           <span style="font-size:0.78rem;color:var(--text-secondary);">Banner color</span>
+           <input type="color" id="bday-color" value="#6b7280" style="width:40px;height:36px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;padding:2px;">
+           <span style="font-size:0.78rem;color:#9ca3af;">Banner color</span>
           </div>
          </div>
         </div>
@@ -754,19 +904,19 @@
       </div>
 
       <!-- ANNIVERSARY MANAGER -->
-      <div style="margin-top:2rem;border-top:1px solid var(--border);padding-top:2rem;">
+      <div style="margin-top:2rem;border-top:1px solid #f0f0f0;padding-top:2rem;">
        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <div>
          <h3 style="font-weight:700;font-size:1rem;letter-spacing:-0.01em;">
-          <i data-lucide="heart" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:var(--text-secondary);stroke-width:2;"></i>Anniversary &amp; Special Dates
+          <i data-lucide="heart" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;stroke-width:2;"></i>Anniversary &amp; Special Dates
          </h3>
-         <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:2px;">Anniversaries, debuts, special dates</p>
+         <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">Anniversaries, debuts, special dates</p>
         </div>
         <button class="btn-secondary" style="font-size:0.82rem;padding:6px 12px;" onclick="openAnnivForm()">
          <i data-lucide="plus" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Add
         </button>
        </div>
-       <div id="anniv-form-wrap" style="display:none;background:var(--bg-surface);border-radius:12px;padding:1.25rem;margin-bottom:1rem;border:1px solid var(--border);">
+       <div id="anniv-form-wrap" style="display:none;background:#f9fafb;border-radius:12px;padding:1.25rem;margin-bottom:1rem;border:1px solid #e5e7eb;">
         <p style="font-weight:700;font-size:0.85rem;margin-bottom:1rem;">Add New Anniversary</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
          <div style="grid-column:1/-1;">
@@ -782,12 +932,12 @@
           <input class="form-input" id="anniv-day" type="number" min="1" max="31">
          </div>
          <div>
-          <label class="form-label">Start Year <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+          <label class="form-label">Start Year <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
           <input class="form-input" id="anniv-year" type="number" min="2000" max="2099">
          </div>
          <div>
           <label class="form-label">Banner Color</label>
-          <input type="color" id="anniv-color" value="#a855f7" style="width:40px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px;">
+          <input type="color" id="anniv-color" value="#a855f7" style="width:40px;height:36px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;padding:2px;">
          </div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
@@ -804,7 +954,7 @@
 
   <!-- DETAIL MODAL -->
   <div class="modal-backdrop" id="detail-modal" style="display:none;" onclick="closeDetailModalBackdrop(event)">
-   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:680px;width:100%;background:#181818;border-radius:20px;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+   <div class="modal-box" onclick="event.stopPropagation()" style="max-width:680px;width:100%;background:#fff;border-radius:20px;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
     <div style="position:relative;line-height:0;">
      <div id="detail-img-wrap"></div>
      <button onclick="closeDetailModal()" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);border:none;border-radius:99px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
@@ -816,14 +966,14 @@
     </div>
     <div style="padding:1.25rem;">
      <div id="detail-artist-badge" style="margin-bottom:0.6rem;"></div>
-     <h2 id="detail-title" style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.6rem;line-height:1.3;color:var(--text-primary);"></h2>
+     <h2 id="detail-title" style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.6rem;line-height:1.3;"></h2>
      <div id="detail-meta" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;"></div>
      <div id="detail-desc-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:0.4rem;" >DESCRIPTION</p>
-      <p id="detail-desc" style="font-size:0.88rem;line-height:1.6;color:var(--text-secondary);"></p>
+      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.4rem;" >DESCRIPTION</p>
+      <p id="detail-desc" style="font-size:0.88rem;line-height:1.6;color:#374151;"></p>
      </div>
      <div id="detail-links-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:0.75rem;" >LINKS</p>
+      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;" >LINKS</p>
       <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
      </div>
      <div id="detail-cal-wrap" style="display:none;margin-bottom:1.25rem;"></div>
@@ -835,7 +985,7 @@
       <div id="detail-ticket-btns" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
      </div>
      <div id="detail-map-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:var(--text-muted);letter-spacing:0.08em;margin-bottom:0.75rem;" >MAP</p>
+      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;" >MAP</p>
       <div id="detail-map" class="map-embed-wrap"></div>
      </div>
     </div>
@@ -847,7 +997,7 @@
    <div class="modal-box" onclick="event.stopPropagation()" style="max-width:720px;">
     <div style="padding:1.5rem 1.5rem 0;">
      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-      <h3 id="form-modal-title" style="font-weight:700;font-size:1.1rem;color:var(--text-primary);"></h3>
+      <h3 id="form-modal-title" style="font-weight:700;font-size:1.1rem;"></h3>
       <button onclick="closeEventFormModal()" style="background:none;border:none;cursor:pointer;padding:4px;">
        <i data-lucide="x" style="width:20px;height:20px;stroke-width:2.5;"></i>
       </button>
@@ -857,12 +1007,12 @@
      <form id="event-form" novalidate>
 
       <!-- ── Main Info ── -->
-      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Main Info</p>
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Main Info</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
 
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-title" style="font-weight:700;">Event Name <span style="color:#ec4899;">*</span></label>
-        <input class="form-input" id="ev-title" name="title" placeholder="e.g. Pond Concert Night" style="border:1.5px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);font-weight:600;" aria-required="true">
+        <input class="form-input" id="ev-title" name="title" placeholder="e.g. Pond Concert Night" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;" aria-required="true">
        </div>
 
        <div style="grid-column:1/-1;">
@@ -879,11 +1029,11 @@
 
        <div>
         <label class="form-label" for="ev-dateStart" style="font-weight:700;">Date Start <span style="color:#ec4899;">*</span></label>
-        <input class="form-input" id="ev-dateStart" name="dateStart" type="date" style="border:1.5px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);font-weight:600;" aria-required="true">
+        <input class="form-input" id="ev-dateStart" name="dateStart" type="date" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;" aria-required="true">
        </div>
        <div>
-        <label class="form-label" style="font-weight:700;color:var(--text-secondary);">Status <span style="font-weight:400;font-size:0.78rem;">(auto)</span></label>
-        <div style="padding:0.6rem 0.95rem;border-radius:8px;background:var(--bg-surface);border:1px solid var(--border);font-size:0.82rem;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+        <label class="form-label" style="font-weight:700;color:#9ca3af;">Status <span style="font-weight:400;font-size:0.78rem;">(auto)</span></label>
+        <div style="padding:0.6rem 0.95rem;border-radius:8px;background:#f9fafb;border:1px solid #e5e7eb;font-size:0.82rem;color:#6b7280;display:flex;align-items:center;gap:6px;">
          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
          Past if date &lt; today · Upcoming if date ≥ today
         </div>
@@ -891,73 +1041,73 @@
 
        <div>
         <label class="form-label" for="ev-startTime" style="font-weight:700;">Start Time <span style="color:#ec4899;">*</span></label>
-        <input class="form-input" id="ev-startTime" name="startTime" type="text" placeholder="e.g. 18:00 GMT+7" style="border:1.5px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.06);font-weight:600;">
+        <input class="form-input" id="ev-startTime" name="startTime" type="text" placeholder="e.g. 18:00 GMT+7" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
        </div>
        <div>
-        <label class="form-label" for="ev-endTime">End Time <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-endTime">End Time <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-endTime" name="endTime" type="text" placeholder="e.g. 21:00 GMT+7">
        </div>
 
       </div>
 
       <!-- ── Details ── -->
-      <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.1);margin:0.25rem 0 0.85rem;">
-      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Details <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(optional)</span></p>
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Details <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(optional)</span></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
 
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-image">Image URL <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-image">Image URL <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-image" name="image" placeholder="https://...jpg" oninput="previewAdminImg('ev-image','prev-image')">
-        <div id="prev-image" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;max-height:160px;border:1px solid var(--border);">
+        <div id="prev-image" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;max-height:160px;border:1px solid #e5e7eb;">
          <img style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;" alt="preview">
         </div>
        </div>
 
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-heroImage">Hero Image URL <span style="font-weight:400;color:var(--text-secondary);">(Artist portrait — used in Hero banner instead of the main image)</span></label>
+        <label class="form-label" for="ev-heroImage">Hero Image URL <span style="font-weight:400;color:#9ca3af;">(Artist portrait — used in Hero banner instead of the main image)</span></label>
         <input class="form-input" id="ev-heroImage" name="heroImage" placeholder="https://...jpg" oninput="previewAdminImg('ev-heroImage','prev-heroImage')">
-        <div id="prev-heroImage" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;max-height:160px;border:1px solid var(--border);">
+        <div id="prev-heroImage" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;max-height:160px;border:1px solid #e5e7eb;">
          <img style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;" alt="preview">
         </div>
        </div>
 
        <div>
-        <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:var(--text-secondary);">(if multi-day)</span></label>
+        <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:#9ca3af;">(if multi-day)</span></label>
         <input class="form-input" id="ev-dateEnd" name="dateEnd" type="date">
        </div>
        <div>
-        <label class="form-label" for="ev-type">Event Type <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-type">Event Type <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-type" name="type" placeholder="e.g. Fanmeet, Concert, Live">
        </div>
 
        <div>
-        <label class="form-label" for="ev-country">Country <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-country">Country <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-country" name="country" placeholder="e.g. Thailand">
        </div>
        <div>
-        <label class="form-label" for="ev-city">City <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-city">City <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-city" name="city" placeholder="e.g. Bangkok">
        </div>
 
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-location">Location Name <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-location">Location Name <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-location" name="location" placeholder="e.g. Impact Arena">
        </div>
 
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-description">Description <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-description">Description <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <textarea class="form-input" id="ev-description" name="description" rows="3" placeholder="Event details..."></textarea>
        </div>
 
        <div style="grid-column:1/-1;">
-        <label class="form-label" for="ev-note">Note <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-note">Note <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-note" name="note" placeholder="e.g. live on YouTube, time not confirmed">
        </div>
 
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-tv">
          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:-2px;margin-right:3px;color:#6b7280;"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>
-         TV Channel <span style="font-weight:400;color:var(--text-secondary);">(optional)</span>
+         TV Channel <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
         <input class="form-input" id="ev-tv" name="tv" placeholder="e.g. GMM25, ONE31, PPTV, NHK, Netflix...">
        </div>
@@ -965,7 +1115,7 @@
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-map">
          <svg width="13" height="13" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:3px;" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-         Google Maps Embed <span style="font-weight:400;color:var(--text-secondary);">(optional)</span>
+         Google Maps Embed <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
         <textarea class="form-input" id="ev-map" name="map" rows="2" placeholder='Paste Google Maps iframe embed code'></textarea>
        </div>
@@ -973,8 +1123,8 @@
       </div>
 
       <!-- ── Links ── -->
-      <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.1);margin:0.25rem 0 0.85rem;">
-      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">Links <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(all optional)</span></p>
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Links <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(all optional)</span></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
        <div>
         <label class="form-label" for="ev-youtube">YouTube</label>
@@ -1019,39 +1169,39 @@
       </div>
 
       <!-- ── Ticket Links ── -->
-      <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.1);margin:0.25rem 0 0.85rem;">
+      <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
       <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#f97316;margin-bottom:0.4rem;">
        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:4px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
        Ticket Links
       </p>
-      <p style="font-size:0.72rem;color:var(--text-secondary);margin-bottom:0.85rem;">ThaiTicketMajor, AllTicket, Ticketmaster, Eventpop, LiveNation etc. — shows Buy Ticket button on event card</p>
+      <p style="font-size:0.72rem;color:#9ca3af;margin-bottom:0.85rem;">ThaiTicketMajor, AllTicket, Ticketmaster, Eventpop, LiveNation etc. — shows Buy Ticket button on event card</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
        <div>
         <label class="form-label" for="ev-ticket1">
          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:3px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
-         Ticket Link 1 <span style="font-size:0.7rem;font-weight:600;background:rgba(249,115,22,0.12);color:#f97316;padding:1px 6px;border-radius:4px;margin-left:3px;">Main</span>
+         Ticket Link 1 <span style="font-size:0.7rem;font-weight:600;background:#fff7ed;color:#c2410c;padding:1px 6px;border-radius:4px;margin-left:3px;">Main</span>
         </label>
         <input class="form-input" id="ev-ticket1" name="ticket1" placeholder="https://www.thaiticketmajor.com/...">
        </div>
        <div>
-        <label class="form-label" for="ev-ticket2">Ticket Link 2 <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-ticket2">Ticket Link 2 <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-ticket2" name="ticket2" placeholder="https://www.allticket.com/...">
        </div>
        <div>
-        <label class="form-label" for="ev-ticket3">Ticket Link 3 <span style="font-weight:400;color:var(--text-secondary);">(optional)</span></label>
+        <label class="form-label" for="ev-ticket3">Ticket Link 3 <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
         <input class="form-input" id="ev-ticket3" name="ticket3" placeholder="https://www.eventpop.me/...">
        </div>
        <div>
         <label class="form-label" for="ev-ticket-live">
          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#ef4444"/></svg>
-         Live Stream Ticket <span style="font-weight:400;color:var(--text-secondary);">(optional)</span>
+         Live Stream Ticket <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
         <input class="form-input" id="ev-ticket-live" name="ticketLive" placeholder="https://...">
        </div>
        <div>
         <label class="form-label" for="ev-ticket-fanclub">
          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:3px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-         Fanclub Ticket <span style="font-weight:400;color:var(--text-secondary);">(optional)</span>
+         Fanclub Ticket <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
         <input class="form-input" id="ev-ticket-fanclub" name="ticketFanclub" placeholder="https://...">
        </div>
@@ -1074,9 +1224,9 @@
 
   <!-- PREVIEW POPUP -->
   <div id="preview-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:400;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closePreviewPopup();">
-   <div style="background:#181818;border-radius:20px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem 0.75rem;border-bottom:1px solid var(--border);">
-     <p style="font-weight:700;font-size:0.95rem;color:var(--text-primary);">Card Preview</p>
+   <div style="background:#fff;border-radius:20px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem 0.75rem;border-bottom:1px solid #f0f0f0;">
+     <p style="font-weight:700;font-size:0.95rem;">Card Preview</p>
      <button onclick="closePreviewPopup()" style="background:none;border:none;cursor:pointer;padding:4px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
      </button>
@@ -1677,16 +1827,16 @@ function showSkeletons() {
   if (!grid) return;
   if (noEv) noEv.style.display = 'none';
   const skel = (w1,w2) => `
-    <div style="background:var(--bg-card);border-radius:16px;overflow:hidden;border:1px solid var(--border);">
-      <div style="height:190px;background:linear-gradient(90deg,#1e1e1e 0%,#2a2a2a 40%,#1e1e1e 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;"></div>
+    <div style="background:#fff;border-radius:16px;overflow:hidden;border:1.5px solid #f0f0f0;">
+      <div style="height:190px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;"></div>
       <div style="padding:0.9rem;">
         <div style="display:flex;gap:6px;margin-bottom:10px;">
-          <div style="height:10px;width:40px;background:linear-gradient(90deg,#1e1e1e 0%,#2a2a2a 40%,#1e1e1e 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
-          <div style="height:10px;width:30px;background:linear-gradient(90deg,#1e1e1e 0%,#2a2a2a 40%,#1e1e1e 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
+          <div style="height:10px;width:40px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
+          <div style="height:10px;width:30px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
         </div>
-        <div style="height:16px;background:linear-gradient(90deg,#1e1e1e 0%,#2a2a2a 40%,#1e1e1e 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:8px;width:${w1};"></div>
-        <div style="height:13px;background:linear-gradient(90deg,#1e1e1e 0%,#2a2a2a 40%,#1e1e1e 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:6px;width:${w2};"></div>
-        <div style="height:11px;background:linear-gradient(90deg,#1e1e1e 0%,#2a2a2a 40%,#1e1e1e 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;width:55%;"></div>
+        <div style="height:16px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:8px;width:${w1};"></div>
+        <div style="height:13px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:6px;width:${w2};"></div>
+        <div style="height:11px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;width:55%;"></div>
       </div>
     </div>`;
   const widths = [['85%','70%'],['75%','60%'],['90%','75%'],['80%','65%'],['70%','80%'],['88%','72%']];
@@ -1709,11 +1859,11 @@ function showConnectionError() {
   const noEv = document.getElementById('no-events');
   if (noEv) noEv.style.display = 'none';
   if (!grid) return;
-  grid.innerHTML = `<div style="text-align:center;padding:4rem 1rem;color:var(--text-secondary);">
-    <div style="width:48px;height:48px;background:rgba(220,38,38,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+  grid.innerHTML = `<div style="text-align:center;padding:4rem 1rem;color:#9ca3af;">
+    <div style="width:48px;height:48px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
-    <p style="font-weight:700;color:var(--text-primary);margin-bottom:0.35rem;">Cannot connect to Google Sheets</p>
+    <p style="font-weight:700;color:#374151;margin-bottom:0.35rem;">Cannot connect to Google Sheets</p>
     <p style="font-size:0.82rem;margin-bottom:1.25rem;">Please check that your Apps Script is deployed</p>
     <button onclick="retryConnection()" style="background:#111;color:#fff;border:none;border-radius:8px;padding:0.6rem 1.25rem;font-size:0.88rem;font-weight:600;cursor:pointer;">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:-2px;margin-right:5px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Retry
@@ -1729,7 +1879,7 @@ function showStaleWarning() {
   if (existing) return;
   const warn = document.createElement('div');
   warn.id = 'stale-warn';
-  warn.style.cssText = 'background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.2);border-radius:8px;padding:8px 14px;font-size:0.78rem;color:#fbbf24;margin-bottom:1rem;display:flex;align-items:center;gap:8px;';
+  warn.style.cssText = 'background:#fef3c7;border-radius:8px;padding:8px 14px;font-size:0.78rem;color:#92400e;margin-bottom:1rem;display:flex;align-items:center;gap:8px;';
   warn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Showing cached data — retrying...`;
   grid.insertBefore(warn, grid.firstChild);
   setTimeout(() => { if (warn.parentNode) warn.parentNode.removeChild(warn); }, 8000);
@@ -1970,20 +2120,20 @@ function renderHome() {
         const row = document.createElement('div');
         row.style.cssText = `display:flex;gap:14px;align-items:flex-start;padding-bottom:${idx === group.length-1 ? '0' : '14px'};`;
         // dot / date circle
-        let dateCircle = `<div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:absolute;left:9px;"><span style="font-size:0.72rem;font-weight:800;color:var(--text-secondary);">?</span></div>`;
+        let dateCircle = `<div style="width:36px;height:36px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:absolute;left:9px;"><span style="font-size:0.72rem;font-weight:800;color:#6b7280;">?</span></div>`;
         if (ev.dateStart) {
           const d = new Date(ev.dateStart+'T00:00:00');
-          dateCircle = `<div style="position:absolute;left:9px;text-align:center;"><div style="font-size:0.5rem;font-weight:700;color:var(--text-secondary);line-height:1;margin-bottom:1px;">${days_abbr[d.getDay()]}</div><div style="width:36px;height:36px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;"><span style="font-size:0.8rem;font-weight:800;color:#fff;">${d.getDate()}</span></div></div>`;
+          dateCircle = `<div style="position:absolute;left:9px;text-align:center;"><div style="font-size:0.5rem;font-weight:700;color:#9ca3af;line-height:1;margin-bottom:1px;">${days_abbr[d.getDay()]}</div><div style="width:36px;height:36px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;"><span style="font-size:0.8rem;font-weight:800;color:#fff;">${d.getDate()}</span></div></div>`;
         }
         row.innerHTML = `
           ${dateCircle}
-          <div style="flex:1;background:var(--bg-card);border-radius:12px;padding:10px 12px;border-left:3px solid ${color};cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
+          <div style="flex:1;background:#f9fafb;border-radius:12px;padding:10px 12px;border-left:3px solid ${color};cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;">
               <span style="font-size:0.65rem;font-weight:700;color:${color};">${escHtml(artistLabel)}</span>
               ${countdownBadge}
             </div>
-            <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);line-height:1.3;margin-bottom:4px;">${escHtml(ev.title)}</div>
-            <div style="font-size:0.65rem;color:var(--text-secondary);">
+            <div style="font-size:0.82rem;font-weight:700;color:#111;line-height:1.3;margin-bottom:4px;">${escHtml(ev.title)}</div>
+            <div style="font-size:0.65rem;color:#9ca3af;">
               ${ev.startTime ? fmtTime(ev.startTime)+' · ' : ''}${ev.location ? escHtml(ev.location) : ''}
             </div>
           </div>`;
@@ -2061,11 +2211,11 @@ function renderPastEvents(grid) {
       <div style="display:flex;gap:4px;"><div style="width:7px;height:7px;border-radius:50%;background:#d1d5db;"></div><div style="width:7px;height:7px;border-radius:50%;background:#d1d5db;"></div><div style="width:7px;height:7px;border-radius:50%;background:#d1d5db;"></div></div>
       <button onclick="togglePastEvents()" id="past-toggle-btn" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0;">
         <span style="font-size:0.9rem;font-weight:700;color:#6b7280;">Past Events</span>
-        <span style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);background:rgba(255,255,255,0.08);border-radius:99px;padding:2px 10px;">${pastEvs.length} event${pastEvs.length!==1?'s':''}</span>
+        <span style="font-size:0.72rem;font-weight:700;color:#9ca3af;background:#f3f4f6;border-radius:99px;padding:2px 10px;">${pastEvs.length} event${pastEvs.length!==1?'s':''}</span>
         <svg id="past-toggle-icon" width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2.5" viewBox="0 0 24 24" style="transition:transform 0.2s;transform:rotate(${isOpen?'180':'0'}deg)"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      <div style="flex:1;height:1px;background:var(--border);border-radius:99px;"></div>
-      <select id="past-month-select" onchange="onPastMonthChange(this.value)" style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:4px 10px;cursor:pointer;outline:none;display:${isOpen?'block':'none'};">
+      <div style="flex:1;height:1px;background:#f0f0f0;border-radius:99px;"></div>
+      <select id="past-month-select" onchange="onPastMonthChange(this.value)" style="font-size:0.75rem;font-weight:600;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:4px 10px;cursor:pointer;outline:none;display:${isOpen?'block':'none'};">
         ${monthOptions}
       </select>
     </div>
@@ -2173,28 +2323,28 @@ function getTypeStyle(type) {
   if (!type) return null;
   const t = type.trim().toLowerCase();
   const map = {
-    'live event':          { bg:'rgba(249,115,22,0.12)', color:'#f97316', border:'rgba(249,115,22,0.3)', dot:'#f97316' },
-    'concert':             { bg:'rgba(168,85,247,0.12)', color:'#a855f7', border:'rgba(168,85,247,0.3)' },
-    'private event':       { bg:'rgba(236,72,153,0.12)', color:'#ec4899', border:'rgba(236,72,153,0.3)' },
-    'event':               { bg:'rgba(34,197,94,0.12)', color:'#22c55e', border:'rgba(34,197,94,0.3)' },
-    'variety & game show': { bg:'rgba(59,130,246,0.12)', color:'#60a5fa', border:'rgba(59,130,246,0.3)' },
-    'collab':              { bg:'rgba(255,255,255,0.06)', color:'var(--text-secondary)', border:'rgba(255,255,255,0.12)' },
-    'tpop fest':           { bg:'rgba(234,179,8,0.12)', color:'#fbbf24', border:'rgba(234,179,8,0.3)' },
-    'fanmeet':             { bg:'rgba(217,70,239,0.12)', color:'#d946ef', border:'rgba(217,70,239,0.3)' },
-    'fansign':             { bg:'rgba(192,38,211,0.12)', color:'#c026d3', border:'rgba(192,38,211,0.3)' },
-    'presstour':           { bg:'rgba(109,40,217,0.12)', color:'#a78bfa', border:'rgba(109,40,217,0.3)' },
-    'fancon':              { bg:'rgba(3,105,161,0.12)', color:'#38bdf8', border:'rgba(3,105,161,0.3)' },
-    'fanfest':             { bg:'rgba(190,18,60,0.12)', color:'#fb7185', border:'rgba(190,18,60,0.3)' },
-    'music mv':            { bg:'rgba(234,179,8,0.12)', color:'#fbbf24', border:'rgba(234,179,8,0.3)' },
-    'live':                { bg:'rgba(249,115,22,0.12)', color:'#fb923c', border:'rgba(249,115,22,0.3)', dot:'#f97316' },
-    'series':              { bg:'rgba(22,163,74,0.12)', color:'#4ade80', border:'rgba(22,163,74,0.3)' },
-    'fan party':           { bg:'rgba(59,130,246,0.12)', color:'#60a5fa', border:'rgba(59,130,246,0.3)' },
-    'fanday':              { bg:'rgba(147,51,234,0.12)', color:'#c084fc', border:'rgba(147,51,234,0.3)' },
-    'short drama':         { bg:'rgba(12,74,110,0.2)', color:'#38bdf8', border:'rgba(12,74,110,0.4)' },
-    'fashion week':        { bg:'rgba(153,27,27,0.15)', color:'#f87171', border:'rgba(153,27,27,0.35)' },
-    'onair':               { bg:'rgba(239,68,68,0.12)', color:'#f87171', border:'rgba(239,68,68,0.3)', dot:'#ef4444' },
+    'live event':          { bg:'#fff7ed', color:'#c2410c', border:'#fed7aa', dot:'#f97316' },
+    'concert':             { bg:'#fdf4ff', color:'#7e22ce', border:'#d8b4fe' },
+    'private event':       { bg:'#fce7f3', color:'#9d174d', border:'#fbcfe8' },
+    'event':               { bg:'#f0fdf4', color:'#15803d', border:'#bbf7d0' },
+    'variety & game show': { bg:'#eff6ff', color:'#1d4ed8', border:'#bfdbfe' },
+    'collab':              { bg:'#f9fafb', color:'#374151', border:'#e5e7eb' },
+    'tpop fest':           { bg:'#fefce8', color:'#854d0e', border:'#fde047' },
+    'fanmeet':             { bg:'#fef0ff', color:'#a21caf', border:'#f0abfc' },
+    'fansign':             { bg:'#fdf2ff', color:'#86198f', border:'#e879f9' },
+    'presstour':           { bg:'#faf5ff', color:'#6d28d9', border:'#ddd6fe' },
+    'fancon':              { bg:'#f0f9ff', color:'#0369a1', border:'#bae6fd' },
+    'fanfest':             { bg:'#fff1f2', color:'#be123c', border:'#fda4af' },
+    'music mv':            { bg:'#fefce8', color:'#713f12', border:'#fef08a' },
+    'live':                { bg:'#fff7ed', color:'#9a3412', border:'#fdba74', dot:'#f97316' },
+    'series':              { bg:'#f0fdf4', color:'#166534', border:'#86efac' },
+    'fan party':           { bg:'#eff6ff', color:'#1e40af', border:'#93c5fd' },
+    'fanday':              { bg:'#fdf4ff', color:'#9333ea', border:'#e9d5ff' },
+    'short drama':         { bg:'#f0f9ff', color:'#0c4a6e', border:'#7dd3fc' },
+    'fashion week':        { bg:'#fef2f2', color:'#991b1b', border:'#fca5a5' },
+    'onair':               { bg:'#fef2f2', color:'#b91c1c', border:'#fca5a5', dot:'#ef4444' },
   };
-  return map[t] || { bg:'rgba(255,255,255,0.06)', color:'var(--text-secondary)', border:'rgba(255,255,255,0.12)' };
+  return map[t] || { bg:'#f3f4f6', color:'#374151', border:'#e5e7eb' };
 }
 function buildTypePill(type, size) {
   if (!type) return '';
@@ -2251,7 +2401,7 @@ function buildCountdownNoImg(ev) {
   const days = daysUntilEvent(ev.dateStart);
   if (days === null || days < 0 || days > 60) return '';
   const label = days === 0 ? 'Today' : `in ${days} day${days !== 1 ? 's' : ''}`;
-  return `<div style="font-size:0.72rem;font-weight:700;color:var(--text-secondary);padding:6px 0 2px;">${label}</div>`;
+  return `<div style="font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0 2px;">${label}</div>`;
 }
 // Legacy stub
 function buildCountdownTag(ev, color) { return ''; }
@@ -2281,7 +2431,7 @@ function createCard(ev) {
     const parts = artistArr.map((a, i) => {
       const dot = artistColors[a] || color;
       const txt = artistTextColors[a] || color;
-      const divider = i > 0 ? `<span style="width:1px;height:10px;background:rgba(255,255,255,0.15);display:inline-block;flex-shrink:0;"></span>` : '';
+      const divider = i > 0 ? `<span style="width:1px;height:10px;background:#e5e7eb;display:inline-block;flex-shrink:0;"></span>` : '';
       return `${divider}<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;color:${txt};"><span style="width:6px;height:6px;border-radius:50%;background:${dot};display:inline-block;flex-shrink:0;"></span>${a}</span>`;
     }).join('');
     artistBadge = `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px;">${parts}</div>`;
@@ -2296,8 +2446,8 @@ function createCard(ev) {
       const timeText = allTimes + (ev.endTime ? ' – ' + fmtTime(ev.endTime) : '');
       const timeFontSize = timeText.length > 20 ? '0.65rem' : '0.78rem';
       const clockSvg = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-      const divider = `<span style="width:1px;height:12px;background:rgba(255,255,255,0.15);margin:0 6px;flex-shrink:0;display:inline-block;"></span>`;
-      timeHtml = `${divider}<span style="display:flex;align-items:center;gap:3px;font-size:${timeFontSize};font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;flex-shrink:1;min-width:0;">${clockSvg}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(timeText)}</span></span>`;
+      const divider = `<span style="width:1px;height:12px;background:#e5e7eb;margin:0 6px;flex-shrink:0;display:inline-block;"></span>`;
+      timeHtml = `${divider}<span style="display:flex;align-items:center;gap:3px;font-size:${timeFontSize};font-weight:700;color:#111;white-space:nowrap;overflow:hidden;flex-shrink:1;min-width:0;">${clockSvg}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(timeText)}</span></span>`;
     }
     dtRow = `<div style="display:flex;align-items:center;margin-bottom:5px;min-width:0;overflow:hidden;"><span style="display:flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:700;color:${color};white-space:nowrap;flex-shrink:0;"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escHtml(dateLabel)}</span>${timeHtml}</div>`;
   }
@@ -2307,19 +2457,19 @@ function createCard(ev) {
   const locText = lp.join(', ');
   const locFontSize = locText.length > 40 ? '0.60rem' : locText.length > 25 ? '0.65rem' : '0.72rem';
   const locRow = lp.length
-    ? `<div style="margin-bottom:5px;min-width:0;overflow:hidden;"><span style="display:flex;align-items:center;gap:5px;font-size:${locFontSize};font-weight:600;color:var(--text-secondary);background:rgba(255,255,255,0.06);border:1px solid var(--border);padding:3px 9px;border-radius:6px;overflow:hidden;min-width:0;"><svg width="10" height="10" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(locText)}</span></span></div>`
+    ? `<div style="margin-bottom:5px;min-width:0;overflow:hidden;"><span style="display:flex;align-items:center;gap:5px;font-size:${locFontSize};font-weight:600;color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;padding:3px 9px;border-radius:6px;overflow:hidden;min-width:0;"><svg width="10" height="10" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(locText)}</span></span></div>`
     : '';
 
   const typePill = buildTypePill(ev.type, 'sm');
   const tvPill = (ev.tv && !hasHtml(ev.tv))
-    ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;font-weight:700;background:rgba(249,115,22,0.12);color:#f97316;border-radius:5px;padding:3px 8px;border:1px solid rgba(249,115,22,0.25);"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>${escHtml(ev.tv)}</span>`
+    ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;font-weight:700;background:#fff7ed;color:#c2410c;border-radius:5px;padding:3px 8px;border:1px solid #fed7aa;"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>${escHtml(ev.tv)}</span>`
     : '';
   const pillsRow = (typePill || tvPill) ? `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:5px;">${tvPill}${typePill}</div>` : '';
   const noteRow = (ev.note && !hasHtml(ev.note))
-    ? `<div style="font-size:0.76rem;font-weight:700;color:var(--text-secondary);margin-bottom:5px;display:flex;align-items:flex-start;gap:5px;background:rgba(255,255,255,0.04);border-left:3px solid rgba(255,255,255,0.2);padding:4px 7px;border-radius:0 5px 5px 0;line-height:1.4;"><svg width="11" height="11" fill="none" stroke="#374151" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${escHtml(ev.note)}</div>`
+    ? `<div style="font-size:0.76rem;font-weight:700;color:#374151;margin-bottom:5px;display:flex;align-items:flex-start;gap:5px;background:#fafafa;border-left:3px solid #374151;padding:4px 7px;border-radius:0 5px 5px 0;line-height:1.4;"><svg width="11" height="11" fill="none" stroke="#374151" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${escHtml(ev.note)}</div>`
     : '';
   const descRow = (ev.description && !hasHtml(ev.description))
-    ? `<div style="font-size:0.7rem;color:var(--text-secondary);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:4px;">${escHtml(ev.description)}</div>`
+    ? `<div style="font-size:0.7rem;color:#9ca3af;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:4px;">${escHtml(ev.description)}</div>`
     : '';
 
   const socialHtml = buildSocialIcons(ev);
@@ -2332,7 +2482,7 @@ function createCard(ev) {
   card.innerHTML = `${imgSection}${hoverOverlay}
     <div style="padding:0.85rem;display:flex;flex-direction:column;flex:1;min-height:0;">
       ${artistBadge}
-      <h3 style="font-weight:700;font-size:0.88rem;letter-spacing:-0.01em;margin-bottom:6px;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:var(--text-primary);">${escHtml(ev.title)}</h3>
+      <h3 style="font-weight:700;font-size:0.88rem;letter-spacing:-0.01em;margin-bottom:6px;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.title)}</h3>
       ${dtRow}${locRow}${pillsRow}${noteRow}${descRow}
       ${socialHtml ? `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
       <div style="flex:1;"></div>
@@ -2369,15 +2519,15 @@ function openDetailModal(id) {
     const d = new Date(ev.dateStart + 'T00:00:00');
     const dateLabel = fmtDateRange(ev.dateStart, ev.dateEnd);
     const timeHtml = ev.startTime
-      ? `<span style="width:1px;height:14px;background:rgba(255,255,255,0.15);margin:0 10px;flex-shrink:0;display:inline-block;"></span><span style="display:flex;align-items:center;gap:5px;font-size:0.88rem;font-weight:700;color:var(--text-primary);"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(fmtTime(ev.startTime))}${ev.endTime?' – '+escHtml(fmtTime(ev.endTime)):''}</span>`
+      ? `<span style="width:1px;height:14px;background:#e5e7eb;margin:0 10px;flex-shrink:0;display:inline-block;"></span><span style="display:flex;align-items:center;gap:5px;font-size:0.88rem;font-weight:700;color:#111;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(fmtTime(ev.startTime))}${ev.endTime?' – '+escHtml(fmtTime(ev.endTime)):''}</span>`
       : '';
     metaRows.push(`<div style="display:flex;align-items:center;margin-bottom:2px;"><span style="display:flex;align-items:center;gap:5px;font-size:0.88rem;font-weight:700;color:${color};"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escHtml(dateLabel)}</span>${timeHtml}</div>`);
   }
-  if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.88rem;color:var(--text-secondary);margin-top:4px;"><svg width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span>${lp.join(', ')}</span></div>`);
+  if (lp.length) metaRows.push(`<div style="display:flex;align-items:center;gap:6px;font-size:0.88rem;color:#374151;margin-top:4px;"><svg width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span>${lp.join(', ')}</span></div>`);
   const typePillHtml = buildTypePill(ev.type, 'lg');
-  const tvPillHtml = ev.tv ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.75rem;font-weight:700;background:rgba(249,115,22,0.12);color:#f97316;border-radius:6px;padding:4px 10px;border:1px solid rgba(249,115,22,0.25);"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>${escHtml(ev.tv)}</span>` : '';
+  const tvPillHtml = ev.tv ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.75rem;font-weight:700;background:#fff7ed;color:#c2410c;border-radius:6px;padding:4px 10px;border:1px solid #fed7aa;"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>${escHtml(ev.tv)}</span>` : '';
   if (typePillHtml || tvPillHtml) metaRows.push(`<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px;">${tvPillHtml}${typePillHtml}</div>`);
-  if (ev.note && !hasHtmlD(ev.note)) metaRows.push(`<div style="font-size:0.85rem;font-weight:700;color:var(--text-secondary);margin-top:8px;display:flex;align-items:flex-start;gap:6px;background:rgba(255,255,255,0.04);border-left:3px solid rgba(255,255,255,0.2);padding:6px 10px;border-radius:0 6px 6px 0;line-height:1.5;"><svg width="13" height="13" fill="none" stroke="#374151" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${escHtml(ev.note)}</div>`);
+  if (ev.note && !hasHtmlD(ev.note)) metaRows.push(`<div style="font-size:0.85rem;font-weight:700;color:#374151;margin-top:8px;display:flex;align-items:flex-start;gap:6px;background:#fafafa;border-left:3px solid #374151;padding:6px 10px;border-radius:0 6px 6px 0;line-height:1.5;"><svg width="13" height="13" fill="none" stroke="#374151" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${escHtml(ev.note)}</div>`);
 
   document.getElementById('detail-meta').innerHTML = metaRows.join('');
 
@@ -2399,10 +2549,10 @@ function openDetailModal(id) {
     const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}/${dateStr}&location=${loc}`;
     const ical = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:${title}%0ADTSTART:${dateStr}%0ADTEND:${dateStr}%0ALOCATION:${loc}%0AEND:VEVENT%0AEND:VCALENDAR`;
     calWrap.style.display = 'block';
-    calWrap.innerHTML = `<div style="margin-bottom:0.75rem;font-size:0.78rem;font-weight:700;color:var(--text-secondary);">${t('add_calendar')}</div>
+    calWrap.innerHTML = `<div style="margin-bottom:0.75rem;font-size:0.78rem;font-weight:700;color:#374151;">${t('add_calendar')}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="${gcal}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);font-size:0.78rem;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''"  onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_add_cal')}</a>
-        <a href="${ical}" download="${(ev.title||'event').replace(/\s+/g,'_')}.ics" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);font-size:0.78rem;font-weight:600;color:var(--text-secondary);text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''" onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_ical')}</a>
+        <a href="${gcal}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:0.78rem;font-weight:600;color:#374151;text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''"  onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_add_cal')}</a>
+        <a href="${ical}" download="${(ev.title||'event').replace(/\s+/g,'_')}.ics" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:0.78rem;font-weight:600;color:#374151;text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''" onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_ical')}</a>
       </div>`;
   } else if (calWrap) { calWrap.style.display = 'none'; }
 
@@ -2411,10 +2561,10 @@ function openDetailModal(id) {
   const ticketBtns = document.getElementById('detail-ticket-btns');
   const tickets = [
     { url: ev.ticket1,       label: 'Buy Ticket',         icon: '🎟', style: 'background:#f97316;color:#fff;border-color:#ea6500;' },
-    { url: ev.ticket2,       label: 'Ticket Info',        icon: '🎫', style: 'background:rgba(249,115,22,0.1);color:#f97316;border-color:rgba(249,115,22,0.3);' },
-    { url: ev.ticket3,       label: 'Booking',            icon: '📋', style: 'background:rgba(249,115,22,0.1);color:#f97316;border-color:rgba(249,115,22,0.3);' },
-    { url: ev.ticketLive,    label: 'Live Stream Ticket', icon: '📡', style: 'background:rgba(220,38,38,0.1);color:#f87171;border-color:rgba(220,38,38,0.3);' },
-    { url: ev.ticketFanclub, label: 'Fanclub Ticket',     icon: '💜', style: 'background:rgba(168,85,247,0.1);color:#a855f7;border-color:rgba(168,85,247,0.3);' },
+    { url: ev.ticket2,       label: 'Ticket Info',        icon: '🎫', style: 'background:#fff7ed;color:#c2410c;border-color:#fed7aa;' },
+    { url: ev.ticket3,       label: 'Booking',            icon: '📋', style: 'background:#fff7ed;color:#c2410c;border-color:#fed7aa;' },
+    { url: ev.ticketLive,    label: 'Live Stream Ticket', icon: '📡', style: 'background:#fef2f2;color:#dc2626;border-color:#fca5a5;' },
+    { url: ev.ticketFanclub, label: 'Fanclub Ticket',     icon: '💜', style: 'background:#faf5ff;color:#7e22ce;border-color:#ddd6fe;' },
   ].filter(t => isValidUrl(t.url));
 
   if (tickets.length > 0) {
@@ -2542,19 +2692,24 @@ function filterCalendar(artist) {
   calFilter = artist;
   document.querySelectorAll('.cal-filter-btn').forEach(btn => {
     const a = btn.dataset.artist;
-    if (a === artist) {
-      if (a === 'all') {
-        btn.style.background = 'rgba(255,255,255,0.9)'; btn.style.color = '#0a0a0a'; btn.style.borderColor = 'rgba(255,255,255,0.9)';
-      } else {
-        btn.style.background = getArtistColor(a); btn.style.color = '#fff'; btn.style.borderColor = getArtistColor(a);
-      }
-    } else {
-      const c = a==='Pond'?'#f97316':a==='Phuwin'?'#9ca3af':a==='Permpoon'?'#22c55e':'rgba(255,255,255,0.9)';
-      btn.style.background = 'transparent'; btn.style.color = c;
-      btn.style.borderColor = a==='Pond'?'rgba(249,115,22,0.5)':a==='Phuwin'?'rgba(107,114,128,0.5)':a==='Permpoon'?'rgba(34,197,94,0.5)':'rgba(255,255,255,0.3)';
-    }
+    if (a === artist) { btn.style.background = a==='all'?'#111':getArtistColor(a); btn.style.color='#fff'; btn.style.borderColor=a==='all'?'#111':getArtistColor(a); }
+    else { const c=a==='Pond'?'#f97316':a==='Phuwin'?'#6b7280':a==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
   });
   renderCalendar();
+}
+
+function updateCalShowAllBtn() {
+  const btn = document.getElementById('cal-show-all-btn');
+  if (!btn) return;
+  if (calSelectedDate) {
+    btn.style.background = '#111';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#111';
+  } else {
+    btn.style.background = '#f9fafb';
+    btn.style.color = '#6b7280';
+    btn.style.borderColor = '#e5e7eb';
+  }
 }
 
 function renderCalendar() {
@@ -2615,15 +2770,15 @@ function renderCalendar() {
     cell.className = 'cal-day' + (hasEvent ? ' cal-day-has-event' : '') + (isSelect ? ' cal-day-selected' : '');
     const fs = isMobile ? '0.82rem' : '1rem';
     const numStyle = isSelect ? `font-size:${fs};font-weight:800;color:#fff;`
-      : isToday  ? `font-size:${fs};font-weight:800;color:var(--text-primary);text-decoration:underline;text-underline-offset:3px;`
-      : `font-size:${fs};font-weight:600;color:var(--text-secondary);`;
+      : isToday  ? `font-size:${fs};font-weight:800;color:#111;text-decoration:underline;text-underline-offset:3px;`
+      : `font-size:${fs};font-weight:600;color:#374151;`;
     let dotsHtml = '';
     if (hasEvent) {
       const colors = (eventsOnDay.slice(0,3)).map(ev => getArtistColor(ev.artists));
       dotsHtml = `<div style="position:absolute;bottom:3px;left:50%;transform:translateX(-50%);display:flex;gap:2px;">${colors.map(c=>`<div style="width:4px;height:4px;border-radius:50%;background:${isSelect?'#fff':c};"></div>`).join('')}${evCount>3?`<div style="width:4px;height:4px;border-radius:50%;background:${isSelect?'rgba(255,255,255,0.6)':'#d1d5db'};"></div>`:''}</div>`;
     }
     cell.innerHTML = `<span style="${numStyle}">${d}</span>${dotsHtml}`;
-    cell.onclick = () => { calSelectedDate = dateStr; renderCalendar(); };
+    cell.onclick = () => { calSelectedDate = dateStr; renderCalendar(); updateCalShowAllBtn(); };
     frag.appendChild(cell);
   }
 
@@ -2678,8 +2833,50 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
     });
   }
 
-  const sortedDates = Object.keys(monthEvents).sort();
-  if (sortedDates.length === 0) {
+  const allSortedDates = Object.keys(monthEvents).sort();
+
+  // Header showing selected date or month summary
+  const headerEl = document.getElementById('cal-list-header');
+  if (headerEl) {
+    if (calSelectedDate) {
+      const sd = new Date(calSelectedDate + 'T00:00:00');
+      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const evCount = (monthEvents[calSelectedDate] || []).filter(e=>!e.__bday).length;
+      headerEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:0.65rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;text-transform:uppercase;">${dayNames[sd.getDay()]}</div>
+          <div style="font-size:1rem;font-weight:800;color:#111;letter-spacing:-0.02em;">${monthNames[sd.getMonth()]} ${sd.getDate()}</div>
+          <div style="font-size:0.7rem;color:#9ca3af;margin-top:1px;">${evCount === 0 ? 'No events' : evCount + ' event' + (evCount!==1?'s':'')}</div>
+        </div>
+        <button onclick="calSelectedDate=null;renderCalendar();" style="font-size:0.72rem;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">View all ↩</button>
+      </div>`;
+    } else {
+      const totalEvs = allSortedDates.reduce((s,d)=>s+(monthEvents[d]||[]).filter(e=>!e.__bday).length,0);
+      headerEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:0.72rem;font-weight:600;color:#9ca3af;">All events this month · <strong style="color:#374151;">${totalEvs}</strong></div>
+        <div style="font-size:0.68rem;color:#d1d5db;">Tap a date to filter</div>
+      </div>`;
+    }
+  }
+
+  // If selected date has no events, show empty state
+  if (calSelectedDate && !monthEvents[calSelectedDate]) {
+    list.style.display = 'flex'; if (noEv) noEv.style.display = 'none';
+    list.innerHTML = `<div style="text-align:center;padding:2.5rem 1rem;color:#9ca3af;">
+      <div style="font-size:2rem;margin-bottom:8px;">📅</div>
+      <p style="font-size:0.88rem;font-weight:600;color:#6b7280;">No events on this day</p>
+      <p style="font-size:0.75rem;margin-top:4px;">Try selecting another date</p>
+    </div>`;
+    return;
+  }
+
+  // Filter by selected date if one is chosen and has events
+  const sortedDates = (calSelectedDate && monthEvents[calSelectedDate])
+    ? [calSelectedDate]
+    : allSortedDates;
+
+  if (allSortedDates.length === 0) {
     list.style.display = 'none'; if (noEv) noEv.style.display = 'block'; return;
   }
   list.style.display = 'flex'; if (noEv) noEv.style.display = 'none';
@@ -2695,11 +2892,11 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
         const color = ev.color || '#9ca3af';
         return `<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:12px;position:relative;">
           ${i === 0 ? `<div style="flex-shrink:0;width:56px;text-align:center;position:relative;z-index:1;">
-            <div style="font-size:0.58rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.07em;line-height:1;margin-bottom:2px;">${dow}</div>
-            <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto;"><span style="font-size:0.8rem;font-weight:800;color:var(--text-secondary);">${dayNum}</span></div>
+            <div style="font-size:0.58rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;line-height:1;margin-bottom:2px;">${dow}</div>
+            <div style="width:36px;height:36px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;margin:0 auto;"><span style="font-size:0.8rem;font-weight:800;color:#6b7280;">${dayNum}</span></div>
           </div>` : `<div style="width:56px;flex-shrink:0;"></div>`}
-          <div style="flex:1;background:var(--bg-card);border-radius:12px;padding:10px 12px;border-left:3px solid ${color};opacity:0.8;">
-            <div style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">${isAnniv ? ev.label + ' 🥂' : t('bday_suffix', ev.name) + ' 🎂'}</div>
+          <div style="flex:1;background:#f9fafb;border-radius:12px;padding:10px 12px;border-left:3px solid ${color};opacity:0.8;">
+            <div style="font-size:0.78rem;font-weight:700;color:#374151;">${isAnniv ? ev.label + ' 🥂' : t('bday_suffix', ev.name) + ' 🎂'}</div>
           </div>
         </div>`;
       }
@@ -2710,7 +2907,7 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
       const days2 = daysUntilEvent(ev.dateStart);
       const countdownBadge = (!past && days2 !== null && days2 >= 0 && days2 <= 7)
         ? `<span style="background:${color};color:#fff;font-size:0.58rem;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:0.04em;margin-left:auto;flex-shrink:0;">${days2 === 0 ? t('next_today') : days2 === 1 ? '1 DAY' : days2+' DAYS'}</span>` : '';
-      const pastBadge = past ? `<span style="font-size:0.58rem;background:rgba(255,255,255,0.08);color:var(--text-secondary);padding:2px 6px;border-radius:4px;font-weight:600;margin-left:auto;flex-shrink:0;">${'Past'}</span>` : '';
+      const pastBadge = past ? `<span style="font-size:0.58rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:auto;flex-shrink:0;">${'Past'}</span>` : '';
       const artistDots = artistArr.map(a => {
         const ac = getArtistColor(a);
         const tc = a==='Pond'?'#ea580c':a==='Phuwin'?'#4b5563':'#16a34a';
@@ -2718,16 +2915,16 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
       }).join('<span style="color:#e5e7eb;font-size:0.65rem;margin:0 2px;">·</span>');
       return `<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:14px;position:relative;cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
         ${i === 0 ? `<div style="flex-shrink:0;width:56px;text-align:center;position:relative;z-index:1;">
-          <div style="font-size:0.58rem;font-weight:700;color:var(--text-secondary);letter-spacing:0.07em;line-height:1;margin-bottom:2px;">${dow}</div>
+          <div style="font-size:0.58rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;line-height:1;margin-bottom:2px;">${dow}</div>
           <div style="width:36px;height:36px;border-radius:50%;background:${past?'#e5e7eb':color};display:flex;align-items:center;justify-content:center;margin:0 auto;"><span style="font-size:0.8rem;font-weight:800;color:#fff;">${dayNum}</span></div>
         </div>` : `<div style="width:56px;flex-shrink:0;"></div>`}
-        <div style="flex:1;background:var(--bg-card);border-radius:12px;padding:10px 12px;border-left:3px solid ${past?'rgba(255,255,255,0.1)':color};min-width:0;">
+        <div style="flex:1;background:#f9fafb;border-radius:12px;padding:10px 12px;border-left:3px solid ${past?'#e5e7eb':color};min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px;">
             ${artistDots}
             ${countdownBadge}${pastBadge}
           </div>
           <div style="font-size:0.82rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.35;margin-bottom:${loc||ev.startTime?'4px':'0'};">${escHtml(ev.title)}</div>
-          ${(ev.startTime||loc) ? `<div style="font-size:0.65rem;color:var(--text-secondary);">${[ev.startTime?fmtTime(ev.startTime):null,loc?escHtml(loc):null].filter(Boolean).join(' · ')}</div>` : ''}
+          ${(ev.startTime||loc) ? `<div style="font-size:0.65rem;color:#9ca3af;">${[ev.startTime?fmtTime(ev.startTime):null,loc?escHtml(loc):null].filter(Boolean).join(' · ')}</div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -2735,20 +2932,12 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
 
   // wrap all in timeline container with vertical line
   list.innerHTML = `<div style="position:relative;padding-left:0;">
-    <div style="position:absolute;left:27px;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.08);border-radius:99px;z-index:0;"></div>
+    <div style="position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px;z-index:0;"></div>
     ${parts.join('')}
   </div>`;
 
-  // Scroll to selected date
-  if (calSelectedDate && monthEvents[calSelectedDate]) {
-    const idx = sortedDates.indexOf(calSelectedDate);
-    if (idx >= 0) {
-      let offset = 0;
-      for (let i = 0; i < idx; i++) offset += monthEvents[sortedDates[i]].length;
-      const items = list.querySelectorAll('.cal-list-item');
-      if (items[offset]) requestAnimationFrame(() => items[offset].scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
-    }
-  }
+  // Scroll list to top whenever content changes
+  requestAnimationFrame(() => { list.scrollTop = 0; });
 }
 
 let _calStatYear = 2026;
@@ -2802,15 +2991,9 @@ function filterHome(artist) {
   document.querySelectorAll('.artist-filter-btn').forEach(btn => {
     const a = btn.dataset.artist;
     if (a === artist) {
-      if (a === 'all') {
-        btn.style.background = 'rgba(255,255,255,0.9)'; btn.style.color = '#0a0a0a'; btn.style.borderColor = 'rgba(255,255,255,0.9)';
-      } else {
-        const ac = a==='Pond'?'#f97316':a==='Phuwin'?'#9ca3af':'#22c55e';
-        btn.style.background = ac; btn.style.color = '#fff'; btn.style.borderColor = ac;
-      }
+      btn.style.background = '#111'; btn.style.color = '#fff'; btn.style.borderColor = '#111';
     } else {
-      const ic = a==='Pond'?'#f97316':a==='Phuwin'?'#9ca3af':a==='Permpoon'?'#22c55e':'rgba(255,255,255,0.9)';
-      btn.style.background = 'transparent'; btn.style.color = ic; btn.style.borderColor = ic.replace(')',',0.4)').replace('rgba(','rgba(').replace('rgb(','rgba(').replace('#f97316','rgba(249,115,22,0.4)').replace('#9ca3af','rgba(156,163,175,0.4)').replace('#22c55e','rgba(34,197,94,0.4)');
+      btn.style.background = '#fff'; btn.style.color = '#6b7280'; btn.style.borderColor = '#f0f0f0';
     }
   });
   // Bento card active state
@@ -2822,7 +3005,7 @@ function filterHome(artist) {
     const isActive = bentoMap[artist] === k;
     c.style.boxShadow = isActive ? `0 0 0 2px ${colorMap[k]}` : 'none';
     c.style.transform = isActive ? 'scale(1.03)' : 'scale(1)';
-    c.style.borderColor = isActive ? colorMap[k] : 'rgba(255,255,255,0.08)';
+    c.style.borderColor = isActive ? colorMap[k] : '#f0f0f0';
   });
   scheduleRender();
 }
@@ -2930,7 +3113,7 @@ function createAdminRow(ev) {
   const rowKey = ev.__rowNumber ? String(ev.__rowNumber) : (ev.__backendId || String(Math.random()));
   row.dataset.eventId  = rowKey;
   row.dataset.rowNumber = ev.__rowNumber || '';
-  row.style.cssText = 'background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;box-shadow:none;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;';
+  row.style.cssText = 'background:#fff;border-radius:12px;padding:1rem 1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:center;gap:1rem;flex-wrap:wrap;';
   updateAdminRow(row, ev);
   return row;
 }
@@ -2946,8 +3129,8 @@ function updateAdminRow(row, ev) {
     : '';
   row.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
     <div style="flex:1;min-width:150px;">
-      <p style="font-weight:700;font-size:1rem;${past?'color:var(--text-secondary);':''}">${escHtml(ev.title)}${idBadge}${past?`<span style="font-size:0.7rem;background:rgba(255,255,255,0.08);color:var(--text-secondary);padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">${t('past_events')}</span>`:''}</p>
-      <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:2px;">${fmtDate(ev.dateStart)} · ${getArtistLabel(ev.artists)}</p>
+      <p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${idBadge}${past?`<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">${t('past_events')}</span>`:''}</p>
+      <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${fmtDate(ev.dateStart)} · ${getArtistLabel(ev.artists)}</p>
     </div>
     <div style="display:flex;gap:6px;align-items:center;">${isConf
       ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">${t('admin_confirm_delete')}</span><button class="btn-danger" onclick="confirmDelete('${rowKey}')">Yes</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${rowKey}')">${t('admin_cancel')}</button>`
@@ -2980,21 +3163,21 @@ function renderAnniversaryAdmin() {
   const bdayListEl = document.getElementById('bday-admin-list');
   if (bdayListEl) {
     if (allBirthdays.length === 0) {
-      bdayListEl.innerHTML = '<p style="font-size:0.82rem;color:var(--text-secondary);padding:0.5rem 0;">No birthdays added yet</p>';
+      bdayListEl.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">No birthdays added yet</p>';
     } else {
       const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       bdayListEl.innerHTML = allBirthdays.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
         <span style="width:10px;height:10px;border-radius:50%;background:${b.color||'#6b7280'};flex-shrink:0;display:inline-block;"></span>
-        <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${b.artist_name}</p><p style="font-size:0.75rem;color:var(--text-secondary);margin:1px 0 0;">${mn[b.birthday_month-1]} ${b.birthday_day}</p></div>
+        <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${b.artist_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[b.birthday_month-1]} ${b.birthday_day}</p></div>
         <button onclick="deleteBirthday('${b.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">Delete</button>
       </div>`).join('');
     }
   }
-  if (allAnniversaries.length === 0) { list.innerHTML = '<p style="font-size:0.82rem;color:var(--text-secondary);padding:0.5rem 0;">No anniversaries added yet</p>'; return; }
+  if (allAnniversaries.length === 0) { list.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">No anniversaries added yet</p>'; return; }
   const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   list.innerHTML = allAnniversaries.map(a => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
     <span style="width:10px;height:10px;border-radius:50%;background:${a.color||'#a855f7'};flex-shrink:0;display:inline-block;"></span>
-    <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${a.anniversary_name}</p><p style="font-size:0.75rem;color:var(--text-secondary);margin:1px 0 0;">${mn[a.anniversary_month-1]} ${a.anniversary_day}${a.anniversary_year?' (since '+a.anniversary_year+')':''}</p></div>
+    <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${a.anniversary_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[a.anniversary_month-1]} ${a.anniversary_day}${a.anniversary_year?' (since '+a.anniversary_year+')':''}</p></div>
     <button onclick="deleteAnniversary('${a.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">Delete</button>
   </div>`).join('');
 }
@@ -3093,7 +3276,7 @@ function adminLogout() {
 
 async function adminRefresh() {
   const btn = document.getElementById('admin-refresh-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-top-color:#0a0a0a;"></span>'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-top-color:#111;"></span>'; }
   Cache.clearAll(); _fetchingEvents = false; _fetchingBdays = false; _fetchingAnnivs = false;
   try { await apiPost({ action: 'clearCache' }); } catch(e) {}
   await loadEventsFromSheets(true);
@@ -3203,7 +3386,7 @@ function openPreviewPopup() {
   const popup = document.getElementById('preview-popup'); if (!popup) return;
   const ev = getFormPreviewData();
   const card = createCard(ev);
-  card.onclick = null; card.style.cursor = 'default'; card.style.border = '1px solid rgba(255,255,255,0.06)';
+  card.onclick = null; card.style.cursor = 'default'; card.style.border = '1.5px solid #e5e7eb';
   const btn = card.querySelector('button[onmouseenter]'); if (btn) btn.style.display = 'none';
   const pc = document.getElementById('preview-popup-card'); pc.innerHTML = ''; pc.appendChild(card);
   popup.style.display = 'flex'; document.body.style.overflow = 'hidden';
@@ -3262,8 +3445,8 @@ function setViewMode(mode) {
   const gridBtn     = document.getElementById('view-grid-btn');
   const listBtn     = document.getElementById('view-list-btn');
   const timelineBtn = document.getElementById('view-timeline-btn');
-  const active = 'rgba(255,255,255,0.9)', inactive = 'transparent';
-  const activeStroke = '#0a0a0a', inactiveStroke = 'rgba(255,255,255,0.4)';
+  const active = '#111', inactive = 'transparent';
+  const activeStroke = '#fff', inactiveStroke = '#6b7280';
   if (gridBtn)     { gridBtn.style.background     = mode==='grid'     ? active : inactive; gridBtn.querySelector('svg').style.stroke     = mode==='grid'     ? activeStroke : inactiveStroke; }
   if (listBtn)     { listBtn.style.background     = mode==='list'     ? active : inactive; listBtn.querySelector('svg').style.stroke     = mode==='list'     ? activeStroke : inactiveStroke; }
   if (timelineBtn) { timelineBtn.style.background = mode==='timeline' ? active : inactive; timelineBtn.querySelector('svg').style.stroke = mode==='timeline' ? activeStroke : inactiveStroke; }
@@ -3302,7 +3485,7 @@ function buildTimelineView(events) {
         dotHtml = `<div class="timeline-dot-wrap"><div class="timeline-dow">${dowNames[d.getDay()]}</div><div class="timeline-circle" style="background:${color};"><span>${d.getDate()}</span></div></div>`;
       }
       const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()) : [];
-      const artistBadges = artistArr.map(a => `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.62rem;font-weight:700;color:${artistTextColors[a]||color};"><span style="width:5px;height:5px;border-radius:50%;background:${getArtistColor(a)};display:inline-block;"></span>${a}</span>`).join('<span style="color:rgba(255,255,255,0.2);margin:0 2px;">·</span>');
+      const artistBadges = artistArr.map(a => `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.62rem;font-weight:700;color:${artistTextColors[a]||color};"><span style="width:5px;height:5px;border-radius:50%;background:${getArtistColor(a)};display:inline-block;"></span>${a}</span>`).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
       const days2 = daysUntilEvent(ev.dateStart);
       const badge = (days2 !== null && days2 >= 0 && days2 <= 7) ? `<span style="margin-left:auto;flex-shrink:0;background:${color};color:#fff;font-size:0.55rem;font-weight:800;padding:2px 7px;border-radius:99px;">${days2===0?'TODAY':days2+' DAY'+(days2>1?'S':'')}</span>` : '';
       const meta = [ev.startTime ? escHtml(ev.startTime) : '', ev.location ? escHtml(ev.location) : ''].filter(Boolean).join(' · ');
