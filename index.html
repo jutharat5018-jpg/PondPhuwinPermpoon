@@ -685,7 +685,7 @@ self.addEventListener('fetch', e => {
      <!-- HERO -->
      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;align-items:stretch;">
       <!-- Event 1 -->
-      <div id="bento-next" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
+      <div id="bento-next" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:21/9;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
        <div id="bento-next-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
        <div style="position:relative;">
@@ -709,7 +709,7 @@ self.addEventListener('fetch', e => {
        </div>
       </div>
       <!-- Event 2 -->
-      <div id="bento-ev2" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:16/9;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
+      <div id="bento-ev2" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:21/9;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
        <div id="bento-next2-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
        <div style="position:relative;">
@@ -740,14 +740,6 @@ self.addEventListener('fetch', e => {
         <svg width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
        </button>
       </div>
-     </div>
-     <!-- SEARCH BAR -->
-     <div style="position:relative;margin-bottom:1.25rem;">
-      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;" width="15" height="15" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="home-search" type="text" placeholder="Search events, venues, artists..." oninput="onHomeSearch(this.value)" style="width:100%;box-sizing:border-box;padding:9px 36px 9px 36px;border:1px solid #f0f0f0;border-radius:6px;font-size:0.85rem;outline:none;background:#f9fafb;color:#111;transition:border-color 0.2s;" onfocus="this.style.borderColor='#111'" onblur="this.style.borderColor='#f0f0f0'">
-      <button id="home-search-clear" onclick="clearHomeSearch()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;cursor:pointer;padding:2px;color:#9ca3af;">
-       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
      </div>
      <div id="events-grid"></div>
      <div id="no-events" style="display:none;padding:3rem 1rem;">
