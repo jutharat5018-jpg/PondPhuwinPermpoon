@@ -992,7 +992,7 @@ self.addEventListener('fetch', e => {
        <div style="flex:1;"></div>
        <div style="display:flex;align-items:center;gap:6px;">
         <span style="font-size:0.78rem;font-weight:600;color:#6b7280;">Year:</span>
-        <div id="admin-year-tabs" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+        <select id="admin-year-select" onchange="setAdminYear(this.value)" style="padding:4px 10px;border-radius:8px;border:1.5px solid #e5e7eb;background:#fff;color:#111;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;outline:none;"></select>
        </div>
       </div>
       <div id="admin-events-list" style="display:flex;flex-direction:column;gap:10px;"></div>
@@ -3349,25 +3349,19 @@ const _adminOpenMonths = new Set();
 let _adminYearFilter = String(new Date().getFullYear());
 
 function renderAdminYearTabs() {
-  const wrap = document.getElementById('admin-year-tabs');
-  if (!wrap) return;
+  const sel = document.getElementById('admin-year-select');
+  if (!sel) return;
   const years = [...new Set(
     allEvents
       .filter(ev => ev.dateStart && ev.dateStart.length >= 4)
       .map(ev => ev.dateStart.slice(0, 4))
   )].sort();
-  if (years.length === 0) { wrap.innerHTML = ''; return; }
-  // If current filter year doesn't exist in data, pick nearest year
+  if (years.length === 0) { sel.innerHTML = ''; return; }
   if (!years.includes(_adminYearFilter)) {
     const currentYear = String(new Date().getFullYear());
-    _adminYearFilter = years.includes(currentYear)
-      ? currentYear
-      : years[years.length - 1];
+    _adminYearFilter = years.includes(currentYear) ? currentYear : years[years.length - 1];
   }
-  wrap.innerHTML = years.map(y => {
-    const active = y === _adminYearFilter;
-    return `<button onclick="setAdminYear('${y}')" style="padding:4px 14px;border-radius:99px;border:1.5px solid ${active?'#111':'#e5e7eb'};background:${active?'#111':'#fff'};color:${active?'#fff':'#374151'};font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;">${y}</button>`;
-  }).join('');
+  sel.innerHTML = years.map(y => `<option value="${y}" ${y === _adminYearFilter ? 'selected' : ''}>${y}</option>`).join('');
 }
 
 function setAdminYear(y) {
