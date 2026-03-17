@@ -3059,7 +3059,7 @@ function renderCalendarCardGrid(monthEvents) {
     }
     return;
   }
-  grid.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start;';
   if (noEv) noEv.style.display = 'none';
 
   const today = new Date();
