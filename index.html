@@ -3089,11 +3089,7 @@ function renderCalendarCardGrid(monthEvents) {
       const ac = getArtistColor(a);
       return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;font-weight:700;color:${past?'#9ca3af':ac};"><span style="width:5px;height:5px;border-radius:50%;background:${past?'#d1d5db':ac};display:inline-block;"></span>${a}</span>`;
     }).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
-    const badge = past
-      ? `<span style="font-size:0.55rem;font-weight:700;padding:2px 7px;border-radius:99px;background:#f3f4f6;color:#9ca3af;">past</span>`
-      : (days2 !== null && days2 >= 0 && days2 <= 7)
-        ? `<span style="font-size:0.55rem;font-weight:800;padding:2px 7px;border-radius:99px;background:${color};color:#fff;">${days2===0?'TODAY':days2===1?'1 DAY':days2+' DAYS'}</span>`
-        : '';
+    const badge = '';
     const loc = [ev.location, ev.city].filter(Boolean).join(', ');
     // Image or gradient placeholder
     const gradients = {
