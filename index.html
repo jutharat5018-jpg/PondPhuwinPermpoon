@@ -782,10 +782,10 @@ self.addEventListener('fetch', e => {
      </div>
 
      <!-- ── แถวเดียว: กรอบซ้าย + กรอบขวา ── -->
-     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;align-items:start;">
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;align-items:stretch;">
 
      <!-- กรอบ 1: Stats + Artist -->
-     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 20px;">
+     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 20px;box-sizing:border-box;display:flex;flex-direction:column;">
       <!-- แถว 1: Total + Past/Remaining/% -->
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;margin-bottom:12px;">
        <div style="display:flex;align-items:baseline;gap:8px;">
@@ -810,7 +810,7 @@ self.addEventListener('fetch', e => {
        </div>
       </div>
       <!-- แถว 2: Pond / Phuwin / Permpoon -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;align-content:stretch;">
        <div style="background:#fff7ed;border:0.5px solid #fed7aa;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
          <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
