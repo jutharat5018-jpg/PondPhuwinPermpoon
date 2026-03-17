@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#ffffff">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!-- Cache-Control hints for CDN/edge (Vercel/Cloudflare auto-respects these) -->
-  <meta http-equiv="Cache-Control" content="public, max-age=3600, stale-while-revalidate=86400">
+  <!-- Force no-cache on all clients including iPhone/PWA -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>PondPhuwinPermpoon Schedule</title>
   <!-- PWA / installable — enables instant load from home screen -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -33,58 +35,35 @@
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      // Inline SW as a blob — no separate file needed
       const swCode = `
-const SW_CACHE = 'ppp-sw-v3';
-const STATIC_URLS = ['/'];
-const API_PATTERN = /script\\.google\\.com/;
-self.addEventListener('install', e => {
-  self.skipWaiting();
-  e.waitUntil(caches.open(SW_CACHE).then(c => c.addAll(STATIC_URLS).catch(()=>{})));
-});
+const SW_VERSION = 'ppp-sw-v4-nocache';
+self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
+  // Delete ALL old caches on activate
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== SW_CACHE).map(k => caches.delete(k))
-    )).then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 self.addEventListener('fetch', e => {
-  const url = e.request.url;
+  // Always fetch fresh — never serve from cache
   if (e.request.method !== 'GET') return;
-  // API requests: stale-while-revalidate (serve cached, refresh in background)
-  if (API_PATTERN.test(url)) {
-    e.respondWith(
-      caches.open(SW_CACHE).then(cache =>
-        cache.match(e.request).then(cached => {
-          const fresh = fetch(e.request.clone(), {cache:'no-store'})
-            .then(res => { if (res.ok) cache.put(e.request, res.clone()); return res; })
-            .catch(() => null);
-          return cached || fresh;
-        })
-      )
-    );
-    return;
-  }
-  // Static assets: cache-first, network fallback
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request)
-      .then(res => {
-        if (res.ok && !url.includes('chrome-extension')) {
-          caches.open(SW_CACHE).then(c => c.put(e.request, res.clone()));
-        }
-        return res;
-      }).catch(() => caches.match('/'))
-    )
+    fetch(e.request, { cache: 'no-store' }).catch(() => new Response('', { status: 503 }))
   );
 });
 `;
       const blob = new Blob([swCode], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
       navigator.serviceWorker.register(swUrl, { scope: '/' })
-        .catch(() => {}); // fail silently if blocked
+        .catch(() => {});
     });
   }
+
+  // Force reload on back/forward cache restore (iPhone bfcache fix)
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) window.location.reload();
+  });
   </script>
   <style>
   :root {
@@ -1712,11 +1691,10 @@ function fetchJSONP(url, timeoutMs = FETCH_TIMEOUT_MS) {
 }
 
 async function apiGetWithRetry(action, retryIndex = 0) {
-  const url = `${API_URL}?action=${encodeURIComponent(action)}`;
+  const url = `${API_URL}?action=${encodeURIComponent(action)}&t=${Date.now()}`;
   try {
     return await fetchWithTimeout(url);
   } catch(e) {
-    // Try JSONP fallback on first failure
     try {
       return await fetchJSONP(url);
     } catch(e2) {
