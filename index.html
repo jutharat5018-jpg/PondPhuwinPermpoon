@@ -2651,7 +2651,7 @@ function createCard(ev) {
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div style="overflow:hidden;height:clamp(120px,14vw,200px);flex-shrink:0;background:#f3f4f6;position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div style="overflow:hidden;height:clamp(100px,11vw,160px);flex-shrink:0;background:#f3f4f6;position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
 
   const artistColors = { Pond:'#f97316', Phuwin:'#6b7280', Permpoon:'#22c55e' };
