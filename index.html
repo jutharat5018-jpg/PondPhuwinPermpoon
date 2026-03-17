@@ -138,13 +138,8 @@ self.addEventListener('fetch', e => {
   .list-card-title { font-size:0.85rem;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px; }
   .list-card-meta { font-size:0.68rem;color:#9ca3af;display:flex;gap:8px;flex-wrap:wrap; }
   .event-card:active { transform: translateY(-1px) scale(1.002); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-  /* ── Card countdown timer ── */
-  .card-countdown { display:flex; gap:4px; flex-wrap:wrap; margin-top:8px; }
-  .count-box { background:rgba(0,0,0,0.08); color:#111; padding:4px 6px; border-radius:6px; font-size:0.65rem; font-weight:800; text-align:center; line-height:1.2; min-width:34px; letter-spacing:0.02em; }
-  .count-box span { display:block; font-size:0.5rem; font-weight:600; color:#9ca3af; margin-top:1px; letter-spacing:0.06em; }
+  /* ── TODAY badge on card image ── */
   .today-badge { background:#ef4444; color:#fff; font-weight:800; padding:4px 10px; border-radius:6px; position:absolute; top:8px; left:8px; font-size:0.62rem; letter-spacing:0.06em; box-shadow:0 2px 8px rgba(239,68,68,0.4); z-index:4; }
-  .next-event-label { font-size:0.58rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#f97316; margin-top:6px; margin-bottom:2px; }
-  @media (max-width:480px) { .count-box { font-size:0.6rem; padding:3px 5px; min-width:28px; } }
   .card-img-placeholder { width: 100%; height: 160px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   /* ── Card image wrapper: fixed height, never expands ── */
   .card-img-wrap {
@@ -791,38 +786,77 @@ self.addEventListener('fetch', e => {
 
      <!-- HERO -->
      <div id="bento-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
-      <!-- Event 1 -->
+      <!-- Event 1: HERO BANNER with countdown -->
       <div id="bento-next" style="background:#111;border-radius:14px;overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
        <div id="bento-next-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
-       <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
-       <div style="position:absolute;top:18px;left:20px;">
+       <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.08) 100%);"></div>
+       <!-- Top-left: UPCOMING badge -->
+       <div style="position:absolute;top:14px;left:16px;">
         <div style="display:flex;align-items:center;gap:6px;">
          <div style="display:flex;gap:3px;"><div style="width:5px;height:5px;border-radius:50%;background:#f97316;"></div><div style="width:5px;height:5px;border-radius:50%;background:#6b7280;"></div><div style="width:5px;height:5px;border-radius:50%;background:#22c55e;"></div></div>
-         <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;">UPCOMING</span>
+         <span style="font-size:0.58rem;font-weight:700;color:rgba(255,255,255,0.45);letter-spacing:0.08em;text-transform:uppercase;">UPCOMING</span>
         </div>
        </div>
-       <div style="position:relative;">
-        <div id="bento-next-label" style="font-size:0.6rem;font-weight:800;letter-spacing:0.08em;margin-bottom:6px;color:#f97316;">NEXT EVENT</div>
-        <div id="bento-next-title" style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:5px;">Loading...</div>
-        <div id="bento-next-meta" style="font-size:0.62rem;color:rgba(255,255,255,0.4);margin-bottom:4px;"></div>
-        <div id="bento-countdown" style="display:none;gap:4px;align-items:center;margin-top:8px;">
-         <div style="display:flex;gap:4px;">
-          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-days" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">DAYS</div></div>
-          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-hours" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">HRS</div></div>
-          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-mins" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">MIN</div></div>
-          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-secs" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">SEC</div></div>
+       <!-- Bottom content -->
+       <div style="position:relative;z-index:1;">
+        <!-- NEXT · X DAY label -->
+        <div id="bento-next-label" style="font-size:0.58rem;font-weight:800;letter-spacing:0.1em;margin-bottom:5px;color:#f97316;text-transform:uppercase;">NEXT EVENT</div>
+        <!-- Title -->
+        <div id="bento-next-title" style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:4px;">Loading...</div>
+        <!-- Meta: date · time · location -->
+        <div id="bento-next-meta" style="font-size:0.6rem;color:rgba(255,255,255,0.45);margin-bottom:10px;"></div>
+        <!-- Countdown boxes -->
+        <div id="bento-countdown" style="display:none;gap:6px;align-items:center;">
+         <div style="display:flex;gap:5px;">
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);backdrop-filter:none;border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd-days" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">DAYS</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd-hours" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">HRS</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd-mins" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">MIN</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd-secs" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">SEC</div>
+          </div>
          </div>
         </div>
        </div>
       </div>
-      <!-- Event 2 -->
+      <!-- Event 2: second hero banner with countdown -->
       <div id="bento-ev2" style="background:#111;border-radius:14px;overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
        <div id="bento-next2-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
-       <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
-       <div style="position:relative;">
-        <div id="bento-next2-label" style="font-size:0.6rem;font-weight:800;letter-spacing:0.08em;margin-bottom:6px;display:none;"></div>
-        <div id="bento-next2-title" style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:5px;display:none;"></div>
-        <div id="bento-next2-meta" style="font-size:0.62rem;color:rgba(255,255,255,0.4);display:none;"></div>
+       <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.30) 55%, rgba(0,0,0,0.08) 100%);"></div>
+       <div style="position:relative;z-index:1;">
+        <div id="bento-next2-label" style="font-size:0.58rem;font-weight:800;letter-spacing:0.1em;margin-bottom:5px;display:none;text-transform:uppercase;"></div>
+        <div id="bento-next2-title" style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:4px;display:none;"></div>
+        <div id="bento-next2-meta" style="font-size:0.6rem;color:rgba(255,255,255,0.45);margin-bottom:10px;display:none;"></div>
+        <!-- Countdown for event 2 -->
+        <div id="bento-countdown2" style="display:none;gap:6px;align-items:center;">
+         <div style="display:flex;gap:5px;">
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd2-days" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">DAYS</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd2-hours" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">HRS</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd2-mins" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">MIN</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.08);border-radius:7px;padding:5px 8px;text-align:center;min-width:38px;">
+           <div id="cd2-secs" style="font-size:1rem;font-weight:900;color:#fff;line-height:1.1;">0</div>
+           <div style="font-size:0.4rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:2px;text-transform:uppercase;">SEC</div>
+          </div>
+         </div>
+        </div>
        </div>
       </div>
      </div>
@@ -2442,6 +2476,7 @@ function renderHome() {
       el('bento-next2-bg').style.backgroundImage = `url('${hero2Src}')`;
     }
     if (el('bento-ev2')) el('bento-ev2').dataset.id = next2.__backendId;
+    startCountdown2(next2.dateStart, next2.startTime);
   } else if (el('bento-ev2')) {
     el('bento-ev2').style.display = 'none';
   }
@@ -2573,8 +2608,6 @@ function renderHome() {
   grid.appendChild(frag);
 
   debounceLucide();
-  // ── Start live per-card countdown tickers ──
-  startCardCountdowns();
 }
 
 function renderPastEvents(grid) {
@@ -2793,7 +2826,9 @@ function isEventToday(ev) {
 // ── Card Countdown System ─────────────────────────────────────────
 // Tracks the nearest upcoming event and runs a live per-card ticker
 let _nextEventId = null;
-let _cardCountdownTimer = null;
+// ── Card Countdown System ─────────────────────────────────────────
+// Countdown lives ONLY in hero banners (bento-next, bento-ev2)
+// Small grid/list/calendar cards do NOT show countdowns
 
 // Returns ms until event starts (uses startTime if available, else midnight)
 function msUntilEvent(ev) {
@@ -2818,89 +2853,6 @@ function buildCountdownImgBadge(ev) {
   }
   return '';
 }
-
-// Renders a card-body countdown (days/hrs/min/sec boxes)
-function buildCardCountdown(ev) {
-  if (!ev.dateStart) return '';
-  const days = daysUntilEvent(ev.dateStart);
-  if (days === null || days < 0) return '';
-  const id = ev.__backendId;
-  const isNext = _nextEventId && id === _nextEventId;
-
-  // Only show live ticker for: TODAY or upcoming events (limit to next ~365 days to avoid noise)
-  if (days > 365) return '';
-
-  // Compute initial values
-  const ms = msUntilEvent(ev);
-  if (ms === null) return '';
-  const aboveMs = Math.max(ms, 0);
-  const d = Math.floor(aboveMs / 86400000);
-  const h = Math.floor((aboveMs % 86400000) / 3600000);
-  const m = Math.floor((aboveMs % 3600000)  / 60000);
-  const s = Math.floor((aboveMs % 60000)    / 1000);
-
-  const nextLabel = isNext ? `<div class="next-event-label">⚡ Next Event</div>` : '';
-
-  return `${nextLabel}<div class="card-countdown" data-countdown-ev="${id}">
-    <div class="count-box"><span id="cd-${id}-d">${d}</span><span>DAYS</span></div>
-    <div class="count-box"><span id="cd-${id}-h">${String(h).padStart(2,'0')}</span><span>HRS</span></div>
-    <div class="count-box"><span id="cd-${id}-m">${String(m).padStart(2,'0')}</span><span>MIN</span></div>
-    <div class="count-box"><span id="cd-${id}-s">${String(s).padStart(2,'0')}</span><span>SEC</span></div>
-  </div>`;
-}
-
-// Global ticker — updates every second, targets all rendered countdown widgets
-// Global countdown DOM cache — built once per render, reused every tick
-let _countdownDomCache = null;
-
-function buildCountdownDomCache() {
-  _countdownDomCache = [];
-  const widgets = document.querySelectorAll('[data-countdown-ev]');
-  widgets.forEach(widget => {
-    const id = widget.dataset.countdownEv;
-    const ev = getEventById(id);
-    if (!ev) return;
-    _countdownDomCache.push({
-      widget,
-      ev,
-      dEl: document.getElementById(`cd-${id}-d`),
-      hEl: document.getElementById(`cd-${id}-h`),
-      mEl: document.getElementById(`cd-${id}-m`),
-      sEl: document.getElementById(`cd-${id}-s`),
-    });
-  });
-}
-
-function startCardCountdowns() {
-  if (_cardCountdownTimer) clearInterval(_cardCountdownTimer);
-  buildCountdownDomCache();
-  _cardCountdownTimer = setInterval(() => {
-    if (!_countdownDomCache) return;
-    for (const { widget, ev, dEl, hEl, mEl, sEl } of _countdownDomCache) {
-      const ms = msUntilEvent(ev);
-      if (ms === null) continue;
-      if (ms <= 0) { widget.style.display = 'none'; continue; }
-      const d = Math.floor(ms / 86400000);
-      const h = Math.floor((ms % 86400000) / 3600000);
-      const m = Math.floor((ms % 3600000)  / 60000);
-      const s = Math.floor((ms % 60000)    / 1000);
-      if (dEl) dEl.textContent = d;
-      if (hEl) hEl.textContent = String(h).padStart(2,'0');
-      if (mEl) mEl.textContent = String(m).padStart(2,'0');
-      if (sEl) sEl.textContent = String(s).padStart(2,'0');
-    }
-  }, 1000);
-}
-
-function buildCountdownNoImg(ev) {
-  if (!ev.dateStart) return '';
-  const days = daysUntilEvent(ev.dateStart);
-  if (days === null || days < 0 || days > 60) return '';
-  const label = days === 0 ? 'Today' : `in ${days} day${days !== 1 ? 's' : ''}`;
-  return `<div style="font-size:0.72rem;font-weight:700;color:#9ca3af;padding:6px 0 2px;">${label}</div>`;
-}
-// Legacy stub
-function buildCountdownTag(ev, color) { return ''; }
 
 function createCard(ev) {
   if (!ev.title || !ev.title.trim()) return document.createDocumentFragment();
@@ -2981,7 +2933,6 @@ function createCard(ev) {
       <h3 style="font-weight:700;font-size:0.78rem;letter-spacing:-0.01em;margin-bottom:4px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.title)}</h3>
       ${dtRow}${locRow}${pillsRow}${noteRow}${descRow}
       ${socialHtml ? `<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:4px;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
-      ${buildCardCountdown(ev)}
       <div style="flex:1;"></div>
     </div>`;
   return card;
@@ -3416,32 +3367,7 @@ function renderCalendarCardGrid(monthEvents) {
     }).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
     const badge = '';
     const loc = [ev.location, ev.city].filter(Boolean).join(', ');
-    // Countdown for this event
-    const calDays = daysUntilEvent(ev.dateStart);
-    const calIsToday = calDays === 0;
-    const calIsNext = _nextEventId && ev.__backendId === _nextEventId;
-    // Build inline countdown for calendar card
-    let calCountdownHtml = '';
-    if (!past && calDays !== null && calDays >= 0 && calDays <= 365) {
-      const ms = msUntilEvent(ev);
-      if (ms !== null && ms > 0) {
-        const cd = Math.floor(ms / 86400000);
-        const ch = Math.floor((ms % 86400000) / 3600000);
-        const cm = Math.floor((ms % 3600000)  / 60000);
-        const cs = Math.floor((ms % 60000)    / 1000);
-        const cid = ev.__backendId;
-        const nextLbl = calIsNext ? `<span style="font-size:0.52rem;font-weight:800;letter-spacing:0.08em;color:#f97316;text-transform:uppercase;margin-right:4px;">⚡ Next</span>` : '';
-        calCountdownHtml = `<div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin-top:5px;" data-countdown-ev="${cid}">
-          ${nextLbl}
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-d">${cd}</span><span>D</span></span>
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-h">${String(ch).padStart(2,'0')}</span><span>H</span></span>
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-m">${String(cm).padStart(2,'0')}</span><span>M</span></span>
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-s">${String(cs).padStart(2,'0')}</span><span>S</span></span>
-        </div>`;
-      } else if (calIsToday) {
-        calCountdownHtml = `<div style="margin-top:5px;"><span class="today-badge" style="position:static;display:inline-block;">TODAY</span></div>`;
-      }
-    }
+    const calIsToday = daysUntilEvent(ev.dateStart) === 0;
     // Image or gradient placeholder
     const gradients = {
       '#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)',
@@ -3470,12 +3396,9 @@ function renderCalendarCardGrid(monthEvents) {
           ${ev.startTime?`<span style="color:#d1d5db;">·</span><span>${fmtTime(ev.startTime)}</span>`:''}
           ${loc?`<span style="color:#d1d5db;">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(loc)}</span>`:''}
         </div>
-        ${calCountdownHtml}
       </div>
     </div>`;
   }).join('');
-  // ── Start live countdown tickers for calendar cards ──
-  startCardCountdowns();
 }
 
 function scrollToEventCard(dateStr) {
@@ -3635,6 +3558,44 @@ function startCountdown(dateStr, timeStr) {
   cdEl.style.display = 'flex';
   tick();
   _countdownTimer = setInterval(tick, 1000);
+}
+
+// Countdown for second hero (bento-ev2)
+let _countdown2Target = null;
+let _countdown2Timer  = null;
+function startCountdown2(dateStr, timeStr) {
+  if (_countdown2Timer) clearInterval(_countdown2Timer);
+  const cdEl = document.getElementById('bento-countdown2');
+  if (!cdEl || !dateStr) return;
+  let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
+  if (!t) t = '00:00';
+  if (!t.includes(':')) t = t.slice(0,2)+':'+t.slice(2);
+  if (t.split(':')[0].length === 1) t = '0' + t;
+  const target = new Date(dateStr + 'T' + t + ':00');
+  if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
+  _countdown2Target = target;
+  function tick2() {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      document.getElementById('cd2-days').textContent  = '0';
+      document.getElementById('cd2-hours').textContent = '00';
+      document.getElementById('cd2-mins').textContent  = '00';
+      document.getElementById('cd2-secs').textContent  = '00';
+      clearInterval(_countdown2Timer);
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000)  / 60000);
+    const s = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('cd2-days').textContent  = d;
+    document.getElementById('cd2-hours').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd2-mins').textContent  = String(m).padStart(2,'0');
+    document.getElementById('cd2-secs').textContent  = String(s).padStart(2,'0');
+  }
+  cdEl.style.display = 'flex';
+  tick2();
+  _countdown2Timer = setInterval(tick2, 1000);
 }
 
 function previewAdminImg(inputId, previewId) {
