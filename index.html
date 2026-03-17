@@ -369,6 +369,8 @@ self.addEventListener('fetch', e => {
     }
     #cal-date-strip button { width: 100% !important; height: 38px !important; }
     /* Done/Left already stacked as separate divs */
+    /* Permpoon: span full row when alone on bottom */
+    .artist-stat-permpoon { grid-column: 1 / -1 !important; }
   }
   /* Desktop/tablet: restore fixed 36px cells */
   @media (min-width: 768px) {
@@ -882,7 +884,7 @@ self.addEventListener('fetch', e => {
          <div style="font-size:0.62rem;color:#d1d5db;">Left <strong id="cs-phuwin-up" style="color:#6b7280;">-</strong></div>
         </div>
        </div>
-       <div style="background:#f0fdf4;border:0.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+       <div class="artist-stat-permpoon" style="background:#f0fdf4;border:0.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
          <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;"></div>
          <span style="font-size:0.6rem;font-weight:700;color:#14532d;letter-spacing:0.08em;">PERMPOON</span>
