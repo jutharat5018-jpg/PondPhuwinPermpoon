@@ -301,8 +301,8 @@ self.addEventListener('fetch', e => {
   /* ── Fluid card grid — truly infinite, auto-fills forever ── */
   .cards-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 11vw, 180px), 1fr)) !important;
-    gap: clamp(6px, 1vw, 12px) !important;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(160px, 15vw, 240px), 1fr)) !important;
+    gap: clamp(8px, 1.2vw, 14px) !important;
     align-items: start !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -2652,7 +2652,7 @@ function createCard(ev) {
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div style="overflow:hidden;aspect-ratio:16/7;width:100%;flex-shrink:0;background:#f3f4f6;position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div style="overflow:hidden;aspect-ratio:16/9;width:100%;flex-shrink:0;background:#f3f4f6;position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:4px;background:${color};flex-shrink:0;"></div>`;
 
   const artistColors = { Pond:'#f97316', Phuwin:'#6b7280', Permpoon:'#22c55e' };
