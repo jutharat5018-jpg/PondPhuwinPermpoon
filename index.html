@@ -3326,8 +3326,11 @@ async function saveBirthday() {
 // SECURITY + NAVIGATION
 // ═══════════════════════════════════════════════════════════════════
 function checkPanelKey() {
-  const p = new URLSearchParams(window.location.search);
-  if (p.get('panel') === PANEL_KEY) {
+  // Support both ?panel=KEY and #panel=KEY (hash — works on Vercel/GitHub Pages)
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams   = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const key = searchParams.get('panel') || hashParams.get('panel') || '';
+  if (key === PANEL_KEY) {
     panelUnlocked = true;
     try { sessionStorage.setItem(PANL_FLAG, '1'); } catch(e) {}
     history.replaceState(null, '', window.location.pathname);
