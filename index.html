@@ -110,7 +110,7 @@ self.addEventListener('fetch', e => {
   .nav-link.active { color: #111; background: #e5e7eb; border-radius: 99px; font-weight: 600; }
   .event-card { background:#fff;border-radius:var(--radius-card);overflow:hidden;transition:transform 0.15s ease,box-shadow 0.15s ease;cursor:pointer;display:flex;flex-direction:column;border:none;box-shadow:var(--shadow-card);height:100%;position:relative;contain:layout style; }
   .event-card:hover { transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.10); }
-  .month-group { content-visibility:auto;contain-intrinsic-size:0 400px; }
+  .month-group { contain: layout style; }
   .card-hover-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.75);border-radius:11px;display:flex;flex-direction:column;justify-content:center;padding:16px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:5; }
   .event-card:hover .card-hover-overlay { opacity:1; }
   .card-hover-overlay .oh-title { font-size:0.8rem;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.4; }
@@ -281,7 +281,7 @@ self.addEventListener('fetch', e => {
   /* Smooth scrolling on pages, GPU-accelerated */
   .page { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
   /* GPU layer hint for scroll containers — prevents paint during scroll */
-  #events-grid, #cal-card-grid, #cal-event-list { will-change: scroll-position; transform: translateZ(0); }
+  #events-grid, #cal-card-grid, #cal-event-list { will-change: scroll-position; }
   /* Skeleton loading optimization */
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
