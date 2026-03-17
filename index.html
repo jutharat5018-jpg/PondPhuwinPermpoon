@@ -2182,16 +2182,13 @@ function renderHome() {
 
   // Build DOM via fragment for minimal reflow
   const frag = document.createDocumentFragment();
-  const onlyOneMonth = dateMap.size === 1;
   dateMap.forEach(({ label, events: group }) => {
     const gw = document.createElement('div');
     gw.className = 'month-group';
-    if (!onlyOneMonth) {
-      const hdr = document.createElement('div');
-      hdr.className = 'month-group-header';
-      hdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${label}</span><span class="month-group-header-count">${group.length} event${group.length !== 1 ? 's' : ''}</span></div><span class="month-group-header-line"></span>`;
-      gw.appendChild(hdr);
-    }
+    const hdr = document.createElement('div');
+    hdr.className = 'month-group-header';
+    hdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${label}</span><span class="month-group-header-count">${group.length} event${group.length !== 1 ? 's' : ''}</span></div><span class="month-group-header-line"></span>`;
+    gw.appendChild(hdr);
 
     if (_viewMode === 'list') {
       // LIST VIEW
