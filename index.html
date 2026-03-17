@@ -348,16 +348,25 @@ self.addEventListener('fetch', e => {
      TABLET  768px – 1023px
   ══════════════════════════════════════════════ */
   @media (max-width: 1023px) {
-    /* Calendar: stack vertically */
+    /* Calendar: stack vertically — calendar top, events below */
     #cal-layout {
       grid-template-columns: 1fr !important;
-      gap: 20px !important;
+      gap: 16px !important;
     }
-    #cal-left { width: 100% !important; max-width: 100% !important; }
+    #cal-left {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    /* Expand calendar cells to fill full width */
+    #cal-dow-headers,
+    #cal-date-strip {
+      grid-template-columns: repeat(7, 1fr) !important;
+      width: 100% !important;
+    }
+    #cal-date-strip button { width: 100% !important; }
     #cal-event-list { max-height: none !important; }
-
-    /* Home title */
-    #home-title { font-size: 1.9rem !important; }
+  }
 
     /* Page padding */
     #page-home > div,
@@ -881,10 +890,10 @@ self.addEventListener('fetch', e => {
 
 
      <!-- ── Split: calendar ซ้าย + งานขวา ── -->
-     <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;">
+     <div id="cal-layout" style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;">
 
       <!-- ซ้าย: mini calendar -->
-      <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:16px;flex-shrink:0;">
+      <div id="cal-left" style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:16px;flex-shrink:0;">
        <!-- filter pills แนวนอน -->
        <div class="filter-bar" style="margin-bottom:12px;">
         <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
@@ -910,7 +919,7 @@ self.addEventListener('fetch', e => {
         <button onclick="nextMonth();" style="width:26px;height:26px;border-radius:7px;border:1px solid #e5e7eb;background:#f9fafb;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;">›</button>
        </div>
        <!-- DOW headers -->
-       <div style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;margin-bottom:3px;">
+       <div id="cal-dow-headers" style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;margin-bottom:3px;width:fit-content;">
         <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">S</div>
         <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">M</div>
         <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">T</div>
@@ -920,7 +929,7 @@ self.addEventListener('fetch', e => {
         <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">S</div>
        </div>
        <!-- Calendar grid cells -->
-       <div id="cal-date-strip" style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;"></div>
+       <div id="cal-date-strip" style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;width:fit-content;"></div>
       </div>
 
       <!-- ขวา: event cards -->
@@ -2986,7 +2995,7 @@ function renderCalendar() {
   // ── Date strip — only days with events + today ──
   const dateStripEl = document.getElementById('cal-date-strip');
   if (dateStripEl) {
-    dateStripEl.style.cssText = 'display:grid;grid-template-columns:repeat(7,36px);gap:2px;';
+    dateStripEl.style.cssText = 'display:grid;gap:2px;';
     const firstDay = new Date(year, month, 1).getDay();
     let cells = '';
     // empty cells ก่อนวันที่ 1
