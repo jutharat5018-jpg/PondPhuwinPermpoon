@@ -3297,20 +3297,21 @@ function startCountdown(dateStr, timeStr) {
   // Use only the first time if multiple (e.g. "13:00/15:00/17:00")
   let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
   if (!t) t = '00:00';
+  // Ensure HH:MM format
   if (!t.includes(':')) t = t.slice(0,2)+':'+t.slice(2);
-  if (t.length === 4) t = '0' + t; // e.g. "8:00" → "08:00"
+  if (t.split(':')[0].length === 1) t = '0' + t;
   const target = new Date(dateStr + 'T' + t + ':00');
-  if (isNaN(target)) { cdEl.style.display = 'none'; return; }
+  if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
   _countdownTarget = target;
   function tick() {
     const now  = new Date();
     const diff = target - now;
     if (diff <= 0) {
-      clearInterval(_countdownTimer);
       document.getElementById('cd-days').textContent  = '0';
-      document.getElementById('cd-hours').textContent = '0';
-      document.getElementById('cd-mins').textContent  = '0';
-      document.getElementById('cd-secs').textContent  = '0';
+      document.getElementById('cd-hours').textContent = '00';
+      document.getElementById('cd-mins').textContent  = '00';
+      document.getElementById('cd-secs').textContent  = '00';
+      clearInterval(_countdownTimer);
       return;
     }
     const d = Math.floor(diff / 86400000);
@@ -4050,8 +4051,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Init calendar date ──
   const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
 
-  // ── STEP 1: Clear ALL stale localStorage cache — always fetch fresh ──
-  try { Cache.clearAll(); } catch(e) {}
+  // ── STEP 1: Clear only timestamps to force re-fetch, keep data for instant display ──
+  try { [LC.TS_EV, LC.TS_BD, LC.TS_AN].forEach(k => Cache.del(k)); } catch(e) {}
 
   // ── STEP 2: Immediately hydrate from localStorage (zero-latency skeleton) ──
   hydrateFromCache();
