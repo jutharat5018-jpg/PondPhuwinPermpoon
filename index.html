@@ -171,6 +171,11 @@ self.addEventListener('fetch', e => {
   }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+  /* ── Hero bento: stack vertically on mobile ── */
+  @media (max-width: 600px) {
+    #bento-grid { grid-template-columns: 1fr !important; }
+    #bento-next, #bento-ev2 { aspect-ratio: 16/9 !important; padding: 14px 16px !important; }
+  }
   /* ── Filter bar — always horizontal scroll, never wrap ── */
   .filter-bar {
     display: flex;
@@ -417,10 +422,6 @@ self.addEventListener('fetch', e => {
     .month-group-header-label { font-size: 1.1rem !important; }
     .month-group { margin-bottom: 1.5rem !important; }
     #page-home > div > div[style*="grid-template-columns:2fr"] { grid-template-columns: 1fr 1fr !important; }
-    #bento-next { grid-row: span 1 !important; grid-column: span 2 !important; min-height: 120px !important; }
-    /* If bento-ev2 is hidden, bento-next takes full width */
-    #bento-ev2[style*="display: none"] ~ #bento-next,
-    #bento-ev2[style*="display:none"] ~ #bento-next { grid-column: span 2 !important; }
 
     /* ── Filter buttons — wrap, never overflow ── */
     .artist-filter-btn, .cal-filter-btn {
@@ -723,9 +724,9 @@ self.addEventListener('fetch', e => {
      <div id="bday-banners" style="display:none;flex-direction:column;gap:8px;margin-bottom:1.5rem;"></div>
 
      <!-- HERO -->
-     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;align-items:stretch;">
+     <div id="bento-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
       <!-- Event 1 -->
-      <div id="bento-next" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:21/9;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
+      <div id="bento-next" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:9/5;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
        <div id="bento-next-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
        <div style="position:relative;">
@@ -749,7 +750,7 @@ self.addEventListener('fetch', e => {
        </div>
       </div>
       <!-- Event 2 -->
-      <div id="bento-ev2" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:21/9;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
+      <div id="bento-ev2" style="background:#111;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:9/5;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
        <div id="bento-next2-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
        <div style="position:relative;">
@@ -761,24 +762,27 @@ self.addEventListener('fetch', e => {
      </div>
 
      <!-- FILTER BAR -->
-     <div id="home-filter-bar" class="filter-bar" style="margin-bottom:0.75rem;">
-      <button class="artist-filter-btn" data-artist="all" onclick="filterHome('all')"
-        style="padding:5px 14px;border-radius:6px;border:1px solid #111;background:#111;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;" >All</button>
-      <button class="artist-filter-btn" data-artist="Pond" onclick="filterHome('Pond')"
-        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#f97316;display:inline-block;"></span>Pond</button>
-      <button class="artist-filter-btn" data-artist="Phuwin" onclick="filterHome('Phuwin')"
-        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#6b7280;display:inline-block;"></span>Phuwin</button>
-      <button class="artist-filter-btn" data-artist="Permpoon" onclick="filterHome('Permpoon')"
-        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>Permpoon</button>
-      <div style="flex:1;"></div>
-      <span id="events-count" style="font-size:0.68rem;font-weight:600;color:#fff;background:#111;border-radius:6px;padding:2px 10px;"></span>
-      <div style="display:flex;align-items:center;gap:2px;background:#f3f4f6;border-radius:8px;padding:3px;flex-shrink:0;">
-       <button id="view-grid-btn" onclick="setViewMode('grid')" style="width:30px;height:28px;border-radius:6px;background:#111;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Grid view">
-        <svg width="13" height="13" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-       </button>
-       <button id="view-list-btn" onclick="setViewMode('list')" style="width:30px;height:28px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="List view">
-        <svg width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-       </button>
+     <div style="margin-bottom:0.75rem;">
+      <div id="home-filter-bar" class="filter-bar" style="margin-bottom:6px;">
+       <button class="artist-filter-btn" data-artist="all" onclick="filterHome('all')"
+         style="padding:5px 14px;border-radius:99px;border:1px solid #111;background:#111;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;">All</button>
+       <button class="artist-filter-btn" data-artist="Pond" onclick="filterHome('Pond')"
+         style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#f97316;display:inline-block;"></span>Pond</button>
+       <button class="artist-filter-btn" data-artist="Phuwin" onclick="filterHome('Phuwin')"
+         style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#6b7280;display:inline-block;"></span>Phuwin</button>
+       <button class="artist-filter-btn" data-artist="Permpoon" onclick="filterHome('Permpoon')"
+         style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>Permpoon</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+       <span id="events-count" style="font-size:0.68rem;font-weight:600;color:#fff;background:#111;border-radius:6px;padding:2px 10px;"></span>
+       <div style="display:flex;align-items:center;gap:2px;background:#f3f4f6;border-radius:8px;padding:3px;flex-shrink:0;">
+        <button id="view-grid-btn" onclick="setViewMode('grid')" style="width:30px;height:28px;border-radius:6px;background:#111;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Grid view">
+         <svg width="13" height="13" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <button id="view-list-btn" onclick="setViewMode('list')" style="width:30px;height:28px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="List view">
+         <svg width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+       </div>
       </div>
      </div>
      <div id="events-grid"></div>
@@ -4020,10 +4024,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Init calendar date ──
   const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
 
-  // ── STEP 1: Clear stale localStorage cache — always fetch fresh on load ──
-  try {
-    [LC.TS_EV, LC.TS_BD, LC.TS_AN].forEach(k => localStorage.removeItem(k));
-  } catch(e) {}
+  // ── STEP 1: Clear ALL stale localStorage cache — always fetch fresh ──
+  try { Cache.clearAll(); } catch(e) {}
 
   // ── STEP 2: Immediately hydrate from localStorage (zero-latency skeleton) ──
   hydrateFromCache();
