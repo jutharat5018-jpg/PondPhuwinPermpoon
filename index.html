@@ -2856,10 +2856,19 @@ function renderBirthdayBanners() {
 // ═══════════════════════════════════════════════════════════════════
 function filterCalendar(artist) {
   calFilter = artist;
+  calSelectedDate = null; // reset → แสดงทั้งเดือนของ artist นั้น
   document.querySelectorAll('.cal-filter-btn').forEach(btn => {
     const a = btn.dataset.artist;
-    if (a === artist) { btn.style.background = a==='all'?'#111':getArtistColor(a); btn.style.color='#fff'; btn.style.borderColor=a==='all'?'#111':getArtistColor(a); }
-    else { const c=a==='Pond'?'#f97316':a==='Phuwin'?'#6b7280':a==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
+    if (a === artist) {
+      btn.style.background = a==='all'?'#111':getArtistColor(a);
+      btn.style.color = '#fff';
+      btn.style.borderColor = a==='all'?'#111':getArtistColor(a);
+    } else {
+      const c = a==='Pond'?'#f97316':a==='Phuwin'?'#6b7280':a==='Permpoon'?'#22c55e':'#111';
+      btn.style.background = '#fff';
+      btn.style.color = c;
+      btn.style.borderColor = c;
+    }
   });
   renderCalendar();
 }
@@ -2892,9 +2901,12 @@ function renderCalendar() {
     }
   });
 
-  if (!calSelectedDate || !calSelectedDate.startsWith(monthStr)) {
-    if (today.getFullYear() === year && today.getMonth() === month) calSelectedDate = todayStr;
-    else { const first = Object.keys(monthEvents).sort()[0]; calSelectedDate = first || `${monthStr}-01`; }
+  // calHighlightDate ใช้แค่ highlight บน strip (ไม่ filter card)
+  // ไม่ filter รายวัน — แสดงทั้งเดือนเสมอ
+  let calHighlightDate = null;
+  if (!calHighlightDate || !calHighlightDate.startsWith(monthStr)) {
+    if (today.getFullYear() === year && today.getMonth() === month) calHighlightDate = todayStr;
+    else calHighlightDate = `${monthStr}-01`;
   }
 
   // ── Month event count ──
@@ -2939,19 +2951,18 @@ function renderCalendar() {
     dateStripEl.innerHTML = days.map(d => {
       const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
       const isToday = ds === todayStr;
-      const isSelected = ds === calSelectedDate;
       const evs = monthEvents[ds] || [];
       const hasEv = evs.length > 0;
       const dow = dowNames[new Date(ds+'T00:00:00').getDay()];
       const accentColor = hasEv ? getArtistColor(evs[0].artists) : null;
+      // highlight วันนี้ด้วย #111, วันที่มี event ด้วยสีศิลปิน
       let chipStyle = '';
-      if (isSelected && accentColor) chipStyle = `background:${accentColor};`;
-      else if (isSelected) chipStyle = 'background:#111;';
-      else if (isToday) chipStyle = 'background:#111;';
-      const dowColor = (isSelected || isToday) ? 'color:rgba(255,255,255,0.55);' : 'color:#9ca3af;';
-      const numColor = (isSelected || isToday) ? 'color:#fff;' : 'color:#111;';
-      const dot = hasEv && !isSelected ? `<div class="cal-date-chip-dot" style="background:${accentColor};"></div>` : '';
-      return `<button class="cal-date-chip" style="${chipStyle}" onclick="calSelectedDate='${ds}';renderCalendar();"><span class="cal-date-chip-dow" style="${dowColor}">${dow}</span><span class="cal-date-chip-num" style="${numColor}">${d}</span>${dot}</button>`;
+      if (isToday) chipStyle = 'background:#111;';
+      else if (hasEv) chipStyle = `background:${accentColor}18;`;
+      const dowColor = isToday ? 'color:rgba(255,255,255,0.55);' : 'color:#9ca3af;';
+      const numColor = isToday ? 'color:#fff;' : hasEv ? `color:${accentColor};font-weight:800;` : 'color:#374151;';
+      const dot = hasEv && !isToday ? `<div class="cal-date-chip-dot" style="background:${accentColor};"></div>` : '';
+      return `<button class="cal-date-chip" style="${chipStyle}" onclick="this.scrollIntoView({behavior:'smooth',inline:'center'});"><span class="cal-date-chip-dow" style="${dowColor}">${dow}</span><span class="cal-date-chip-num" style="${numColor}">${d}</span>${dot}</button>`;
     }).join('');
   }
 
@@ -3017,33 +3028,42 @@ function renderCalendarCardGrid(monthEvents) {
   if (!grid) return;
   const monthStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
 
-  // Determine events to show
-  // ถ้ากดวันไหน → แสดงเฉพาะวันนั้น (ถ้าไม่มี event ก็แสดงว่าไม่มี)
-  // ถ้าไม่ได้เลือกวัน → แสดงทั้งเดือน
+  // ถ้ากดวัน → แสดงเฉพาะวันนั้น, ถ้าไม่ได้กด → แสดงทั้งเดือน
+  // ทั้งสองกรณี filter ตาม calFilter (artist) ด้วย
   let eventsToShow = [];
+  const seen = new Set();
   const hasDateSelected = calSelectedDate && calSelectedDate.startsWith(monthStr);
-  if (hasDateSelected) {
-    eventsToShow = monthEvents[calSelectedDate] || [];
-  } else {
-    // All events in month, deduplicated
-    const seen = new Set();
-    Object.keys(monthEvents).sort().forEach(ds => {
-      (monthEvents[ds]||[]).forEach(ev => {
-        if (ev.__backendId && !seen.has(ev.__backendId)) { seen.add(ev.__backendId); eventsToShow.push(ev); }
-      });
+
+  const datesToShow = hasDateSelected
+    ? [calSelectedDate]
+    : Object.keys(monthEvents).sort();
+
+  datesToShow.forEach(ds => {
+    (monthEvents[ds]||[]).forEach(ev => {
+      if (!ev.__backendId || seen.has(ev.__backendId)) return;
+      // artist filter
+      if (calFilter !== 'all') {
+        const artists = (ev.artists||'').split(',').map(a=>a.trim());
+        if (!artists.includes(calFilter)) return;
+      }
+      seen.add(ev.__backendId);
+      eventsToShow.push(ev);
     });
-  }
+  });
 
   if (eventsToShow.length === 0) {
     grid.innerHTML = '';
     grid.style.display = 'none';
     if (noEv) {
       noEv.style.display = 'block';
-      const d = hasDateSelected ? new Date(calSelectedDate+'T00:00:00') : null;
-      const dowNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      noEv.innerHTML = d
-        ? `<p style="font-weight:700;color:#111;margin-bottom:4px;">${dowNames[d.getDay()]} ${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}</p><p style="font-size:0.82rem;color:#9ca3af;">No events on this day</p>`
-        : `<p style="font-weight:600;color:#9ca3af;">No events this month</p>`;
+      if (hasDateSelected) {
+        const d = new Date(calSelectedDate+'T00:00:00');
+        const dowNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const monNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        noEv.innerHTML = `<p style="font-weight:700;color:#111;margin-bottom:4px;">${dowNames[d.getDay()]} ${d.getDate()} ${monNames[d.getMonth()]}</p><p style="font-size:0.82rem;color:#9ca3af;">No events on this day</p>`;
+      } else {
+        noEv.innerHTML = `<p style="font-weight:600;color:#9ca3af;">No events this month</p>`;
+      }
     }
     return;
   }
@@ -3096,6 +3116,23 @@ function renderCalendarCardGrid(monthEvents) {
       </div>
     </div>`;
   }).join('');
+}
+
+function scrollToEventCard(dateStr) {
+  // scroll card grid ไปหา card ของวันนั้น (ถ้ามี)
+  setTimeout(() => {
+    const grid = document.getElementById('cal-card-grid');
+    if (!grid) return;
+    const cards = grid.querySelectorAll('[data-date]');
+    for (const card of cards) {
+      if (card.dataset.date === dateStr) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        card.style.outline = '2px solid #111';
+        setTimeout(() => card.style.outline = '', 1200);
+        return;
+      }
+    }
+  }, 80);
 }
 
 function renderCalendarEventList(monthEvents, daysInMonth) {
