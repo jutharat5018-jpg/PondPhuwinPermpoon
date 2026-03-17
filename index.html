@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="en" style="height:100%">
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#ffffff">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!-- Force no-cache on all clients including iPhone/PWA -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <!-- HTTP cache: allow CDN/proxy to cache page for 60s, browser for 30s -->
+  <meta http-equiv="Cache-Control" content="public, max-age=30, s-maxage=60">
+  <!-- Resource hint: preload critical path -->
+  <link rel="modulepreload" href="/_sdk/element_sdk.js" as="script">
   <title>PondPhuwinPermpoon Schedule</title>
   <!-- PWA / installable — enables instant load from home screen -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,48 +22,56 @@
   <!-- DNS prefetch + preconnect for external assets -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="dns-prefetch" href="https://script.google.com">
-  <!-- Preload critical font subset -->
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
+  <!-- Font: display=optional = zero render-block, uses system font until cached -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=optional" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=optional"></noscript>
   <!-- Non-blocking scripts -->
   <script src="/_sdk/element_sdk.js" defer></script>
-  <script src="https://cdn.tailwindcss.com/3.4.17" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" defer></script>
   <!-- Service Worker registration — L3 cache layer -->
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = `
-const SW_VERSION = 'ppp-sw-v4-nocache';
+const SW_VERSION = 'ppp-sw-v6';
+const STATIC_CACHE = SW_VERSION + '-static';
+const SKIP_CACHE_PATTERNS = [/script\.google\.com/, /googleapis\.com\/macros/];
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
-  // Delete ALL old caches on activate
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(
+      keys.filter(k => k !== STATIC_CACHE).map(k => caches.delete(k))
+    )).then(() => self.clients.claim())
   );
 });
 self.addEventListener('fetch', e => {
-  // Always fetch fresh — never serve from cache
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request, { cache: 'no-store' }).catch(() => new Response('', { status: 503 }))
-  );
+  const url = e.request.url;
+  // Never cache API calls
+  if (SKIP_CACHE_PATTERNS.some(p => p.test(url))) return;
+  // Network-first for HTML, cache-first for static assets
+  if (url.includes('fonts.') || url.includes('cdn.') || url.endsWith('.js') || url.endsWith('.css')) {
+    e.respondWith(
+      caches.open(STATIC_CACHE).then(cache =>
+        cache.match(e.request).then(cached => {
+          if (cached) return cached;
+          return fetch(e.request).then(res => {
+            if (res.ok) cache.put(e.request, res.clone());
+            return res;
+          }).catch(() => cached || new Response('', { status: 503 }));
+        })
+      )
+    );
+  }
 });
 `;
       const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
-      navigator.serviceWorker.register(swUrl, { scope: '/' })
-        .catch(() => {});
+      navigator.serviceWorker.register(URL.createObjectURL(blob), { scope: '/' }).catch(() => {});
     });
   }
-
-  // Force reload on back/forward cache restore (iPhone bfcache fix)
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) window.location.reload();
-  });
+  window.addEventListener('pageshow', e => { if (e.persisted) window.location.reload(); });
   </script>
   <style>
   :root {
@@ -97,11 +105,12 @@ self.addEventListener('fetch', e => {
   #app { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
   .page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; }
   .page.active { display: flex; flex-direction: column; }
-  .nav-link { cursor: pointer; transition: all 0.15s; font-size: 0.88rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 99px; color: #9ca3af; letter-spacing: 0.01em; }
+  .nav-link { cursor:pointer;transition:color 0.12s,background 0.12s;font-size:0.88rem;font-weight:500;padding:0.4rem 0.85rem;border-radius:99px;color:#9ca3af;letter-spacing:0.01em; }
   .nav-link:hover { color: #111; background: rgba(0,0,0,0.06); }
   .nav-link.active { color: #111; background: #e5e7eb; border-radius: 99px; font-weight: 600; }
-  .event-card { background: #fff; border-radius: var(--radius-card); overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease; cursor: pointer; display: flex; flex-direction: column; border: none; box-shadow: var(--shadow-card); height: 100%; position: relative; }
-  .event-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
+  .event-card { background:#fff;border-radius:var(--radius-card);overflow:hidden;transition:transform 0.15s ease,box-shadow 0.15s ease;cursor:pointer;display:flex;flex-direction:column;border:none;box-shadow:var(--shadow-card);height:100%;position:relative;contain:layout style; }
+  .event-card:hover { transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.10); }
+  .month-group { content-visibility:auto;contain-intrinsic-size:0 400px; }
   .card-hover-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.75);border-radius:11px;display:flex;flex-direction:column;justify-content:center;padding:16px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:5; }
   .event-card:hover .card-hover-overlay { opacity:1; }
   .card-hover-overlay .oh-title { font-size:0.8rem;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.4; }
@@ -155,8 +164,8 @@ self.addEventListener('fetch', e => {
     display: block;
     background: #f3f4f6;
   }
-  .card-img.img-loading { filter: blur(8px); transform: scale(1.04); transition: filter 0.4s ease, transform 0.4s ease; }
-  .card-img.img-loaded  { filter: none; transform: scale(1); }
+  .card-img.img-loading { opacity:0; }
+  .card-img.img-loaded  { opacity:1; transition:opacity 0.25s ease; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   /* ── CALENDAR ── */
   .cal-day { width:66px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:background 0.15s;box-sizing:border-box;position:relative;border:none;padding:0; }
@@ -225,13 +234,13 @@ self.addEventListener('fetch', e => {
   .filter-bar > div:last-child { flex-shrink: 0; }
   .cal-month-strip { display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none; }
   .cal-month-strip::-webkit-scrollbar { display:none; }
-  .cal-month-pill { padding:6px 16px;border-radius:99px;font-size:0.82rem;font-weight:600;color:#9ca3af;background:#f3f4f6;cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;font-family:inherit; }
+  .cal-month-pill { padding:6px 16px;border-radius:99px;font-size:0.82rem;font-weight:600;color:#9ca3af;background:#f3f4f6;cursor:pointer;transition:background 0.12s,color 0.12s;white-space:nowrap;border:none;font-family:inherit; }
   .cal-month-pill:hover { background:#e5e7eb;color:#111; }
   .cal-month-pill.active { background:#111;color:#fff;font-weight:700; }
   /* date strip */
   /* cal-date-strip: controlled by inline style per context */
   .cal-date-strip::-webkit-scrollbar { display:none; }
-  .cal-date-chip { width:100%;display:flex;flex-direction:row;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:none;background:transparent;font-family:inherit;position:relative;box-sizing:border-box;flex-shrink:0; }
+  .cal-date-chip { width:100%;display:flex;flex-direction:row;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;cursor:pointer;transition:background 0.12s;border:none;background:transparent;font-family:inherit;position:relative;box-sizing:border-box;flex-shrink:0; }
   .cal-date-chip:hover { background:#f3f4f6; }
   .cal-date-chip.today { background:#111; }
   .cal-date-chip.today .cal-date-chip-dow { color:rgba(255,255,255,0.5); }
@@ -242,14 +251,14 @@ self.addEventListener('fetch', e => {
   .cal-date-chip-dot { width:6px;height:6px;border-radius:50%;margin-left:auto;flex-shrink:0; }
   /* card grid */
   .cal-card-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px; }
-  .cal-ev-card { background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);overflow:hidden;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s; }
-  .cal-ev-card:hover { transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.10); }
+  .cal-ev-card { background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;cursor:pointer;transition:box-shadow 0.15s; }
+  .cal-ev-card:hover { box-shadow:0 4px 14px rgba(0,0,0,0.09); }
   .cal-ev-card-img { width:100%;height:120px;object-fit:cover;object-position:top;display:block;background:#f3f4f6; }
   .cal-ev-card-img-placeholder { width:100%;height:120px;display:flex;align-items:center;justify-content:center; }
   .cal-ev-card-body { padding:10px 12px; }
   .cal-ev-card-title { font-size:0.82rem;font-weight:700;color:#111;line-height:1.35;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical; }
   .cal-ev-card-meta { font-size:0.68rem;color:#9ca3af;display:flex;align-items:center;gap:5px;flex-wrap:wrap; }
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+  .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto; }
   .modal-box { background: #fafaf8; border-radius: var(--radius-card); max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.12); margin: auto; }
   .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.7rem 0.95rem; font-size: 1rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
   .form-input:focus { border-color: #111; }
@@ -265,7 +274,21 @@ self.addEventListener('fetch', e => {
   #toast.show { opacity: 1; pointer-events: auto; }
   .spinner { width: 16px; height: 16px; border: 2px solid #ccc; border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; margin-right: 4px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes shimmer {
+  /* ── Performance: reduced motion + mobile GPU optimization ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+  @media (max-width: 767px) {
+    .event-card { transition: none; }
+    .event-card:hover { transform: none; box-shadow: var(--shadow-card); }
+    .cal-ev-card { transition: none; }
+    .card-img.img-loaded { transition: none; }
+  }
+  /* Smooth scrolling on pages, GPU-accelerated */
+  .page { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+  /* GPU layer hint for scroll containers — prevents paint during scroll */
+  #events-grid, #cal-card-grid, #cal-event-list { will-change: scroll-position; transform: translateZ(0); }
+  /* Skeleton loading optimization */
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
@@ -330,6 +353,7 @@ self.addEventListener('fetch', e => {
     align-items: start !important;
     width: 100% !important;
     min-width: 0 !important;
+    contain: layout !important;
   }
   /* Phone override only — let auto-fill handle everything else */
   @media (max-width: 480px) { .cards-grid { grid-template-columns: 1fr !important; } }
@@ -1548,14 +1572,39 @@ async function hashPassword(pw) {
 }
 
 // ── PERFORMANCE CONFIG ────────────────────────────────────────────
-const CACHE_VERSION    = 'ppp_v3';
-const CACHE_TTL_MS     = 60 * 1000;           // 60s — min refresh interval
+const CACHE_VERSION    = 'ppp_v4';
+const CACHE_TTL_MS     = 120 * 1000;          // 120s — halves API load vs 60s
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h stale fallback
-const FETCH_TIMEOUT_MS = 12000;
-const RETRY_DELAYS     = [2000, 5000, 15000];
+const FETCH_TIMEOUT_MS = 10000;               // 10s — faster fail on slow mobile
+const RETRY_DELAYS     = [3000, 8000, 20000];  // more breathing room between retries
 const DEBOUNCE_RENDER  = 16;
-const DEBOUNCE_RESIZE  = 150;
+const DEBOUNCE_RESIZE  = 200;
 const SKELETON_COUNT   = 6;
+
+// ── COMPUTED EVENT CACHE — memoize expensive per-render calculations ──
+const _evCache = {
+  _color: {}, _past: {}, _days: {}, _tsKey: 0, _todayRef: null,
+  color(artists) {
+    if (this._color[artists] !== undefined) return this._color[artists];
+    return (this._color[artists] = getArtistColor(artists));
+  },
+  past(id, dateStart) {
+    if (this._past[id] !== undefined) return this._past[id];
+    if (!dateStart) return (this._past[id] = false);
+    const todayMs = this._todayRef || (this._todayRef = (() => { const t=new Date(); t.setHours(0,0,0,0); return t.getTime(); })());
+    return (this._past[id] = new Date(dateStart + 'T00:00:00').getTime() < todayMs);
+  },
+  days(dateStart) {
+    if (!dateStart) return null;
+    if (this._days[dateStart] !== undefined) return this._days[dateStart];
+    const todayMs = this._todayRef || (this._todayRef = (() => { const t=new Date(); t.setHours(0,0,0,0); return t.getTime(); })());
+    return (this._days[dateStart] = Math.round((new Date(dateStart + 'T00:00:00').getTime() - todayMs) / 86400000));
+  },
+  invalidate() {
+    this._color={}; this._past={}; this._days={}; this._tsKey=Date.now(); this._todayRef=null;
+    for (const ev of allEvents) { delete ev._artistArr; delete ev._searchStr; }
+  }
+};
 
 // ── RATE LIMITER — prevents API spam even on traffic spike ────────
 const _rateLimit = {
@@ -1592,6 +1641,7 @@ const LC = {
 
 // ── GLOBAL STATE ──────────────────────────────────────────────────
 let allEvents       = [];
+let _eventsMap      = new Map(); // O(1) id→event lookup
 let allBirthdays    = [];
 let allAnniversaries= [];
 let isAdmin         = false;
@@ -1602,6 +1652,13 @@ let calSelectedDate = null;
 let calFilter       = 'all';
 let homeFilter      = 'all';
 let homeSearch      = '';
+
+// Rebuild the O(1) lookup map whenever allEvents changes
+function _indexEvents() {
+  _eventsMap.clear();
+  for (const ev of allEvents) { if (ev.__backendId) _eventsMap.set(ev.__backendId, ev); }
+}
+function getEventById(id) { return _eventsMap.get(id) || null; }
 
 // ── i18n (English only) ───────────────────────────────────────────
 const i18n = {
@@ -1945,15 +2002,17 @@ function processEvents(raw) {
 // Hydrate from cache immediately — zero-latency first paint
 // Priority: L1 (memory) → L2 (localStorage)
 function hydrateFromCache() {
+  _evCache.invalidate();
   // L1 check first (same session, instant)
   const memEv = _memCache.get('events');
   if (memEv && memEv.length) {
-    allEvents = memEv; apiLoaded = true; scheduleRender();
+    allEvents = memEv; apiLoaded = true; _indexEvents(); scheduleRender();
   } else {
     // L2: localStorage
     const ev = Cache.get(LC.EVENTS);
     if (ev && ev.length) {
       allEvents = ev; apiLoaded = true;
+      _indexEvents();
       _memCache.set('events', ev); // promote to L1
       scheduleRender();
     } else {
@@ -1989,10 +2048,12 @@ async function loadEventsFromSheets(force = false) {
       const raw = data.events || [];
       const processed = processEvents(raw);
       allEvents = processed;
+      _indexEvents();
       _memCache.set('events', processed);   // L1 write
       Cache.set(LC.EVENTS, processed);      // L2 write
       Cache.setTS(LC.TS_EV);
       apiLoaded = true;
+      _evCache.invalidate();
       hideConnectionError();
       scheduleRender();
     }
@@ -2003,6 +2064,7 @@ async function loadEventsFromSheets(force = false) {
       const stale = Cache.get(LC.EVENTS);
       if (stale && stale.length) {
         allEvents = stale; apiLoaded = true;
+        _indexEvents();
         scheduleRender();
         showStaleWarning();
       } else {
@@ -2147,10 +2209,21 @@ function renderCurrentPage() {
 }
 
 // ── Status helpers ────────────────────────────────────────────────
+// ── TODAY TIMESTAMP — recomputed once per minute, shared across all callers ──
+let _todayMs = 0;
+let _todayMsExpires = 0;
+function getTodayMs() {
+  const now = Date.now();
+  if (now < _todayMsExpires) return _todayMs;
+  const t = new Date(); t.setHours(0,0,0,0);
+  _todayMs = t.getTime();
+  _todayMsExpires = now + 60000; // refresh every minute
+  return _todayMs;
+}
+
 function isEventPast(ev) {
   if (!ev.dateStart) return false;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  return new Date(ev.dateStart + 'T00:00:00') < today;
+  return new Date(ev.dateStart + 'T00:00:00').getTime() < getTodayMs();
 }
 function isEventUpcoming(ev) { return !isEventPast(ev); }
 
@@ -2271,19 +2344,40 @@ function escHtml(str) {
 function renderHome() {
   renderBirthdayBanners();
   const q = homeSearch.trim().toLowerCase();
-  const events = allEvents.filter(ev => {
-    if (!ev.title || !ev.title.trim()) return false;
-    if (isEventPast(ev)) return false;
-    if (homeFilter !== 'all') {
-      if (!ev.artists) return false;
-      if (!ev.artists.split(',').map(a => a.trim()).includes(homeFilter)) return false;
+
+  // ── Single-pass filter + bento stats (was 4 separate filter passes) ──
+  let cPond = 0, cPhuwin = 0, cPermpoon = 0;
+  const upAll = [];
+  const events = [];
+  for (const ev of allEvents) {
+    if (!ev.title || !ev.title.trim()) continue;
+    const past = _evCache.past(ev.__backendId, ev.dateStart);
+    if (!past) {
+      upAll.push(ev);
+      // Count by artist (reuse cached split if available)
+      if (ev._artistArr) {
+        if (ev._artistArr.includes('Pond'))     cPond++;
+        if (ev._artistArr.includes('Phuwin'))   cPhuwin++;
+        if (ev._artistArr.includes('Permpoon')) cPermpoon++;
+      } else if (ev.artists) {
+        const arr = ev.artists.split(',').map(a => a.trim());
+        ev._artistArr = arr; // cache on object to avoid re-splitting
+        if (arr.includes('Pond'))     cPond++;
+        if (arr.includes('Phuwin'))   cPhuwin++;
+        if (arr.includes('Permpoon')) cPermpoon++;
+      }
+      // Apply home filter
+      if (homeFilter !== 'all') {
+        if (!ev._artistArr || !ev._artistArr.includes(homeFilter)) continue;
+      }
+      // Apply search
+      if (q) {
+        if (!ev._searchStr) ev._searchStr = [ev.title, ev.location, ev.city, ev.country, ev.artists, ev.type, ev.tv].join(' ').toLowerCase();
+        if (!ev._searchStr.includes(q)) continue;
+      }
+      events.push(ev);
     }
-    if (q) {
-      const haystack = [ev.title, ev.location, ev.city, ev.country, ev.artists, ev.type, ev.tv].join(' ').toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
-    return true;
-  });
+  }
 
   // ── Hero background image from first event ──
   const heroImg = document.getElementById('home-hero-img');
@@ -2304,11 +2398,6 @@ function renderHome() {
 
   if (count) count.textContent = t('events_count', events.length);
 
-  // ── Bento grid update ──
-  const upAll = allEvents.filter(ev => ev.title && !isEventPast(ev));
-  const cPond     = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Pond')).length;
-  const cPhuwin   = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Phuwin')).length;
-  const cPermpoon = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Permpoon')).length;
   const el = id => document.getElementById(id);
   if (el('bento-count-pond'))     el('bento-count-pond').textContent     = cPond;
   if (el('bento-count-phuwin'))   el('bento-count-phuwin').textContent   = cPhuwin;
@@ -2695,16 +2784,11 @@ function buildDateBadge(ev, color) {
 // ── Countdown helpers ─────────────────────────────────────────────
 function daysUntilEvent(dateStr) {
   if (!dateStr) return null;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const evDate = new Date(dateStr + 'T00:00:00');
-  const diff = Math.round((evDate - today) / 86400000);
-  return diff;
+  return Math.round((new Date(dateStr + 'T00:00:00').getTime() - getTodayMs()) / 86400000);
 }
 function isEventToday(ev) {
   if (!ev.dateStart) return false;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const evDate = new Date(ev.dateStart + 'T00:00:00');
-  return evDate.getTime() === today.getTime();
+  return new Date(ev.dateStart + 'T00:00:00').getTime() === getTodayMs();
 }
 // ── Card Countdown System ─────────────────────────────────────────
 // Tracks the nearest upcoming event and runs a live per-card ticker
@@ -2766,34 +2850,45 @@ function buildCardCountdown(ev) {
 }
 
 // Global ticker — updates every second, targets all rendered countdown widgets
+// Global countdown DOM cache — built once per render, reused every tick
+let _countdownDomCache = null;
+
+function buildCountdownDomCache() {
+  _countdownDomCache = [];
+  const widgets = document.querySelectorAll('[data-countdown-ev]');
+  widgets.forEach(widget => {
+    const id = widget.dataset.countdownEv;
+    const ev = getEventById(id);
+    if (!ev) return;
+    _countdownDomCache.push({
+      widget,
+      ev,
+      dEl: document.getElementById(`cd-${id}-d`),
+      hEl: document.getElementById(`cd-${id}-h`),
+      mEl: document.getElementById(`cd-${id}-m`),
+      sEl: document.getElementById(`cd-${id}-s`),
+    });
+  });
+}
+
 function startCardCountdowns() {
   if (_cardCountdownTimer) clearInterval(_cardCountdownTimer);
+  buildCountdownDomCache();
   _cardCountdownTimer = setInterval(() => {
-    const widgets = document.querySelectorAll('[data-countdown-ev]');
-    widgets.forEach(widget => {
-      const id = widget.dataset.countdownEv;
-      const ev = allEvents.find(e => e.__backendId === id);
-      if (!ev) return;
+    if (!_countdownDomCache) return;
+    for (const { widget, ev, dEl, hEl, mEl, sEl } of _countdownDomCache) {
       const ms = msUntilEvent(ev);
-      if (ms === null) return;
-      if (ms <= 0) {
-        // Event passed — hide the ticker
-        widget.style.display = 'none';
-        return;
-      }
+      if (ms === null) continue;
+      if (ms <= 0) { widget.style.display = 'none'; continue; }
       const d = Math.floor(ms / 86400000);
       const h = Math.floor((ms % 86400000) / 3600000);
       const m = Math.floor((ms % 3600000)  / 60000);
       const s = Math.floor((ms % 60000)    / 1000);
-      const dEl = document.getElementById(`cd-${id}-d`);
-      const hEl = document.getElementById(`cd-${id}-h`);
-      const mEl = document.getElementById(`cd-${id}-m`);
-      const sEl = document.getElementById(`cd-${id}-s`);
       if (dEl) dEl.textContent = d;
       if (hEl) hEl.textContent = String(h).padStart(2,'0');
       if (mEl) mEl.textContent = String(m).padStart(2,'0');
       if (sEl) sEl.textContent = String(s).padStart(2,'0');
-    });
+    }
   }, 1000);
 }
 
@@ -2821,7 +2916,7 @@ function createCard(ev) {
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div class="card-img-wrap"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div class="card-img-wrap"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" width="400" height="160" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:4px;background:${color};flex-shrink:0;"></div>`;
 
   const artistColors = { Pond:'#f97316', Phuwin:'#6b7280', Permpoon:'#22c55e' };
@@ -2877,7 +2972,7 @@ function createCard(ev) {
   const shareBtn = ``;
   const hoverOverlay = `<div class="card-hover-overlay"><div class="oh-title">${escHtml(ev.title)}</div>${ev.description && !hasHtml(ev.description) ? `<div class="oh-desc">${escHtml(ev.description)}</div>` : ''}<div style="margin-top:10px;display:flex;gap:6px;align-items:center;">${ev.dateStart ? `<button onclick="event.stopPropagation();quickAddCalendar('${ev.__backendId}')" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:6px;color:#fff;font-size:0.62rem;font-weight:700;padding:4px 9px;cursor:pointer;letter-spacing:0.03em;"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Add to Calendar</button>` : ''}<div class="oh-cta" style="margin-top:0;">View details →</div></div></div>`;
   const imgSection = ev.image
-    ? `<div class="card-img-wrap">${shareBtn}<img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div class="card-img-wrap">${shareBtn}<img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" width="400" height="160" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
   card.style.flexDirection = '';
   card.innerHTML = `${imgSection}${hoverOverlay}
@@ -2896,7 +2991,7 @@ function createCard(ev) {
 // DETAIL MODAL — lazy map injection
 // ═══════════════════════════════════════════════════════════════════
 function openDetailModal(id) {
-  const ev = allEvents.find(e => e.__backendId === id);
+  const ev = getEventById(id);
   if (!ev || !ev.title) return;
   const color = getArtistColor(ev.artists);
   const hasHtmlD = v => !!v && /<[a-z][\s\S]*>/i.test(v);
@@ -3009,7 +3104,7 @@ function openDetailModal(id) {
 function shareDetailModal() {
   const id = window._currentDetailId;
   if (!id) return;
-  const ev = allEvents.find(e => e.__backendId === id);
+  const ev = getEventById(id);
   if (!ev) return;
   shareEvent(ev.title, id);
 }
@@ -3119,63 +3214,69 @@ function renderCalendar() {
   if (yearLabelEl) yearLabelEl.textContent = year;
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const todayMs   = getTodayMs();
+  const todayDate = new Date(todayMs);
+  const todayStr  = `${todayDate.getFullYear()}-${String(todayDate.getMonth()+1).padStart(2,'0')}-${String(todayDate.getDate()).padStart(2,'0')}`;
   const monthStr  = `${year}-${String(month+1).padStart(2,'0')}`;
 
-  // Build month events index
+  // Build month events index + count — single pass (was two identical loops)
   const monthEvents = {};
-  const filteredEvs = calFilter === 'all' ? allEvents : allEvents.filter(ev => ev.artists && ev.artists.split(',').map(a=>a.trim()).includes(calFilter));
-  filteredEvs.forEach(ev => {
-    if (!ev.dateStart) return;
-    for (let d = 1; d <= daysInMonth; d++) {
-      const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
-      if (ds >= ev.dateStart && ds <= (ev.dateEnd || ev.dateStart)) {
-        if (!monthEvents[ds]) monthEvents[ds] = [];
-        if (!monthEvents[ds].find(e => e.__backendId === ev.__backendId)) monthEvents[ds].push(ev);
-      }
-    }
-  });
-
-  // calHighlightDate ใช้แค่ highlight บน strip (ไม่ filter card)
-  // ไม่ filter รายวัน — แสดงทั้งเดือนเสมอ
-  let calHighlightDate = null;
-  if (!calHighlightDate || !calHighlightDate.startsWith(monthStr)) {
-    if (today.getFullYear() === year && today.getMonth() === month) calHighlightDate = todayStr;
-    else calHighlightDate = `${monthStr}-01`;
-  }
-
-  // ── Month event count ──
   const totalMonthEvents = new Set();
+  const evCountByMonth = Array(12).fill(0);
+  const filteredEvs = calFilter === 'all' ? allEvents : allEvents.filter(ev => {
+    if (!ev.artists) return false;
+    const arr = ev._artistArr || (ev.artists.split(',').map(a=>a.trim()));
+    if (!ev._artistArr) ev._artistArr = arr;
+    return arr.includes(calFilter);
+  });
+  const yearStr = String(calYear);
   filteredEvs.forEach(ev => {
     if (!ev.dateStart) return;
+    // Month-strip counter (all months in calYear)
+    if (ev.dateStart.startsWith(yearStr)) {
+      const m = parseInt(ev.dateStart.slice(5,7)) - 1;
+      if (m >= 0 && m < 12) evCountByMonth[m]++;
+    }
+    // Day-slot index (only current month)
+    const eStart = ev.dateStart;
+    const eEnd   = ev.dateEnd || eStart;
+    if (eStart > `${monthStr}-31` || eEnd < `${monthStr}-01`) return; // fast skip
     for (let d = 1; d <= daysInMonth; d++) {
       const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
-      if (ds >= ev.dateStart && ds <= (ev.dateEnd || ev.dateStart)) {
+      if (ds < eStart || ds > eEnd) continue;
+      if (!monthEvents[ds]) monthEvents[ds] = [];
+      if (!monthEvents[ds].find(e => e.__backendId === ev.__backendId)) {
+        monthEvents[ds].push(ev);
         totalMonthEvents.add(ev.__backendId || ev.title);
-        break;
       }
     }
   });
   const countEl = document.getElementById('cal-month-event-count');
   if (countEl) countEl.textContent = totalMonthEvents.size;
 
-  // ── Month strip (4×3 grid) ──
+  // ── Month strip — rebuild only when year changes, else just update active ──
   const stripEl = document.getElementById('cal-month-strip');
   if (stripEl) {
     const allMonthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const evCountByMonth = Array(12).fill(0);
-    filteredEvs.forEach(ev => {
-      if (!ev.dateStart || !ev.dateStart.startsWith(String(calYear))) return;
-      const m = parseInt(ev.dateStart.split('-')[1]) - 1;
-      if (m >= 0 && m < 12) evCountByMonth[m]++;
-    });
-    stripEl.innerHTML = allMonthNames.map((mn, mi) => {
-      const isActive = mi === month;
-      const count = evCountByMonth[mi];
-      const dotHtml = count > 0 ? `<span style="width:5px;height:5px;border-radius:50%;background:${isActive?'rgba(255,255,255,0.55)':'#f97316'};display:inline-block;flex-shrink:0;"></span>` : '';
-      return `<button onclick="calMonth=${mi};calSelectedDate=null;renderCalendar();" style="padding:9px 6px;border-radius:10px;border:none;font-size:0.82rem;font-weight:${isActive?'700':'600'};background:${isActive?'#111':'#f3f4f6'};color:${isActive?'#fff':'#374151'};cursor:pointer;transition:all 0.15s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">${mn}${dotHtml}</button>`;
-    }).join('');
+    if (stripEl.dataset.renderedYear !== yearStr) {
+      // Full rebuild — year changed or first render
+      stripEl.innerHTML = allMonthNames.map((mn, mi) => {
+        const isActive = mi === month;
+        const count = evCountByMonth[mi];
+        const dotHtml = count > 0 ? `<span style="width:5px;height:5px;border-radius:50%;background:${isActive?'rgba(255,255,255,0.55)':'#f97316'};display:inline-block;flex-shrink:0;"></span>` : '';
+        return `<button data-mi="${mi}" onclick="calMonth=${mi};calSelectedDate=null;renderCalendar();" style="padding:9px 6px;border-radius:10px;border:none;font-size:0.82rem;font-weight:${isActive?'700':'600'};background:${isActive?'#111':'#f3f4f6'};color:${isActive?'#fff':'#374151'};cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">${mn}${dotHtml}</button>`;
+      }).join('');
+      stripEl.dataset.renderedYear = yearStr;
+      stripEl.dataset.renderedMonth = String(month);
+    } else if (stripEl.dataset.renderedMonth !== String(month)) {
+      // Fast path — only swap active styles
+      const prev = parseInt(stripEl.dataset.renderedMonth);
+      const prevBtn = stripEl.querySelector(`[data-mi="${prev}"]`);
+      const nextBtn = stripEl.querySelector(`[data-mi="${month}"]`);
+      if (prevBtn) { prevBtn.style.background='#f3f4f6'; prevBtn.style.color='#374151'; prevBtn.style.fontWeight='600'; }
+      if (nextBtn) { nextBtn.style.background='#111';    nextBtn.style.color='#fff';    nextBtn.style.fontWeight='700'; }
+      stripEl.dataset.renderedMonth = String(month);
+    }
   }
 
   // ── Date strip — only days with events + today ──
@@ -3210,12 +3311,11 @@ function renderCalendar() {
   // ── Card grid ──
   renderCalendarCardGrid(monthEvents);
 
-  // ── Next event banner ──
-  const upcomingAll = allEvents.filter(ev => ev.title && !isEventPast(ev));
+  // ── Next event banner — use already-known _nextEventId, avoid re-scan ──
   const calBanner = document.getElementById('cal-next-event-banner');
-  if (calBanner && upcomingAll.length > 0) {
-    const next = upcomingAll[0];
-    const days = daysUntilEvent(next.dateStart);
+  const next = _nextEventId ? getEventById(_nextEventId) : allEvents.find(ev => ev.title && !_evCache.past(ev.__backendId, ev.dateStart));
+  if (calBanner && next) {
+    const days = _evCache.days(next.dateStart);
     const color = getArtistColor(next.artists);
     const dayLabel = days === 0 ? t('cal_next_today') : days === 1 ? t('cal_next_1day') : t('cal_next_days', days);
     const meta = [next.dateStart ? fmtDate(next.dateStart) : '', next.startTime ? fmtTime(next.startTime) : '', next.location].filter(Boolean).join(' · ');
@@ -3411,14 +3511,27 @@ function onCalYearChange(val) {
 
 function renderCalYearStats() {
   const year = _calStatYear;
-  const eventsInYear = allEvents.filter(ev => {
-    if (!ev.title || !ev.dateStart) return false;
-    return ev.dateStart.startsWith(String(year));
-  });
-  const past     = eventsInYear.filter(ev => isEventPast(ev)).length;
-  const upcoming = eventsInYear.filter(ev => !isEventPast(ev)).length;
-  const total    = eventsInYear.length;
-  const pct      = total > 0 ? Math.round((past / total) * 100) : 0;
+  const yearStr = String(year);
+  // Single-pass tally — replaces 8 separate .filter() calls
+  let total=0, past=0, upcoming=0;
+  let cPond=0, cPhuwin=0, cPermpoon=0;
+  let pPond=0, pPhuwin=0, pPermpoon=0;
+  let uPond=0, uPhuwin=0, uPermpoon=0;
+  for (const ev of allEvents) {
+    if (!ev.title || !ev.dateStart || !ev.dateStart.startsWith(yearStr)) continue;
+    total++;
+    const isPast = _evCache.past(ev.__backendId, ev.dateStart);
+    if (isPast) past++; else upcoming++;
+    const arr = ev._artistArr || (ev.artists ? ev.artists.split(',').map(a=>a.trim()) : []);
+    if (!ev._artistArr && arr.length) ev._artistArr = arr;
+    const hasPond     = arr.includes('Pond');
+    const hasPhuwin   = arr.includes('Phuwin');
+    const hasPermpoon = arr.includes('Permpoon');
+    if (hasPond)     { cPond++;     if (isPast) pPond++;     else uPond++; }
+    if (hasPhuwin)   { cPhuwin++;   if (isPast) pPhuwin++;   else uPhuwin++; }
+    if (hasPermpoon) { cPermpoon++; if (isPast) pPermpoon++; else uPermpoon++; }
+  }
+  const pct = total > 0 ? Math.round((past / total) * 100) : 0;
 
   const g = id => document.getElementById(id);
   if (g('cal-stat-year-label')) g('cal-stat-year-label').textContent = `${year} · Total`;
@@ -3427,19 +3540,15 @@ function renderCalYearStats() {
   if (g('cal-stat-upcoming')) g('cal-stat-upcoming').textContent = upcoming;
   if (g('cal-stat-pct'))      g('cal-stat-pct').textContent      = pct + '%';
 
-  // Artist breakdown
-  const artists = ['Pond', 'Phuwin', 'Permpoon'];
-  const keys    = ['pond', 'phuwin', 'permpoon'];
-  artists.forEach((artist, i) => {
-    const k = keys[i];
-    const evs   = eventsInYear.filter(ev => ev.artists && ev.artists.split(',').map(a=>a.trim()).includes(artist));
-    const aPast = evs.filter(ev => isEventPast(ev)).length;
-    const aUp   = evs.filter(ev => !isEventPast(ev)).length;
-    const aTotal = evs.length;
-    if (g(`cs-${k}-total`)) g(`cs-${k}-total`).textContent = aTotal;
-    if (g(`cs-${k}-past`))  g(`cs-${k}-past`).textContent  = aPast;
-    if (g(`cs-${k}-up`))    g(`cs-${k}-up`).textContent    = aUp;
-  });
+  if (g('cs-pond-total'))     g('cs-pond-total').textContent     = cPond;
+  if (g('cs-pond-past'))      g('cs-pond-past').textContent      = pPond;
+  if (g('cs-pond-up'))        g('cs-pond-up').textContent        = uPond;
+  if (g('cs-phuwin-total'))   g('cs-phuwin-total').textContent   = cPhuwin;
+  if (g('cs-phuwin-past'))    g('cs-phuwin-past').textContent    = pPhuwin;
+  if (g('cs-phuwin-up'))      g('cs-phuwin-up').textContent      = uPhuwin;
+  if (g('cs-permpoon-total')) g('cs-permpoon-total').textContent = cPermpoon;
+  if (g('cs-permpoon-past'))  g('cs-permpoon-past').textContent  = pPermpoon;
+  if (g('cs-permpoon-up'))    g('cs-permpoon-up').textContent    = uPermpoon;
 }
 
 function prevMonth() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} calSelectedDate=null; renderCalendar(); }
@@ -3541,7 +3650,7 @@ function previewAdminImg(inputId, previewId) {
 }
 
 function quickAddCalendar(id) {
-  const ev = allEvents.find(e => e.__backendId === id);
+  const ev = getEventById(id);
   if (!ev || !ev.dateStart) return;
   const title = encodeURIComponent(ev.title || '');
   const loc   = encodeURIComponent([ev.location, ev.city, ev.country].filter(Boolean).join(', '));
@@ -4194,12 +4303,11 @@ window.addEventListener('resize', () => {
   _resizeTimer = setTimeout(() => {
     if (document.getElementById('page-calendar')?.classList.contains('active')) renderCalendar();
   }, DEBOUNCE_RESIZE);
-});
+}, { passive: true });
 
 // Pause/resume background refresh when tab visibility changes
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    // Tab became visible — only refetch if rate limiter allows AND cache is stale
     if (!Cache.isFresh(LC.TS_EV) && _rateLimit.allow('visibility_refresh', 30000)) {
       loadEventsFromSheets().catch(()=>{});
     }
@@ -4207,8 +4315,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ── Language init ──
-  // Language locked to English
   checkPanelKey();
 
   if (panelUnlocked && !isLoggedIn()) {
@@ -4225,36 +4331,36 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAnniversaryAdmin();
   }
 
-  // ── Keyboard handlers ──
+  // ── Keyboard handlers — merged into single listener ──
   const pwField = document.getElementById('login-pw-field');
   if (pwField) pwField.addEventListener('keydown', e => { if(e.key==='Enter') doAdminLogin().catch(()=>{}); });
 
   document.addEventListener('keydown', function(e) {
-    const modal = document.getElementById('event-form-modal');
-    if (!modal || modal.style.display === 'none') return;
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeEventFormModal(); }
-  });
-  document.addEventListener('keydown', function(e) {
-    // Escape to close detail modal
     if (e.key === 'Escape') {
+      const formModal = document.getElementById('event-form-modal');
+      if (formModal && formModal.style.display !== 'none') { e.preventDefault(); e.stopPropagation(); closeEventFormModal(); return; }
       const detail = document.getElementById('detail-modal');
-      if (detail && detail.style.display !== 'none') closeDetailModal();
+      if (detail && detail.style.display !== 'none') { closeDetailModal(); return; }
+    }
+    if (e.key === 'Enter') {
+      const modal = document.getElementById('event-form-modal');
+      if (!modal || modal.style.display === 'none') return;
+      if (e.target.tagName !== 'TEXTAREA') { e.preventDefault(); e.stopPropagation(); }
     }
   });
-  document.addEventListener('keydown', function(e) {
-    if (e.key !== 'Enter') return;
-    const modal = document.getElementById('event-form-modal');
-    if (!modal || modal.style.display === 'none') return;
-    if (e.target.tagName !== 'TEXTAREA') { e.preventDefault(); e.stopPropagation(); }
-  });
+
+  // ── Passive touch/wheel listeners — prevent scroll jank ──
+  document.addEventListener('touchstart', () => {}, { passive: true });
+  document.addEventListener('touchmove',  () => {}, { passive: true });
+  document.addEventListener('wheel',      () => {}, { passive: true });
 
   // ── Init calendar date ──
   const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
 
-  // ── STEP 1: Clear only timestamps to force re-fetch, keep data for instant display ──
+  // ── STEP 1: Clear timestamps to force re-fetch, keep data for instant display ──
   try { [LC.TS_EV, LC.TS_BD, LC.TS_AN].forEach(k => Cache.del(k)); } catch(e) {}
 
-  // ── STEP 2: Immediately hydrate from localStorage (zero-latency skeleton) ──
+  // ── STEP 2: Hydrate from localStorage (zero-latency) ──
   hydrateFromCache();
   debounceLucide();
 
@@ -4266,7 +4372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAnniversariesFromSheets()
   ]).catch(() => {});
 
-  // ── STEP 4: Schedule recurring 60-second background refresh ──
+  // ── STEP 4: Schedule recurring background refresh ──
   scheduleAutoRefresh();
 });
   </script>
