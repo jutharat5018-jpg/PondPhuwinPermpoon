@@ -1001,9 +1001,14 @@ self.addEventListener('fetch', e => {
        </div>
        <button class="btn-secondary" onclick="adminLogout()"><i data-lucide="log-out" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span >Logout</span></button>
       </div>
-      <div style="margin-bottom:1rem;display:flex;gap:8px;align-items:center;">
+      <div style="margin-bottom:1rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
        <button class="btn-primary" onclick="openAddModal()"><i data-lucide="plus" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:4px;"></i><span >Add Event</span></button>
        <button class="btn-secondary" onclick="adminRefresh()" id="admin-refresh-btn" style="display:flex;align-items:center;gap:5px;"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i><span >Refresh</span></button>
+       <div style="flex:1;"></div>
+       <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:0.78rem;font-weight:600;color:#6b7280;">Year:</span>
+        <div id="admin-year-tabs" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+       </div>
       </div>
       <div id="admin-events-list" style="display:flex;flex-direction:column;gap:10px;"></div>
       <div id="admin-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
@@ -3356,6 +3361,32 @@ function quickAddCalendar(id) {
 // ═══════════════════════════════════════════════════════════════════
 // Track which months are expanded (default: current month open)
 const _adminOpenMonths = new Set();
+let _adminYearFilter = String(new Date().getFullYear());
+
+function renderAdminYearTabs() {
+  const wrap = document.getElementById('admin-year-tabs');
+  if (!wrap) return;
+  // Collect unique years from all events
+  const years = [...new Set(
+    allEvents
+      .filter(ev => ev.dateStart && ev.dateStart.length >= 4)
+      .map(ev => ev.dateStart.slice(0, 4))
+  )].sort();
+  if (years.length === 0) { wrap.innerHTML = ''; return; }
+  // Ensure current filter is valid
+  if (!years.includes(_adminYearFilter)) _adminYearFilter = years[years.length - 1];
+  wrap.innerHTML = years.map(y => {
+    const active = y === _adminYearFilter;
+    return `<button onclick="setAdminYear('${y}')" style="padding:4px 14px;border-radius:99px;border:1.5px solid ${active?'#111':'#e5e7eb'};background:${active?'#111':'#fff'};color:${active?'#fff':'#374151'};font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;">${y}</button>`;
+  }).join('');
+}
+
+function setAdminYear(y) {
+  _adminYearFilter = y;
+  _adminOpenMonths.clear();
+  renderAdminYearTabs();
+  renderAdminList();
+}
 
 function renderAdminList() {
   const list    = document.getElementById('admin-events-list');
@@ -3370,9 +3401,17 @@ function renderAdminList() {
   }
   if (noEv) noEv.style.display = 'none';
 
-  // Group events by year-month
+  // Render year tabs first
+  renderAdminYearTabs();
+
+  // Filter events by selected year
+  const filteredEvents = allEvents.filter(ev =>
+    ev.dateStart && ev.dateStart.startsWith(_adminYearFilter)
+  );
+
+  // Group events by year-month (filtered)
   const groups = new Map();
-  allEvents.forEach(ev => {
+  filteredEvents.forEach(ev => {
     const key = ev.dateStart ? ev.dateStart.slice(0,7) : 'no-date';
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(ev);
