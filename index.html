@@ -358,14 +358,29 @@ self.addEventListener('fetch', e => {
       max-width: 100% !important;
       box-sizing: border-box !important;
     }
-    /* Expand calendar cells to fill full width */
+    #cal-event-list { max-height: none !important; }
+  }
+  /* Mobile only: expand calendar cells to fill full width */
+  @media (max-width: 767px) {
     #cal-dow-headers,
     #cal-date-strip {
       grid-template-columns: repeat(7, 1fr) !important;
       width: 100% !important;
     }
-    #cal-date-strip button { width: 100% !important; }
-    #cal-event-list { max-height: none !important; }
+    #cal-date-strip button { width: 100% !important; height: 38px !important; }
+    /* Done/Left: stack vertically on mobile */
+    .artist-stat-donerow {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-end !important;
+      gap: 1px !important;
+      line-height: 1.4 !important;
+    }
+  }
+  /* Desktop/tablet: restore fixed 36px cells */
+  @media (min-width: 768px) {
+    #cal-dow-headers { grid-template-columns: repeat(7, 36px) !important; width: fit-content !important; }
+    #cal-date-strip  { grid-template-columns: repeat(7, 36px) !important; width: fit-content !important; }
   }
 
     /* Page padding */
@@ -862,7 +877,7 @@ self.addEventListener('fetch', e => {
          <span style="font-size:0.6rem;font-weight:700;color:#9a3412;letter-spacing:0.08em;">POND</span>
         </div>
         <div id="cs-pond-total" style="font-size:1.4rem;font-weight:700;color:#f97316;line-height:1;">-</div>
-        <div style="font-size:0.65rem;color:#fdba74;margin-left:auto;">Done <strong id="cs-pond-past" style="color:#c2410c;">-</strong> · Left <strong id="cs-pond-up" style="color:#f97316;">-</strong></div>
+        <div class="artist-stat-donerow" style="font-size:0.65rem;color:#fdba74;margin-left:auto;">Done <strong id="cs-pond-past" style="color:#c2410c;">-</strong> · Left <strong id="cs-pond-up" style="color:#f97316;">-</strong></div>
        </div>
        <div style="background:#f9fafb;border:0.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
@@ -870,7 +885,7 @@ self.addEventListener('fetch', e => {
          <span style="font-size:0.6rem;font-weight:700;color:#374151;letter-spacing:0.08em;">PHUWIN</span>
         </div>
         <div id="cs-phuwin-total" style="font-size:1.4rem;font-weight:700;color:#4b5563;line-height:1;">-</div>
-        <div style="font-size:0.65rem;color:#d1d5db;margin-left:auto;">Done <strong id="cs-phuwin-past" style="color:#374151;">-</strong> · Left <strong id="cs-phuwin-up" style="color:#6b7280;">-</strong></div>
+        <div class="artist-stat-donerow" style="font-size:0.65rem;color:#d1d5db;margin-left:auto;">Done <strong id="cs-phuwin-past" style="color:#374151;">-</strong> · Left <strong id="cs-phuwin-up" style="color:#6b7280;">-</strong></div>
        </div>
        <div style="background:#f0fdf4;border:0.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
@@ -878,7 +893,7 @@ self.addEventListener('fetch', e => {
          <span style="font-size:0.6rem;font-weight:700;color:#14532d;letter-spacing:0.08em;">PERMPOON</span>
         </div>
         <div id="cs-permpoon-total" style="font-size:1.4rem;font-weight:700;color:#16a34a;line-height:1;">-</div>
-        <div style="font-size:0.65rem;color:#bbf7d0;margin-left:auto;">Done <strong id="cs-permpoon-past" style="color:#15803d;">-</strong> · Left <strong id="cs-permpoon-up" style="color:#22c55e;">-</strong></div>
+        <div class="artist-stat-donerow" style="font-size:0.65rem;color:#bbf7d0;margin-left:auto;">Done <strong id="cs-permpoon-past" style="color:#15803d;">-</strong> · Left <strong id="cs-permpoon-up" style="color:#22c55e;">-</strong></div>
        </div>
       </div>
      </div>
