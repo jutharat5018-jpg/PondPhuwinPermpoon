@@ -770,7 +770,7 @@ self.addEventListener('fetch', e => {
 
    <!-- CALENDAR PAGE -->
    <div class="page" id="page-calendar">
-    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;">
 
      <!-- Header -->
      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.25rem;">
@@ -3008,10 +3008,13 @@ function renderCalendarCardGrid(monthEvents) {
   if (!grid) return;
   const monthStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
 
-  // Determine events to show — if a date is selected show that day's events, else show all month
+  // Determine events to show
+  // ถ้ากดวันไหน → แสดงเฉพาะวันนั้น (ถ้าไม่มี event ก็แสดงว่าไม่มี)
+  // ถ้าไม่ได้เลือกวัน → แสดงทั้งเดือน
   let eventsToShow = [];
-  if (calSelectedDate && calSelectedDate.startsWith(monthStr) && monthEvents[calSelectedDate]) {
-    eventsToShow = monthEvents[calSelectedDate];
+  const hasDateSelected = calSelectedDate && calSelectedDate.startsWith(monthStr);
+  if (hasDateSelected) {
+    eventsToShow = monthEvents[calSelectedDate] || [];
   } else {
     // All events in month, deduplicated
     const seen = new Set();
@@ -3025,7 +3028,14 @@ function renderCalendarCardGrid(monthEvents) {
   if (eventsToShow.length === 0) {
     grid.innerHTML = '';
     grid.style.display = 'none';
-    if (noEv) noEv.style.display = 'block';
+    if (noEv) {
+      noEv.style.display = 'block';
+      const d = hasDateSelected ? new Date(calSelectedDate+'T00:00:00') : null;
+      const dowNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      noEv.innerHTML = d
+        ? `<p style="font-weight:700;color:#111;margin-bottom:4px;">${dowNames[d.getDay()]} ${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}</p><p style="font-size:0.82rem;color:#9ca3af;">No events on this day</p>`
+        : `<p style="font-weight:600;color:#9ca3af;">No events this month</p>`;
+    }
     return;
   }
   grid.style.display = 'grid';
