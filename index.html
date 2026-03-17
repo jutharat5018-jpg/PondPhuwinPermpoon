@@ -292,18 +292,17 @@ self.addEventListener('fetch', e => {
     .cal-day { height: 80px; padding: 4px; }
     .detail-hero { height: 200px; }
   }
-  /* ── Fluid card grid — auto-fills columns based on screen width ── */
+  /* ── Fluid card grid — truly infinite, auto-fills forever ── */
   .cards-grid {
     display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(160px, 18vw, 280px), 1fr)) !important;
     gap: clamp(8px, 1.5vw, 20px) !important;
     align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
-  @media (max-width: 480px)                          { .cards-grid { grid-template-columns: 1fr !important; } }
-  @media (min-width: 481px)  and (max-width: 767px)  { .cards-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; } }
-  @media (min-width: 768px)  and (max-width: 1023px) { .cards-grid { grid-template-columns: repeat(3,minmax(0,1fr)) !important; } }
-  @media (min-width: 1024px) and (max-width: 1399px) { .cards-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; } }
-  @media (min-width: 1400px) and (max-width: 1799px) { .cards-grid { grid-template-columns: repeat(5,minmax(0,1fr)) !important; } }
-  @media (min-width: 1800px)                         { .cards-grid { grid-template-columns: repeat(6,minmax(0,1fr)) !important; } }
+  /* Phone override only — let auto-fill handle everything else */
+  @media (max-width: 480px) { .cards-grid { grid-template-columns: 1fr !important; } }
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
     #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
@@ -351,11 +350,6 @@ self.addEventListener('fetch', e => {
     }
     #cal-left { width: 100% !important; max-width: 100% !important; }
     #cal-event-list { max-height: none !important; }
-
-    /* Cards: 2 columns on tablet */
-    .cards-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
 
     /* Home title */
     #home-title { font-size: 1.9rem !important; }
@@ -630,15 +624,16 @@ self.addEventListener('fetch', e => {
     flex-shrink: 0;
   }
   .nav-inner {
-    max-width: 1400px;
+    width: 100%;
     margin: auto;
-    padding: 0 1.5rem;
+    padding: 0 clamp(10px, 2vw, 1.5rem);
     display: flex;
     align-items: center;
     justify-content: space-between;
     min-height: 48px;
     gap: 8px;
     flex-wrap: nowrap;
+    box-sizing: border-box;
   }
   .nav-logo {
     display: flex;
@@ -670,17 +665,9 @@ self.addEventListener('fetch', e => {
     .nav-label { display: none; }
   }
   /* ══════════════════════════════════════════════
-     LARGE SCREENS  1440px – 1920px+
+     LARGE SCREENS  1920px+
   ══════════════════════════════════════════════ */
-  @media (min-width: 1440px) {
-    .nav-inner { max-width: 1600px; }
-    #page-home > div,
-    #page-calendar > div { max-width: 1600px !important; }
-  }
   @media (min-width: 1920px) {
-    .nav-inner { max-width: 1800px; }
-    #page-home > div,
-    #page-calendar > div { max-width: 1800px !important; }
     /* Hero bento: taller on big screens */
     #bento-next, #bento-ev2 { aspect-ratio: 21/7 !important; }
   }
@@ -690,6 +677,7 @@ self.addEventListener('fetch', e => {
   #page-calendar > div {
     padding: var(--page-pad-y) var(--page-pad-x) !important;
     width: 100%;
+    max-width: 100% !important;
     box-sizing: border-box;
   }
 
@@ -699,7 +687,7 @@ self.addEventListener('fetch', e => {
     object-fit: cover;
     display: block;
   }
-  .card-img        { height: clamp(120px, 14vw, 180px); }
+  .card-img        { height: clamp(120px, 14vw, 200px); }
   .cal-ev-card-img { height: clamp(90px,  10vw, 140px); }
 
   /* ── Fluid typography ── */
@@ -715,17 +703,14 @@ self.addEventListener('fetch', e => {
     font-size: clamp(0.85rem, 1.2vw, 1.25rem) !important;
   }
 
-  /* ── Calendar: fluid 3-col on large enough right panel ── */
-  @media (min-width: 1400px) {
-    #cal-card-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
-  }
-  @media (min-width: 1800px) {
-    #cal-card-grid { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+  /* ── Calendar card grid: fluid auto-fill ── */
+  #cal-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(clamp(180px, 20vw, 300px), 1fr)) !important;
   }
 
-  /* ── List view 2-col: stack to 1 on small screens ── */
+  /* ── List view: stack to 1 col on small screens ── */
   @media (max-width: 600px) {
-    #events-grid .cards-grid[style*="repeat(2"] {
+    #events-grid div[style*="repeat(2"] {
       grid-template-columns: 1fr !important;
     }
   }
@@ -749,7 +734,7 @@ self.addEventListener('fetch', e => {
 
    <!-- HOME PAGE -->
    <div class="page active" id="page-home">
-    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+    <div style="width:100%;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
      <div id="bday-banners" style="display:none;flex-direction:column;gap:8px;margin-bottom:1.5rem;"></div>
 
      <!-- HERO -->
@@ -827,12 +812,12 @@ self.addEventListener('fetch', e => {
       </div>
      </div>
     </div>
-    <footer><div style="max-width:1400px;margin:auto;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
+    <footer><div style="width:100%;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
    </div>
 
    <!-- CALENDAR PAGE -->
    <div class="page" id="page-calendar">
-    <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;">
+    <div style="width:100%;padding:2rem 1rem;width:100%;box-sizing:border-box;">
 
      <!-- Header -->
      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.25rem;">
@@ -872,7 +857,7 @@ self.addEventListener('fetch', e => {
        </div>
       </div>
       <!-- แถว 2: Pond / Phuwin / Permpoon -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;align-content:stretch;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;flex:1;align-content:stretch;">
        <div style="background:#fff7ed;border:0.5px solid #fed7aa;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
          <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
@@ -967,7 +952,7 @@ self.addEventListener('fetch', e => {
      <!-- hidden but keep for JS compatibility -->
      <div id="cal-layout" style="display:none;"><div id="cal-left"><div id="cal-dow-headers"></div><div id="cal-grid" class="cal-grid"></div></div><div id="cal-event-list"></div></div>
     </div>
-    <footer><div style="max-width:1400px;margin:auto;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
+    <footer><div style="width:100%;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
    </div>
 
    <!-- ADMIN PAGE -->
@@ -993,7 +978,7 @@ self.addEventListener('fetch', e => {
      </div>
     </div>
     <div id="admin-panel" style="display:none;flex:1;flex-direction:column;">
-     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
+     <div style="width:100%;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
        <div>
         <h2 class="section-header" >Admin Panel</h2>
@@ -2093,7 +2078,7 @@ function showSkeletons() {
   grid.style.display = 'block';
   const wrap = document.createElement('div');
   wrap.className = 'cards-grid';
-  wrap.style.cssText = 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;align-items:stretch;';
+  wrap.style.cssText = 'display:grid;align-items:stretch;';
   wrap.innerHTML = html;
   grid.appendChild(wrap);
 }
@@ -2310,7 +2295,7 @@ function renderHome() {
     if (_viewMode === 'list') {
       // LIST VIEW — full-width rows with thumbnail on left
       const listWrap = document.createElement('div');
-      listWrap.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;';
+      listWrap.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(260px,35vw,480px),1fr));gap:8px;';
       group.forEach(ev => {
         const color = getArtistColor(ev.artists);
         const gradients = {'#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)','#6b7280':'linear-gradient(135deg,#f9fafb,#f3f4f6)','#22c55e':'linear-gradient(135deg,#f0fdf4,#dcfce7)','#a855f7':'linear-gradient(135deg,#faf5ff,#f3e8ff)','#3b82f6':'linear-gradient(135deg,#eff6ff,#dbeafe)','#ef4444':'linear-gradient(135deg,#fef2f2,#fee2e2)','#ec4899':'linear-gradient(135deg,#fdf2f8,#fce7f3)'};
@@ -2454,7 +2439,7 @@ function renderPastEvents(grid) {
       </select>
     </div>
     <div id="past-events-body" style="display:${isOpen?'block':'none'};">
-      <div id="past-events-grid" class="cards-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:stretch;filter:grayscale(30%);opacity:0.75;"></div>
+      <div id="past-events-grid" class="cards-grid" style="filter:grayscale(30%);opacity:0.75;"></div>
     </div>`;
   grid.appendChild(section);
 
@@ -3131,7 +3116,7 @@ function renderCalendarCardGrid(monthEvents) {
     }
     return;
   }
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:stretch;';
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(200px,22vw,320px),1fr));gap:clamp(8px,1.5vw,16px);align-items:stretch;';
   if (noEv) noEv.style.display = 'none';
 
   const today = new Date();
