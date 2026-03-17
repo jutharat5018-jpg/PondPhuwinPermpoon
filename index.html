@@ -845,18 +845,6 @@ self.addEventListener('fetch', e => {
 
      </div><!-- end grid row -->
 
-     <!-- NEXT EVENT BANNER -->
-     <div id="cal-next-event-banner" style="display:none;background:#fff;border:none;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:14px 16px;margin-bottom:1rem;align-items:center;gap:14px;cursor:pointer;" onclick="openDetailModal(this.dataset.eventId)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openDetailModal(this.dataset.eventId)">
-      <div id="cal-next-event-icon" style="width:44px;height:44px;border-radius:12px;background:#fff7ed;border:1.5px solid #fed7aa;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-       <svg width="20" height="20" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <div style="flex:1;min-width:0;">
-       <div id="cal-next-event-label" style="font-size:0.68rem;font-weight:700;color:#f97316;margin-bottom:2px;letter-spacing:0.04em;"></div>
-       <div id="cal-next-event-title" style="font-size:0.88rem;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-       <div id="cal-next-event-meta" style="font-size:0.72rem;color:#9ca3af;margin-top:2px;"></div>
-      </div>
-      <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-     </div>
 
 
      <!-- ── Split: calendar ซ้าย + งานขวา ── -->
