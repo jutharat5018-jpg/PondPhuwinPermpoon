@@ -174,8 +174,8 @@ self.addEventListener('fetch', e => {
     #cal-event-list { max-height: none !important; }
     .cal-month-strip { gap:6px !important; }
     .cal-month-pill { padding:5px 10px !important; font-size:0.75rem !important; }
-    .cal-date-strip { gap:4px !important; }
-    .cal-date-chip { min-width:38px !important; padding:6px 4px !important; }
+    /* cal-date-strip mobile: no override needed */
+    .cal-date-chip { padding:6px 10px !important; }
     .cal-card-grid { grid-template-columns:1fr !important; }
   }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
@@ -187,17 +187,17 @@ self.addEventListener('fetch', e => {
   .cal-month-pill:hover { background:#e5e7eb;color:#111; }
   .cal-month-pill.active { background:#111;color:#fff;font-weight:700; }
   /* date strip */
-  .cal-date-strip { display:flex;gap:4px;overflow-x:scroll;overflow-y:visible;padding-bottom:6px;padding-right:16px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth; }
+  /* cal-date-strip: controlled by inline style per context */
   .cal-date-strip::-webkit-scrollbar { display:none; }
-  .cal-date-chip { width:42px;min-width:42px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:none;background:transparent;font-family:inherit;position:relative;box-sizing:border-box; }
+  .cal-date-chip { width:100%;display:flex;flex-direction:row;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:none;background:transparent;font-family:inherit;position:relative;box-sizing:border-box;flex-shrink:0; }
   .cal-date-chip:hover { background:#f3f4f6; }
   .cal-date-chip.today { background:#111; }
   .cal-date-chip.today .cal-date-chip-dow { color:rgba(255,255,255,0.5); }
   .cal-date-chip.today .cal-date-chip-num { color:#fff; }
   .cal-date-chip.has-event-chip { /* handled inline with accent color */ }
-  .cal-date-chip-dow { font-size:0.6rem;font-weight:700;color:#9ca3af;letter-spacing:0.06em;text-transform:uppercase; }
-  .cal-date-chip-num { font-size:0.95rem;font-weight:700;color:#111; }
-  .cal-date-chip-dot { width:5px;height:5px;border-radius:50%;position:absolute;bottom:4px; }
+  .cal-date-chip-dow { font-size:0.65rem;font-weight:700;color:#9ca3af;letter-spacing:0.04em;text-transform:uppercase;width:28px;flex-shrink:0; }
+  .cal-date-chip-num { font-size:0.9rem;font-weight:700;color:#111;flex-shrink:0; }
+  .cal-date-chip-dot { width:6px;height:6px;border-radius:50%;margin-left:auto;flex-shrink:0; }
   /* card grid */
   .cal-card-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px; }
   .cal-ev-card { background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);overflow:hidden;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s; }
@@ -859,40 +859,63 @@ self.addEventListener('fetch', e => {
      </div>
 
 
-     <!-- ── Filter + Date strip ── -->
-     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;margin-bottom:1.25rem;">
-      <!-- Filter pills + Year selector -->
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-       <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
-         style="padding:4px 14px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
-       <button class="cal-filter-btn" data-artist="Pond" onclick="filterCalendar('Pond')"
-         style="padding:4px 14px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
-       <button class="cal-filter-btn" data-artist="Phuwin" onclick="filterCalendar('Phuwin')"
-         style="padding:4px 14px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
-       <button class="cal-filter-btn" data-artist="Permpoon" onclick="filterCalendar('Permpoon')"
-         style="padding:4px 14px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
-       <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
-        <button onclick="calYear--;calSelectedDate=null;renderCalendar();" style="width:28px;height:28px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;">‹</button>
-        <span id="cal-year-label" style="font-size:0.88rem;font-weight:700;color:#111;min-width:36px;text-align:center;"></span>
-        <button onclick="calYear++;calSelectedDate=null;renderCalendar();" style="width:28px;height:28px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;">›</button>
+     <!-- ── Split: calendar ซ้าย + งานขวา ── -->
+     <div style="display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;">
+
+      <!-- ซ้าย: mini calendar -->
+      <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:16px;flex-shrink:0;">
+       <!-- filter pills แนวนอน -->
+       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
+          style="padding:4px 12px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
+        <button class="cal-filter-btn" data-artist="Pond" onclick="filterCalendar('Pond')"
+          style="padding:4px 12px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
+        <button class="cal-filter-btn" data-artist="Phuwin" onclick="filterCalendar('Phuwin')"
+          style="padding:4px 12px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
+        <button class="cal-filter-btn" data-artist="Permpoon" onclick="filterCalendar('Permpoon')"
+          style="padding:4px 12px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
+       </div>
+       <!-- month + year nav -->
+       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <button onclick="prevMonth();" style="width:26px;height:26px;border-radius:7px;border:1px solid #e5e7eb;background:#f9fafb;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;">‹</button>
+        <div style="text-align:center;">
+         <div id="cal-month-label" style="font-size:0.88rem;font-weight:700;color:#111;"></div>
+         <div style="display:flex;align-items:center;gap:4px;justify-content:center;margin-top:2px;">
+          <button onclick="calYear--;calSelectedDate=null;renderCalendar();" style="width:18px;height:18px;border-radius:4px;border:none;background:transparent;font-size:0.75rem;cursor:pointer;color:#9ca3af;">‹</button>
+          <span id="cal-year-label" style="font-size:0.72rem;font-weight:600;color:#9ca3af;"></span>
+          <button onclick="calYear++;calSelectedDate=null;renderCalendar();" style="width:18px;height:18px;border-radius:4px;border:none;background:transparent;font-size:0.75rem;cursor:pointer;color:#9ca3af;">›</button>
+         </div>
+        </div>
+        <button onclick="nextMonth();" style="width:26px;height:26px;border-radius:7px;border:1px solid #e5e7eb;background:#f9fafb;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;">›</button>
+       </div>
+       <!-- DOW headers -->
+       <div style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;margin-bottom:3px;">
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">S</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">M</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">T</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">W</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">T</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">F</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">S</div>
+       </div>
+       <!-- Calendar grid cells -->
+       <div id="cal-date-strip" style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;"></div>
+      </div>
+
+      <!-- ขวา: event cards -->
+      <div style="min-width:0;">
+       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:0.72rem;color:#9ca3af;"><span id="cal-month-event-count">—</span> events</div>
+       </div>
+       <div id="cal-card-grid" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;">Loading...</div>
+       </div>
+       <div id="cal-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
+        <p style="font-weight:600;">No events this month</p>
        </div>
       </div>
-      <!-- Month label + count แถวบน -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-       <div id="cal-month-label" style="font-weight:700;font-size:0.95rem;color:#111;"></div>
-       <div style="font-size:0.72rem;color:#9ca3af;"><span id="cal-month-event-count">—</span> events</div>
-      </div>
-      <!-- Date strip เต็มแถว scroll ได้ -->
-      <div id="cal-date-strip" class="cal-date-strip" style="padding-right:16px;"></div>
-     </div>
 
-     <!-- ── Event card grid ── -->
-     <div id="cal-card-grid" class="cal-card-grid" style="margin-bottom:1rem;">
-      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;">Loading...</div>
-     </div>
-     <div id="cal-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
-      <p style="font-weight:600;">No events this month</p>
-     </div>
+     </div><!-- end split -->
 
      <!-- hidden but keep for JS compatibility -->
      <div id="cal-layout" style="display:none;"><div id="cal-left"><div id="cal-dow-headers"></div><div id="cal-grid" class="cal-grid"></div></div><div id="cal-event-list"></div></div>
@@ -2945,35 +2968,31 @@ function renderCalendar() {
   // ── Date strip — only days with events + today ──
   const dateStripEl = document.getElementById('cal-date-strip');
   if (dateStripEl) {
-    const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    // แสดงทุกวันในเดือนเสมอ
-    const days = Array.from({length: daysInMonth}, (_, i) => i + 1);
-    dateStripEl.innerHTML = days.map(d => {
+    dateStripEl.style.cssText = 'display:grid;grid-template-columns:repeat(7,36px);gap:2px;';
+    const firstDay = new Date(year, month, 1).getDay();
+    let cells = '';
+    // empty cells ก่อนวันที่ 1
+    for (let i = 0; i < firstDay; i++) {
+      cells += '<div></div>';
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
       const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
       const isToday = ds === todayStr;
+      const isSelected = ds === calSelectedDate;
       const evs = monthEvents[ds] || [];
       const hasEv = evs.length > 0;
-      const dow = dowNames[new Date(ds+'T00:00:00').getDay()];
       const accentColor = hasEv ? getArtistColor(evs[0].artists) : null;
-      // highlight วันนี้ด้วย #111, วันที่มี event ด้วยสีศิลปิน
-      let chipStyle = '';
-      if (isToday) chipStyle = 'background:#111;';
-      else if (hasEv) chipStyle = `background:${accentColor}18;`;
-      const dowColor = isToday ? 'color:rgba(255,255,255,0.55);' : 'color:#9ca3af;';
-      const numColor = isToday ? 'color:#fff;' : hasEv ? `color:${accentColor};font-weight:800;` : 'color:#374151;';
-      const dot = hasEv && !isToday ? `<div class="cal-date-chip-dot" style="background:${accentColor};"></div>` : '';
-      return `<button class="cal-date-chip" style="${chipStyle}" onclick="this.scrollIntoView({behavior:'smooth',inline:'center'});"><span class="cal-date-chip-dow" style="${dowColor}">${dow}</span><span class="cal-date-chip-num" style="${numColor}">${d}</span>${dot}</button>`;
-    }).join('');
-  }
-
-  // ── Scroll date strip to selected/today ──
-  requestAnimationFrame(() => {
-    const strip = document.getElementById('cal-date-strip');
-    if (strip) {
-      const active = strip.querySelector('[style*="background:#111"],[style*="background:#"]');
-      if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+      let bg = '';
+      if (isSelected && accentColor) bg = `background:${accentColor};border-radius:8px;`;
+      else if (isSelected) bg = 'background:#111;border-radius:8px;';
+      else if (isToday) bg = 'background:#111;border-radius:8px;';
+      else if (hasEv) bg = `background:${accentColor}18;border-radius:8px;`;
+      const numColor = (isSelected||isToday) ? 'color:#fff;font-weight:800;' : hasEv ? `color:${accentColor};font-weight:700;` : 'color:#374151;font-weight:500;';
+      const dot = hasEv && !isSelected && !isToday ? `<div style="width:4px;height:4px;border-radius:50%;background:${accentColor};margin-top:1px;"></div>` : '';
+      cells += `<button onclick="calSelectedDate='${ds}';renderCalendar();" style="width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:none;cursor:pointer;font-family:inherit;${bg}transition:all 0.12s;"><span style="font-size:0.78rem;${numColor}">${d}</span>${dot}</button>`;
     }
-  });
+    dateStripEl.innerHTML = cells;
+  }
 
   // ── Card grid ──
   renderCalendarCardGrid(monthEvents);
@@ -3067,7 +3086,7 @@ function renderCalendarCardGrid(monthEvents) {
     }
     return;
   }
-  grid.style.display = 'grid';
+  grid.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
   if (noEv) noEv.style.display = 'none';
 
   const today = new Date();
@@ -3103,12 +3122,15 @@ function renderCalendarCardGrid(monthEvents) {
       ? `<img class="cal-ev-card-img" src="${escHtml(ev.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cal-ev-card-img-placeholder" style="display:none;background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`
       : `<div class="cal-ev-card-img-placeholder" style="background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
 
-    return `<div class="cal-ev-card" style="opacity:${past?0.6:1};" onclick="openDetailModal('${ev.__backendId}')">
-      ${imgHtml}
-      <div class="cal-ev-card-body">
-        <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;flex-wrap:wrap;">${artistDots}${badge?`<span style="margin-left:auto;">${badge}</span>`:''}</div>
-        <div class="cal-ev-card-title" style="color:${past?'#9ca3af':'#111'};">${escHtml(ev.title)}</div>
-        <div class="cal-ev-card-meta">
+    const imgThumb = ev.image
+      ? `<img src="${escHtml(ev.image)}" alt="" loading="lazy" style="width:72px;height:72px;border-radius:10px;object-fit:cover;object-position:top;flex-shrink:0;" onerror="this.style.display='none'">`
+      : `<div style="width:72px;height:72px;border-radius:10px;flex-shrink:0;background:${grad};display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
+    return `<div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;transition:box-shadow 0.15s;opacity:${past?0.6:1};border-left:3px solid ${past?'#e5e7eb':color};" onclick="openDetailModal('${ev.__backendId}')" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.10)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)')">
+      ${imgThumb}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap;">${artistDots}${badge?`<span style="margin-left:auto;">${badge}</span>`:''}</div>
+        <div style="font-size:0.85rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div>
+        <div style="font-size:0.68rem;color:#9ca3af;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;">
           ${ev.dateStart?`<span>${fmtDate(ev.dateStart)}</span>`:''}
           ${ev.startTime?`<span style="color:#d1d5db;">·</span><span>${fmtTime(ev.startTime)}</span>`:''}
           ${loc?`<span style="color:#d1d5db;">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(loc)}</span>`:''}
