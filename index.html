@@ -10,13 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="dns-prefetch" href="https://script.google.com">
-  <script src="/_sdk/element_sdk.js" defer></script>
-  <!-- Tailwind CDN — cached by browser after first load; serves all 5000 users from CDN -->
   <script src="https://cdn.tailwindcss.com/3.4.17" defer></script>
-  <!-- Lucide loaded async — icons render after JS, no render blocking -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" defer></script>
-  <!-- Google Fonts with font-display:swap so text shows immediately -->
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap&font-display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap&font-display=swap" rel="stylesheet">
   <style>
   :root {
     --color-pond: #f97316;
@@ -26,20 +22,53 @@
     --color-pondpermpoon: #3b82f6;
     --color-phuwinpermpoon: #ef4444;
     --color-pondphuwinpermpoon: #ec4899;
+    --radius-card: 12px;
+    --shadow-card: 0 2px 8px rgba(0,0,0,0.07);
+    --border-card: none;
+    --color-accent: #111;
   }
-  * { font-family: 'DM Sans', sans-serif; font-size: 105%; }
-  html { height: 100%; overflow: hidden; }
-  body { height: 100%; background: #fafafa; color: #111; margin: 0; padding: 0; overflow: hidden; }
+  * { font-family: 'Inter', sans-serif; }
+  html { height: 100%; overflow: hidden; font-size: 105%; }
+  body { height: 100%; background: #fafaf8; color: #111; margin: 0; padding: 0; overflow: hidden; }
   #app { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
   .page { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; }
   .page.active { display: flex; flex-direction: column; }
-  .nav-link { cursor: pointer; transition: color 0.2s; font-size: 1rem; font-weight: 500; padding: 0.5rem 0.75rem; border-radius: 6px; color: #6b7280; }
-  .nav-link:hover, .nav-link.active { color: #111; background: #f5f5f5; }
-  .event-card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05); overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; cursor: pointer; display: flex; flex-direction: column; border: 1.5px solid transparent; }
-  .event-card:hover { transform: translateY(-3px) scale(1.005); box-shadow: 0 8px 28px rgba(0,0,0,0.11); border-color: #e5e7eb; }
+  .nav-link { cursor: pointer; transition: all 0.15s; font-size: 0.88rem; font-weight: 500; padding: 0.4rem 0.7rem; border-radius: 6px; color: #9ca3af; letter-spacing: 0.01em; }
+  .nav-link:hover { color: #111; background: transparent; }
+  .nav-link.active { color: #111; background: transparent; border-bottom: 2px solid #111; border-radius: 0; padding-bottom: calc(0.4rem - 2px); }
+  .event-card { background: #fff; border-radius: var(--radius-card); overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease; cursor: pointer; display: flex; flex-direction: column; border: none; box-shadow: var(--shadow-card); height: 100%; position: relative; }
+  .event-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
+  .card-hover-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.75);border-radius:11px;display:flex;flex-direction:column;justify-content:center;padding:16px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:5; }
+  .event-card:hover .card-hover-overlay { opacity:1; }
+  .card-hover-overlay .oh-title { font-size:0.8rem;font-weight:700;color:#fff;margin-bottom:6px;line-height:1.4; }
+  .card-hover-overlay .oh-desc { font-size:0.68rem;color:rgba(255,255,255,0.7);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical; }
+  .card-hover-overlay .oh-cta { margin-top:10px;font-size:0.65rem;font-weight:700;color:#fff;opacity:0.6; }
+  @media (hover: none) { .card-hover-overlay { display:none !important; } }
+  /* Timeline view */
+  .timeline-wrap { display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px; }
+  .timeline-line { position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px; }
+  .timeline-item { display:flex;gap:14px;align-items:flex-start;padding-bottom:18px;position:relative; }
+  .timeline-dot-wrap { position:absolute;left:-56px;display:flex;flex-direction:column;align-items:center;gap:2px;width:56px; }
+  .timeline-dow { font-size:0.58rem;font-weight:700;color:#9ca3af;letter-spacing:0.05em;text-transform:uppercase; }
+  .timeline-circle { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1; }
+  .timeline-circle span { font-size:0.82rem;font-weight:900;color:#fff; }
+  .timeline-card { flex:1;background:#fff;border-radius:var(--radius-card);padding:12px 14px;box-shadow:var(--shadow-card);cursor:pointer;transition:box-shadow 0.15s;border-left:3px solid #e5e7eb; }
+  .timeline-card:hover { box-shadow:0 4px 14px rgba(0,0,0,0.10); }
+  .timeline-card-top { display:flex;align-items:center;gap:6px;margin-bottom:5px; }
+  .timeline-card-title { font-size:0.85rem;font-weight:700;color:#111;line-height:1.35;margin-bottom:4px; }
+  .timeline-card-meta { font-size:0.68rem;color:#9ca3af;display:flex;gap:8px;flex-wrap:wrap; }
+  /* list view */
+  .list-card { background:#fff;border-radius:var(--radius-card);border:none;box-shadow:var(--shadow-card);display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:all 0.15s; }
+  .list-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.10);transform:translateY(-1px); }
+  .list-card-img { width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#f3f4f6; }
+  .list-card-body { flex:1;min-width:0; }
+  .list-card-title { font-size:0.85rem;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px; }
+  .list-card-meta { font-size:0.68rem;color:#9ca3af;display:flex;gap:8px;flex-wrap:wrap; }
   .event-card:active { transform: translateY(-1px) scale(1.002); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-  .card-img-placeholder { width: 100%; height: 220px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
-  .card-img { width: 100%; height: 220px; object-fit: cover; display: block; }
+  .card-img-placeholder { width: 100%; height: 200px; background: linear-gradient(135deg, #f3f4f6, #e5e7eb); display: flex; align-items: center; justify-content: center; }
+  .card-img { width: 100%; height: 200px; object-fit: cover; object-position: top; display: block; background: #f3f4f6; }
+  .card-img.img-loading { filter: blur(8px); transform: scale(1.04); transition: filter 0.4s ease, transform 0.4s ease; }
+  .card-img.img-loaded  { filter: none; transform: scale(1); }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   /* ── CALENDAR ── */
   .cal-day { width:66px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:background 0.15s;box-sizing:border-box;position:relative;border:none;padding:0; }
@@ -51,8 +80,8 @@
   .cal-event-dot { display:none; }
   .cal-event-dot-circle { display:none; }
   /* event list right side */
-  .cal-list-item { display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px;background:#fff;border:0.5px solid #f0f0f0;cursor:pointer;transition:box-shadow 0.15s; }
-  .cal-list-item:hover { box-shadow:0 2px 12px rgba(0,0,0,0.07); }
+  .cal-list-item { display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:var(--radius-card);background:#fff;box-shadow:var(--shadow-card);cursor:pointer;transition:box-shadow 0.15s; }
+  .cal-list-item:hover { box-shadow:0 4px 14px rgba(0,0,0,0.10); }
   .cal-list-date { flex-shrink:0;width:48px;text-align:center; }
   .cal-list-dow { font-size:0.68rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;text-transform:uppercase; }
   .cal-list-num { font-size:1.3rem;font-weight:700;color:#111;line-height:1.1; }
@@ -74,7 +103,7 @@
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
   .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
-  .modal-box { background: #fff; border-radius: 20px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); margin: auto; }
+  .modal-box { background: #fafaf8; border-radius: var(--radius-card); max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; overflow-x: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.12); margin: auto; }
   .form-input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.7rem 0.95rem; font-size: 1rem; outline: none; transition: border-color 0.2s; background: #fff; box-sizing: border-box; }
   .form-input:focus { border-color: #111; }
   .form-label { font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 0.3rem; display: block; }
@@ -165,11 +194,15 @@
   @keyframes bday-pulse { 0%,100%{opacity:1} 50%{opacity:0.85} }
   .bday-icon { font-size:1.3rem;flex-shrink:0; }
   .bday-countdown { font-size:0.7rem;font-weight:800;padding:3px 8px;border-radius:99px;margin-left:auto;flex-shrink:0;letter-spacing:0.05em; }
-  .month-group { margin-bottom: 2.5rem; }
-  .month-group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
-  .month-group-header-label { font-size: 1.15rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
-  .month-group-header-line { flex: 1; height: 1px; background: #e5e7eb; }
-  .month-group-header-count { font-size: 0.75rem; font-weight: 600; color: #9ca3af; background: #f3f4f6; border-radius: 99px; padding: 2px 8px; }
+  .month-group { margin-bottom: 2.5rem; padding-top: 1.5rem; }
+  .month-group:first-child { padding-top: 0; }
+  .month-group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; margin-top: 0.5rem; }
+  .month-group-header-box { display: inline-flex; align-items: center; gap: 8px; }
+  .month-group-header-dots { display: flex; gap: 4px; align-items: center; }
+  .month-group-header-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .month-group-header-label { font-size: 0.88rem; font-weight: 700; color: #111; letter-spacing: -0.02em; }
+  .month-group-header-line { flex: 1; height: 1px; background: #f3f4f6; border-radius: 99px; }
+  .month-group-header-count { font-size: 0.68rem; font-weight: 600; color: #fff; background: #111; border-radius: 6px; padding: 2px 8px; }
   /* Map embed */
   .map-embed-wrap { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
   .map-embed-wrap iframe { width: 100%; height: 300px; border: 0; display: block; }
@@ -268,13 +301,35 @@
 
     /* ── Section headers ── */
     .section-header { font-size: 1.15rem !important; }
-    .month-group-header-label { font-size: 0.95rem !important; }
+    .month-group-header-label { font-size: 1.1rem !important; }
     .month-group { margin-bottom: 1.5rem !important; }
+    #page-home > div > div[style*="grid-template-columns:2fr"] { grid-template-columns: 1fr 1fr !important; }
+    #bento-next { grid-row: span 1 !important; grid-column: span 2 !important; min-height: 120px !important; }
+    /* If bento-ev2 is hidden, bento-next takes full width */
+    #bento-ev2[style*="display: none"] ~ #bento-next,
+    #bento-ev2[style*="display:none"] ~ #bento-next { grid-column: span 2 !important; }
+
+    /* ── Filter bar — horizontal scroll on mobile ── */
+    #home-filter-bar {
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 6px !important;
+      padding-bottom: 4px !important;
+    }
+    #home-filter-bar::-webkit-scrollbar { display: none !important; }
+    #home-filter-bar > .flex-spacer { display: none !important; }
+    #events-count { flex-shrink: 0 !important; }
+    #home-filter-bar > div:last-child { flex-shrink: 0 !important; }
 
     /* ── Filter buttons — wrap, never overflow ── */
     .artist-filter-btn, .cal-filter-btn {
       font-size: 0.72rem !important;
       padding: 4px 11px !important;
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
     }
 
     /* ── Event cards: single column ── */
@@ -284,7 +339,7 @@
     }
 
     /* Card image height reduced on mobile */
-    .card-img { height: 180px !important; }
+    .card-img { height: 170px !important; }
 
     /* ── Calendar page header ── */
     #page-calendar > div > div:first-child {
@@ -392,7 +447,7 @@
 
     /* Cards: single column, tighter */
     .cards-grid { gap: 8px !important; }
-    .card-img { height: 160px !important; }
+    .card-img { height: 150px !important; }
 
     /* Calendar cells even smaller */
     .cal-day { height: 32px !important; }
@@ -403,7 +458,8 @@
 
     /* Tighter month group spacing */
     .month-group { margin-bottom: 1.25rem !important; }
-    .month-group-header { gap: 8px !important; margin-bottom: 0.6rem !important; }
+    .month-group-header { gap: 8px !important; margin-bottom: 0.8rem !important; }
+    .month-group-header-box { padding: 6px 14px !important; border-radius: 10px !important; }
 
     /* Section header + count row */
     #page-home > div > div[style*="justify-content:space-between"] {
@@ -438,27 +494,30 @@
 
     .cal-list-item { gap: 6px !important; padding: 8px !important; }
     .cal-list-date { width: 36px !important; }
+
+    /* Timeline: reduce left padding so it doesn't overflow */
+    .timeline-wrap { padding-left: 44px !important; }
+    .timeline-line { left: 20px !important; }
+    .timeline-dot-wrap { left: -44px !important; width: 44px !important; }
+    .timeline-circle { width: 28px !important; height: 28px !important; }
   }
 
   /* ══════════════════════════════════════════════
      NAV — responsive, no hamburger, CSS only
   ══════════════════════════════════════════════ */
   #main-nav {
-    background: #fff;
-    border-bottom: 1px solid #f0f0f0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    background: #fafaf8;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
     flex-shrink: 0;
   }
   .nav-inner {
     max-width: 1400px;
     margin: auto;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 52px;
+    min-height: 48px;
     gap: 8px;
     flex-wrap: nowrap;
   }
@@ -470,17 +529,18 @@
     min-width: 0;
   }
   #nav-site-title {
-    font-weight: 700;
-    font-size: 0.95rem;
-    letter-spacing: -0.02em;
+    font-weight: 800;
+    font-size: 0.88rem;
+    letter-spacing: -0.03em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: #111;
   }
   .nav-links-wrap {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 0;
     flex-shrink: 0;
   }
 
@@ -500,13 +560,23 @@
   <div id="app">
    <nav id="main-nav">
     <div class="nav-inner">
-     <div class="nav-logo" onclick="navigate('home')">
-      <span id="nav-site-title">PondPhuwin and Permpoon Schedule</span>
+     <div class="nav-logo" onclick="navigate('home')" style="display:flex;align-items:center;gap:7px;">
+      <div style="display:flex;gap:3px;flex-shrink:0;">
+       <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
+       <div style="width:7px;height:7px;border-radius:50%;background:#6b7280;"></div>
+       <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;"></div>
+      </div>
+      <span id="nav-site-title">PondPhuwinPermpoon</span>
      </div>
      <div class="nav-links-wrap" id="nav-links">
-      <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label">Home</span></span>
-      <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label">Calendar</span></span>
-      <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label">Admin</span></span>
+      <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label" >Home</span></span>
+      <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label" data-i18n="nav_calendar">ปฏิทิน</span></span>
+      <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label" data-i18n="nav_admin">ผู้ดูแล</span></span>
+
+      <div style="display:flex;background:#f3f4f6;border-radius:6px;padding:2px;gap:1px;margin-left:6px;flex-shrink:0;">
+       <button id="lang-th-btn" onclick="setLang('th')" style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:4px;border:none;cursor:pointer;background:#111;color:#fff;transition:all 0.15s;letter-spacing:0.03em;">TH</button>
+       <button id="lang-en-btn" onclick="setLang('en')" style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:4px;border:none;cursor:pointer;background:transparent;color:#9ca3af;transition:all 0.15s;letter-spacing:0.03em;">EN</button>
+      </div>
      </div>
     </div>
    </nav>
@@ -514,35 +584,92 @@
    <!-- HOME PAGE -->
    <div class="page active" id="page-home">
     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
-     <div style="margin-bottom:2.5rem;">
-      <p id="home-tagline" style="font-size:0.8rem;font-weight:600;color:#a855f7;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem;">Pond · Phuwin · Permpoon</p>
-      <h1 id="home-title" style="font-size:2.3rem;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:0.5rem;">PondPhuwinPermpoon Schedule</h1>
-      <p style="color:#6b7280;font-size:0.9rem;">Track upcoming concerts, fan meets, and events.</p>
-     </div>
      <div id="bday-banners" style="display:none;flex-direction:column;gap:8px;margin-bottom:1.5rem;"></div>
-     <!-- FILTER BAR -->
-     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;">
-      
-      <button class="artist-filter-btn" data-artist="all" onclick="filterHome('all')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
-      <button class="artist-filter-btn" data-artist="Pond" onclick="filterHome('Pond')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
-      <button class="artist-filter-btn" data-artist="Phuwin" onclick="filterHome('Phuwin')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
-      <button class="artist-filter-btn" data-artist="Permpoon" onclick="filterHome('Permpoon')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
+
+     <!-- HERO -->
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
+      <!-- Event 1 -->
+      <div id="bento-next" style="background:#111;border-radius:14px;overflow:hidden;position:relative;min-height:240px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
+       <div id="bento-next-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
+       <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
+       <div style="position:relative;">
+        <div style="display:flex;align-items:center;gap:6px;">
+         <div style="display:flex;gap:3px;"><div style="width:5px;height:5px;border-radius:50%;background:#f97316;"></div><div style="width:5px;height:5px;border-radius:50%;background:#6b7280;"></div><div style="width:5px;height:5px;border-radius:50%;background:#22c55e;"></div></div>
+         <span style="font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;">UPCOMING</span>
+        </div>
+       </div>
+       <div style="position:relative;margin-top:auto;">
+        <div id="bento-next-label" style="font-size:0.6rem;font-weight:800;letter-spacing:0.08em;margin-bottom:6px;color:#f97316;">NEXT EVENT</div>
+        <div id="bento-next-title" style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:5px;">กำลังโหลด...</div>
+        <div id="bento-next-meta" style="font-size:0.62rem;color:rgba(255,255,255,0.4);"></div>
+        <div id="bento-countdown" style="display:none;gap:4px;align-items:center;margin-top:8px;">
+         <div style="display:flex;gap:4px;">
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-days" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">DAYS</div></div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-hours" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">HRS</div></div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-mins" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">MIN</div></div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd-secs" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">SEC</div></div>
+         </div>
+        </div>
+       </div>
+      </div>
+      <!-- Event 2 -->
+      <div id="bento-ev2" style="background:#111;border-radius:14px;overflow:hidden;position:relative;min-height:240px;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
+       <div id="bento-next2-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
+       <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
+       <div style="position:relative;">
+        <div id="bento-next2-label" style="font-size:0.6rem;font-weight:800;letter-spacing:0.08em;margin-bottom:6px;display:none;"></div>
+        <div id="bento-next2-title" style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:5px;display:none;"></div>
+        <div id="bento-next2-meta" style="font-size:0.62rem;color:rgba(255,255,255,0.4);display:none;"></div>
+       </div>
+      </div>
      </div>
-     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <h2 class="section-header">Upcoming Events</h2>
-      <span id="events-count" style="font-size:0.8rem;color:#9ca3af;"></span>
+
+     <!-- FILTER BAR -->
+     <div id="home-filter-bar" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:0.75rem;">
+      <button class="artist-filter-btn" data-artist="all" onclick="filterHome('all')"
+        style="padding:5px 14px;border-radius:6px;border:1px solid #111;background:#111;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;" >All</button>
+      <button class="artist-filter-btn" data-artist="Pond" onclick="filterHome('Pond')"
+        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#f97316;display:inline-block;"></span>Pond</button>
+      <button class="artist-filter-btn" data-artist="Phuwin" onclick="filterHome('Phuwin')"
+        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#6b7280;display:inline-block;"></span>Phuwin</button>
+      <button class="artist-filter-btn" data-artist="Permpoon" onclick="filterHome('Permpoon')"
+        style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid #f0f0f0;background:#fff;color:#6b7280;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>Permpoon</button>
+      <div style="flex:1;"></div>
+      <span id="events-count" style="font-size:0.68rem;font-weight:600;color:#fff;background:#111;border-radius:6px;padding:2px 10px;"></span>
+      <div style="display:flex;align-items:center;gap:2px;background:#f3f4f6;border-radius:8px;padding:3px;flex-shrink:0;">
+       <button id="view-grid-btn" onclick="setViewMode('grid')" style="width:30px;height:28px;border-radius:6px;background:#111;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Grid view">
+        <svg width="13" height="13" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+       </button>
+       <button id="view-list-btn" onclick="setViewMode('list')" style="width:30px;height:28px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="List view">
+        <svg width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+       </button>
+      </div>
+     </div>
+     <!-- SEARCH BAR -->
+     <div style="position:relative;margin-bottom:1.25rem;">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;" width="15" height="15" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="home-search" type="text" placeholder="Search events, venues, artists..." oninput="onHomeSearch(this.value)" style="width:100%;box-sizing:border-box;padding:9px 36px 9px 36px;border:1px solid #f0f0f0;border-radius:6px;font-size:0.85rem;outline:none;background:#f9fafb;color:#111;transition:border-color 0.2s;" onfocus="this.style.borderColor='#111'" onblur="this.style.borderColor='#f0f0f0'">
+      <button id="home-search-clear" onclick="clearHomeSearch()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;background:none;border:none;cursor:pointer;padding:2px;color:#9ca3af;">
+       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
      </div>
      <div id="events-grid"></div>
-     <div id="no-events" style="display:none;text-align:center;padding:4rem 0;color:#9ca3af;">
-      <i data-lucide="calendar-x" style="width:40px;height:40px;margin:0 auto 1rem;display:block;stroke-width:1.5;"></i>
-      <p style="font-weight:600;">No upcoming events</p>
-      <p style="font-size:0.85rem;margin-top:0.25rem;">Check back later or view the full calendar.</p>
+     <div id="no-events" style="display:none;padding:3rem 1rem;">
+      <div style="background:#fff;border:1px solid #f0f0f0;border-radius:16px;padding:48px 20px;text-align:center;max-width:400px;margin:auto;">
+       <div style="width:56px;height:56px;border-radius:16px;background:#f5f3ff;border:1.5px solid #e9d5ff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+        <i data-lucide="calendar-x" style="width:24px;height:24px;color:#a855f7;stroke-width:1.8;"></i>
+       </div>
+       <p style="font-size:1rem;font-weight:700;color:#111;margin-bottom:6px;"  data-i18n="no_events_title">ยังไม่มี event ในขณะนี้</p>
+       <p style="font-size:0.82rem;color:#9ca3af;margin-bottom:16px;"  data-i18n="no_events_sub">ติดตามข่าวสารจาก Pond · Phuwin · Permpoon</p>
+       <div style="display:flex;justify-content:center;gap:6px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
+        <div style="width:7px;height:7px;border-radius:50%;background:#6b7280;"></div>
+        <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;"></div>
+       </div>
+      </div>
      </div>
     </div>
+    <footer><div style="max-width:1400px;margin:auto;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
    </div>
 
    <!-- CALENDAR PAGE -->
@@ -550,23 +677,88 @@
     <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
 
      <!-- Header -->
-     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;">
+     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.25rem;">
       <div>
-       <h2 class="section-header" id="cal-section-title">Calendar</h2>
-       <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;">All scheduled events</p>
+       <h2 style="font-size:1.9rem;font-weight:800;letter-spacing:-0.04em;line-height:1.2;margin-bottom:4px;color:#111;" id="cal-section-title">Calendar</h2>
+       <p style="color:#9ca3af;font-size:0.85rem;">concerts · fan meets · events</p>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-       <button onclick="prevMonth()" class="btn-secondary" style="padding:6px 10px;"><i data-lucide="chevron-left" style="width:16px;height:16px;"></i></button>
-       <span id="cal-month-label" style="font-weight:700;font-size:0.95rem;min-width:130px;text-align:center;"></span>
-       <button onclick="nextMonth()" class="btn-secondary" style="padding:6px 10px;"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></button>
+      <!-- Year selector -->
+      <div style="display:flex;align-items:center;gap:6px;">
+       <svg width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+       <select id="cal-year-select" onchange="onCalYearChange(this.value)" style="font-size:0.82rem;font-weight:700;color:#111;background:#f9fafb;border:1px solid #f0f0f0;border-radius:6px;padding:5px 10px;cursor:pointer;outline:none;">
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+       </select>
       </div>
+     </div>
+
+     <!-- Yearly stats — compact -->
+     <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem;">
+      <!-- Dark summary row -->
+      <div style="background:#111;border-radius:12px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+       <div style="display:flex;align-items:baseline;gap:10px;">
+        <div id="cal-stat-total" style="font-size:2.2rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.04em;">-</div>
+        <div id="cal-stat-year-label" style="font-size:0.62rem;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:0.08em;">2026 · ทั้งหมด</div>
+       </div>
+       <div style="display:flex;gap:20px;align-items:center;">
+        <div style="text-align:center;">
+         <div id="cal-stat-past" style="font-size:1.3rem;font-weight:900;color:#6b7280;line-height:1;">-</div>
+         <div style="font-size:0.52rem;color:rgba(255,255,255,0.3);margin-top:3px;font-weight:700;letter-spacing:0.06em;" >Past</div>
+        </div>
+        <div style="width:1px;height:24px;background:rgba(255,255,255,0.08);"></div>
+        <div style="text-align:center;">
+         <div id="cal-stat-upcoming" style="font-size:1.3rem;font-weight:900;color:#f97316;line-height:1;">-</div>
+         <div style="font-size:0.52rem;color:rgba(255,255,255,0.3);margin-top:3px;font-weight:700;letter-spacing:0.06em;" >Remaining</div>
+        </div>
+        <div style="width:1px;height:24px;background:rgba(255,255,255,0.08);"></div>
+        <div style="text-align:center;">
+         <div id="cal-stat-pct" style="font-size:1.3rem;font-weight:900;color:#a855f7;line-height:1;">-</div>
+         <div style="font-size:0.52rem;color:rgba(255,255,255,0.3);margin-top:3px;font-weight:700;letter-spacing:0.06em;">%</div>
+        </div>
+       </div>
+      </div>
+      <!-- Artist row -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+       <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+         <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
+         <span style="font-size:0.6rem;font-weight:700;color:#ea580c;letter-spacing:0.08em;">POND</span>
+        </div>
+        <div id="cs-pond-total" style="font-size:1.6rem;font-weight:900;color:#f97316;line-height:1;letter-spacing:-0.02em;">-</div>
+        <div style="font-size:0.65rem;color:#9ca3af;margin-left:auto;"><span data-i18n="done_label">ผ่าน</span> <strong id="cs-pond-past" style="color:#111;">-</strong> · <span data-i18n="left_label">เหลือ</span> <strong id="cs-pond-up" style="color:#f97316;">-</strong></div>
+       </div>
+       <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+         <div style="width:7px;height:7px;border-radius:50%;background:#6b7280;"></div>
+         <span style="font-size:0.6rem;font-weight:700;color:#4b5563;letter-spacing:0.08em;">PHUWIN</span>
+        </div>
+        <div id="cs-phuwin-total" style="font-size:1.6rem;font-weight:900;color:#6b7280;line-height:1;letter-spacing:-0.02em;">-</div>
+        <div style="font-size:0.65rem;color:#9ca3af;margin-left:auto;"><span data-i18n="done_label">ผ่าน</span> <strong id="cs-phuwin-past" style="color:#111;">-</strong> · <span data-i18n="left_label">เหลือ</span> <strong id="cs-phuwin-up" style="color:#6b7280;">-</strong></div>
+       </div>
+       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+         <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;"></div>
+         <span style="font-size:0.6rem;font-weight:700;color:#16a34a;letter-spacing:0.08em;">PERMPOON</span>
+        </div>
+        <div id="cs-permpoon-total" style="font-size:1.6rem;font-weight:900;color:#22c55e;line-height:1;letter-spacing:-0.02em;">-</div>
+        <div style="font-size:0.65rem;color:#9ca3af;margin-left:auto;"><span data-i18n="done_label">ผ่าน</span> <strong id="cs-permpoon-past" style="color:#111;">-</strong> · <span data-i18n="left_label">เหลือ</span> <strong id="cs-permpoon-up" style="color:#22c55e;">-</strong></div>
+       </div>
+      </div>
+     </div>
+
+     <!-- Month nav -->
+     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;">
+      <button onclick="prevMonth()" class="btn-secondary" style="padding:6px 10px;"><i data-lucide="chevron-left" style="width:16px;height:16px;"></i></button>
+      <span id="cal-month-label" style="font-weight:700;font-size:0.95rem;min-width:130px;text-align:center;"></span>
+      <button onclick="nextMonth()" class="btn-secondary" style="padding:6px 10px;"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></button>
      </div>
 
      <!-- Filter bar -->
      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;">
       
       <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
-        style="padding:5px 16px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
+        style="padding:5px 16px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;" >All</button>
       <button class="cal-filter-btn" data-artist="Pond" onclick="filterCalendar('Pond')"
         style="padding:5px 16px;border-radius:99px;border:2px solid #f97316;background:#fff;color:#f97316;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Pond</button>
       <button class="cal-filter-btn" data-artist="Phuwin" onclick="filterCalendar('Phuwin')"
@@ -575,20 +767,33 @@
         style="padding:5px 16px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
      </div>
 
-     <!-- Layout: mini cal ซ้าย + list ขวา -->
+     <!-- NEXT EVENT BANNER -->
+     <div id="cal-next-event-banner" style="display:none;background:#fff;border:none;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:14px 16px;margin-bottom:1.25rem;align-items:center;gap:14px;cursor:pointer;" onclick="openDetailModal(this.dataset.eventId)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openDetailModal(this.dataset.eventId)">
+      <div id="cal-next-event-icon" style="width:44px;height:44px;border-radius:12px;background:#fff7ed;border:1.5px solid #fed7aa;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+       <svg width="20" height="20" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+       <div id="cal-next-event-label" style="font-size:0.68rem;font-weight:700;color:#f97316;margin-bottom:2px;letter-spacing:0.04em;"></div>
+       <div id="cal-next-event-title" style="font-size:0.88rem;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+       <div id="cal-next-event-meta" style="font-size:0.72rem;color:#9ca3af;margin-top:2px;"></div>
+      </div>
+      <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+     </div>
+
+     <!-- Layout: mini calendar left + event list right -->
      <div id="cal-layout" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;">
 
       <!-- LEFT: Mini calendar -->
       <div id="cal-left" style="width:500px;flex-shrink:0;min-width:0;max-width:100%;">
        <!-- day headers -->
-       <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">S</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">M</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">T</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">W</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">T</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">F</div>
-        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;">S</div>
+       <div id="cal-dow-headers" style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="0">S</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="1">M</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="2">T</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="3">W</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="4">T</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="5">F</div>
+        <div style="text-align:center;font-size:0.82rem;font-weight:700;color:#9ca3af;padding:8px 0;" data-dow="6">S</div>
        </div>
        <div id="cal-grid" class="cal-grid" style="border:none;"></div>
       </div>
@@ -596,7 +801,7 @@
       <!-- RIGHT: Event list (scrollable) -->
       <div style="min-width:0;">
        <div id="cal-event-list" style="display:flex;flex-direction:column;gap:8px;max-height:520px;overflow-y:auto;padding-right:4px;">
-        <div style="text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;">กำลังโหลด...</div>
+        <div style="text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;" data-i18n="loading">กำลังโหลด...</div>
        </div>
        <div id="cal-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
         <p style="font-weight:600;">ไม่มี event ในเดือนนี้</p>
@@ -605,6 +810,7 @@
 
      </div>
     </div>
+    <footer><div style="max-width:1400px;margin:auto;padding:0.5rem 1rem;text-align:center;font-size:0.65rem;color:#d1d5db;letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px;"><div style="display:flex;gap:3px;"><div style="width:4px;height:4px;border-radius:50%;background:#f97316;"></div><div style="width:4px;height:4px;border-radius:50%;background:#6b7280;"></div><div style="width:4px;height:4px;border-radius:50%;background:#22c55e;"></div></div>© 2026 pondphuwin trend. Made with love.</div></footer>
    </div>
 
    <!-- ADMIN PAGE -->
@@ -616,16 +822,16 @@
         <i data-lucide="lock" style="width:18px;height:18px;color:#fff;stroke-width:2;"></i>
        </div>
        <div>
-        <h2 style="font-weight:700;font-size:1.1rem;margin:0;">Admin Login</h2>
-        <p style="font-size:0.72rem;color:#9ca3af;margin:2px 0 0;">PondPhuwin and Permpoon Schedule Management</p>
+        <h2 style="font-weight:700;font-size:1.1rem;margin:0;"  data-i18n="admin_login">เข้าสู่ระบบ</h2>
+        <p style="font-size:0.72rem;color:#9ca3af;margin:2px 0 0;">PondPhuwin &amp; Permpoon Schedule Management</p>
        </div>
       </div>
-      <label class="form-label" for="login-pw-field">Password</label>
+      <label class="form-label" for="login-pw-field"  data-i18n="admin_password">รหัสผ่าน</label>
       <input class="form-input" id="login-pw-field" type="password" placeholder="Enter admin password" style="margin-bottom:0.75rem;" autocomplete="current-password">
-      <div id="login-pw-err" style="font-size:0.8rem;color:#dc2626;margin-bottom:0.75rem;display:none;background:#fee2e2;padding:8px 12px;border-radius:6px;">Incorrect password. Try again.</div>
-      <button class="btn-primary" onclick="doAdminLogin()" style="width:100%;">Log In</button>
+      <div id="login-pw-err" style="font-size:0.8rem;color:#dc2626;margin-bottom:0.75rem;display:none;background:#fee2e2;padding:8px 12px;border-radius:6px;"  data-i18n="login_error">รหัสผ่านไม่ถูกต้อง ลองอีกครั้ง</div>
+      <button class="btn-primary" onclick="doAdminLogin()" style="width:100%;" >Log In</button>
       <div style="margin-top:1.25rem;text-align:center;">
-       <button style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:#9ca3af;" onclick="navigate('home')">← Back to schedule</button>
+       <button style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:#9ca3af;" onclick="navigate('home')"  data-i18n="back_to_schedule">← กลับไปหน้าตาราง</button>
       </div>
      </div>
     </div>
@@ -633,19 +839,19 @@
      <div style="max-width:1400px;margin:auto;padding:2rem 1rem;width:100%;box-sizing:border-box;overflow-x:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
        <div>
-        <h2 class="section-header">Admin Panel</h2>
-        <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;">Manage events</p>
+        <h2 class="section-header"  data-i18n="admin_panel">แผงผู้ดูแล</h2>
+        <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;"  data-i18n="admin_manage">จัดการ event</p>
        </div>
-       <button class="btn-secondary" onclick="adminLogout()"><i data-lucide="log-out" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Logout</button>
+       <button class="btn-secondary" onclick="adminLogout()"><i data-lucide="log-out" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span  data-i18n="admin_logout">ออกจากระบบ</span></button>
       </div>
       <div style="margin-bottom:1rem;display:flex;gap:8px;align-items:center;">
-       <button class="btn-primary" onclick="openAddModal()"><i data-lucide="plus" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:4px;"></i>Add Event</button>
-       <button class="btn-secondary" onclick="adminRefresh()" id="admin-refresh-btn" style="display:flex;align-items:center;gap:5px;"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>Refresh</button>
+       <button class="btn-primary" onclick="openAddModal()"><i data-lucide="plus" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:4px;"></i><span  data-i18n="admin_add_event">เพิ่ม Event</span></button>
+       <button class="btn-secondary" onclick="adminRefresh()" id="admin-refresh-btn" style="display:flex;align-items:center;gap:5px;"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i><span  data-i18n="admin_refresh">รีเฟรช</span></button>
       </div>
       <div id="admin-events-list" style="display:flex;flex-direction:column;gap:10px;"></div>
       <div id="admin-no-events" style="display:none;text-align:center;padding:3rem;color:#9ca3af;">
        <i data-lucide="inbox" style="width:36px;height:36px;display:block;margin:0 auto 0.75rem;stroke-width:1.5;"></i>
-       <p style="font-weight:600;">No events yet.</p>
+       <p style="font-weight:600;"  data-i18n="admin_no_events">ยังไม่มี event</p>
        <p style="font-size:0.82rem;margin-top:3px;">Click "Add Event" to get started.</p>
       </div>
       <div id="admin-limit-warn" style="display:none;margin-top:1rem;background:#fef3c7;border-radius:8px;padding:0.75rem 1rem;font-size:0.82rem;color:#92400e;">
@@ -659,38 +865,38 @@
          <h3 style="font-weight:700;font-size:1rem;letter-spacing:-0.01em;">
           <i data-lucide="cake" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;stroke-width:2;"></i>Artist Birthdays
          </h3>
-         <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">วันเกิดศิลปิน — แสดง countdown banner หน้า Home และในปฏิทิน</p>
+         <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">Artist birthdays — shows countdown banner on Home and Calendar</p>
         </div>
         <button class="btn-secondary" style="font-size:0.82rem;padding:6px 12px;" onclick="openBdayForm()">
-         <i data-lucide="plus" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>เพิ่ม
+         <i data-lucide="plus" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Add
         </button>
        </div>
        <div id="bday-form-wrap" style="display:none;background:#f9fafb;border-radius:12px;padding:1.25rem;margin-bottom:1rem;border:1px solid #e5e7eb;">
-        <p style="font-weight:700;font-size:0.85rem;margin-bottom:1rem;">เพิ่มวันเกิดศิลปิน</p>
+        <p style="font-weight:700;font-size:0.85rem;margin-bottom:1rem;">Add Artist Birthday</p>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
          <div style="grid-column:1/-1;">
-          <label class="form-label">ชื่อศิลปิน</label>
-          <input class="form-input" id="bday-artist-name" placeholder="เช่น Pond">
+          <label class="form-label">Artist Name</label>
+          <input class="form-input" id="bday-artist-name" placeholder="e.g. Pond">
          </div>
          <div>
-          <label class="form-label">เดือน (1–12)</label>
+          <label class="form-label">Month (1–12)</label>
           <input class="form-input" id="bday-month" type="number" min="1" max="12" placeholder="12">
          </div>
          <div>
-          <label class="form-label">วัน (1–31)</label>
+          <label class="form-label">Day (1–31)</label>
           <input class="form-input" id="bday-day" type="number" min="1" max="31" placeholder="7">
          </div>
          <div style="grid-column:3/-1;">
-          <label class="form-label">สี</label>
+          <label class="form-label">Color</label>
           <div style="display:flex;align-items:center;gap:8px;">
            <input type="color" id="bday-color" value="#6b7280" style="width:40px;height:36px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;padding:2px;">
-           <span style="font-size:0.78rem;color:#9ca3af;">สีของ banner</span>
+           <span style="font-size:0.78rem;color:#9ca3af;">Banner color</span>
           </div>
          </div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
-         <button class="btn-secondary" style="font-size:0.82rem;" onclick="closeBdayForm()">ยกเลิก</button>
-         <button class="btn-primary" style="font-size:0.82rem;" onclick="saveBirthday()">บันทึก</button>
+         <button class="btn-secondary" style="font-size:0.82rem;" onclick="closeBdayForm()" data-i18n="admin_cancel">ยกเลิก</button>
+         <button class="btn-primary" style="font-size:0.82rem;" onclick="saveBirthday()">Save</button>
         </div>
        </div>
        <div id="bday-admin-list"></div>
@@ -703,39 +909,39 @@
          <h3 style="font-weight:700;font-size:1rem;letter-spacing:-0.01em;">
           <i data-lucide="heart" style="width:15px;height:15px;display:inline;vertical-align:-2px;margin-right:5px;color:#9ca3af;stroke-width:2;"></i>Anniversary &amp; Special Dates
          </h3>
-         <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">วันครบรอบ, วันเดบิวต์, วันสำคัญ</p>
+         <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">Anniversaries, debuts, special dates</p>
         </div>
         <button class="btn-secondary" style="font-size:0.82rem;padding:6px 12px;" onclick="openAnnivForm()">
-         <i data-lucide="plus" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>เพิ่ม
+         <i data-lucide="plus" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Add
         </button>
        </div>
        <div id="anniv-form-wrap" style="display:none;background:#f9fafb;border-radius:12px;padding:1.25rem;margin-bottom:1rem;border:1px solid #e5e7eb;">
-        <p style="font-weight:700;font-size:0.85rem;margin-bottom:1rem;">เพิ่ม Anniversary ใหม่</p>
+        <p style="font-weight:700;font-size:0.85rem;margin-bottom:1rem;">Add New Anniversary</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
          <div style="grid-column:1/-1;">
-          <label class="form-label">ชื่อ</label>
-          <input class="form-input" id="anniv-label" placeholder="เช่น PondPhuwin Anniversary">
+          <label class="form-label">Name</label>
+          <input class="form-input" id="anniv-label" placeholder="e.g. PondPhuwin Anniversary">
          </div>
          <div>
-          <label class="form-label">เดือน (1–12)</label>
+          <label class="form-label">Month (1–12)</label>
           <input class="form-input" id="anniv-month" type="number" min="1" max="12">
          </div>
          <div>
-          <label class="form-label">วัน (1–31)</label>
+          <label class="form-label">Day (1–31)</label>
           <input class="form-input" id="anniv-day" type="number" min="1" max="31">
          </div>
          <div>
-          <label class="form-label">ปีเริ่ม (optional)</label>
+          <label class="form-label">Start Year <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
           <input class="form-input" id="anniv-year" type="number" min="2000" max="2099">
          </div>
          <div>
-          <label class="form-label">สี Banner</label>
+          <label class="form-label">Banner Color</label>
           <input type="color" id="anniv-color" value="#a855f7" style="width:40px;height:36px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;padding:2px;">
          </div>
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end;">
-         <button class="btn-secondary" style="font-size:0.82rem;" onclick="closeAnnivForm()">ยกเลิก</button>
-         <button class="btn-primary" style="font-size:0.82rem;" onclick="saveAnniversary()">บันทึก</button>
+         <button class="btn-secondary" style="font-size:0.82rem;" onclick="closeAnnivForm()" data-i18n="admin_cancel">ยกเลิก</button>
+         <button class="btn-primary" style="font-size:0.82rem;" onclick="saveAnniversary()">Save</button>
         </div>
        </div>
        <div id="anniv-list"></div>
@@ -753,28 +959,32 @@
      <button onclick="closeDetailModal()" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);border:none;border-radius:99px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
       <i data-lucide="x" style="width:16px;height:16px;color:#fff;stroke-width:2.5;"></i>
      </button>
+     <button id="detail-share-btn" onclick="shareDetailModal()" style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.5);border:none;border-radius:99px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;" title="Share">
+      <i data-lucide="share-2" style="width:16px;height:16px;color:#fff;stroke-width:2.5;"></i>
+     </button>
     </div>
     <div style="padding:1.25rem;">
      <div id="detail-artist-badge" style="margin-bottom:0.6rem;"></div>
-     <h2 id="detail-title" style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:1rem;line-height:1.3;"></h2>
+     <h2 id="detail-title" style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.6rem;line-height:1.3;"></h2>
      <div id="detail-meta" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;"></div>
      <div id="detail-desc-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.4rem;">DESCRIPTION</p>
+      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.4rem;" >DESCRIPTION</p>
       <p id="detail-desc" style="font-size:0.88rem;line-height:1.6;color:#374151;"></p>
      </div>
      <div id="detail-links-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">LINKS</p>
+      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;" >LINKS</p>
       <div id="detail-links" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
      </div>
+     <div id="detail-cal-wrap" style="display:none;margin-bottom:1.25rem;"></div>
      <div id="detail-ticket-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:#f97316;letter-spacing:0.08em;margin-bottom:0.75rem;">
+      <p style="font-size:0.75rem;font-weight:700;color:#f97316;letter-spacing:0.08em;margin-bottom:0.75rem;" data-i18n="detail_tickets">
        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="display:inline;vertical-align:-2px;margin-right:4px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
        TICKETS
       </p>
       <div id="detail-ticket-btns" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
      </div>
      <div id="detail-map-wrap" style="display:none;margin-bottom:1.25rem;">
-      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;">MAP</p>
+      <p style="font-size:0.75rem;font-weight:700;color:#9ca3af;letter-spacing:0.08em;margin-bottom:0.75rem;" >MAP</p>
       <div id="detail-map" class="map-embed-wrap"></div>
      </div>
     </div>
@@ -795,13 +1005,13 @@
     <div style="padding:0 1.5rem 1.5rem;">
      <form id="event-form" novalidate>
 
-      <!-- ── ข้อมูลหลัก ── -->
-      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">ข้อมูลหลัก</p>
+      <!-- ── Main Info ── -->
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Main Info</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
 
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-title" style="font-weight:700;">Event Name <span style="color:#ec4899;">*</span></label>
-        <input class="form-input" id="ev-title" name="title" placeholder="e.g. Pond Concert Night" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
+        <input class="form-input" id="ev-title" name="title" placeholder="e.g. Pond Concert Night" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;" aria-required="true">
        </div>
 
        <div style="grid-column:1/-1;">
@@ -818,7 +1028,7 @@
 
        <div>
         <label class="form-label" for="ev-dateStart" style="font-weight:700;">Date Start <span style="color:#ec4899;">*</span></label>
-        <input class="form-input" id="ev-dateStart" name="dateStart" type="date" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
+        <input class="form-input" id="ev-dateStart" name="dateStart" type="date" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;" aria-required="true">
        </div>
        <div>
         <label class="form-label" style="font-weight:700;color:#9ca3af;">Status <span style="font-weight:400;font-size:0.78rem;">(auto)</span></label>
@@ -839,18 +1049,29 @@
 
       </div>
 
-      <!-- ── รายละเอียด ── -->
+      <!-- ── Details ── -->
       <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
-      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">รายละเอียด <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(optional)</span></p>
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Details <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(optional)</span></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
 
        <div style="grid-column:1/-1;">
         <label class="form-label" for="ev-image">Image URL <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
-        <input class="form-input" id="ev-image" name="image" placeholder="https://...jpg">
+        <input class="form-input" id="ev-image" name="image" placeholder="https://...jpg" oninput="previewAdminImg('ev-image','prev-image')">
+        <div id="prev-image" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;max-height:160px;border:1px solid #e5e7eb;">
+         <img style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;" alt="preview">
+        </div>
+       </div>
+
+       <div style="grid-column:1/-1;">
+        <label class="form-label" for="ev-heroImage">Hero Image URL <span style="font-weight:400;color:#9ca3af;">(Artist portrait — used in Hero banner instead of the main image)</span></label>
+        <input class="form-input" id="ev-heroImage" name="heroImage" placeholder="https://...jpg" oninput="previewAdminImg('ev-heroImage','prev-heroImage')">
+        <div id="prev-heroImage" style="display:none;margin-top:8px;border-radius:10px;overflow:hidden;max-height:160px;border:1px solid #e5e7eb;">
+         <img style="width:100%;height:160px;object-fit:cover;object-position:top;display:block;" alt="preview">
+        </div>
        </div>
 
        <div>
-        <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:#9ca3af;">(ถ้าหลายวัน)</span></label>
+        <label class="form-label" for="ev-dateEnd">Date End <span style="font-weight:400;color:#9ca3af;">(if multi-day)</span></label>
         <input class="form-input" id="ev-dateEnd" name="dateEnd" type="date">
        </div>
        <div>
@@ -895,14 +1116,14 @@
          <svg width="13" height="13" viewBox="0 0 24 24" style="display:inline;vertical-align:-2px;margin-right:3px;" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
          Google Maps Embed <span style="font-weight:400;color:#9ca3af;">(optional)</span>
         </label>
-        <textarea class="form-input" id="ev-map" name="map" rows="2" placeholder='วาง iframe embed จาก Google Maps'></textarea>
+        <textarea class="form-input" id="ev-map" name="map" rows="2" placeholder='Paste Google Maps iframe embed code'></textarea>
        </div>
 
       </div>
 
       <!-- ── Links ── -->
       <hr style="border:none;border-top:1px dashed #e5e7eb;margin:0.25rem 0 0.85rem;">
-      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Links <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(optional ทั้งหมด)</span></p>
+      <p style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#9ca3af;margin-bottom:0.75rem;">Links <span style="font-weight:400;text-transform:none;font-size:0.68rem;">(all optional)</span></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
        <div>
         <label class="form-label" for="ev-youtube">YouTube</label>
@@ -952,7 +1173,7 @@
        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="display:inline;vertical-align:-1px;margin-right:4px;"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
        Ticket Links
       </p>
-      <p style="font-size:0.72rem;color:#9ca3af;margin-bottom:0.85rem;">ThaiTicketMajor, AllTicket, Ticketmaster, Eventpop, LiveNation ฯลฯ — ถ้าใส่จะแสดงปุ่ม Buy Ticket หน้า event</p>
+      <p style="font-size:0.72rem;color:#9ca3af;margin-bottom:0.85rem;">ThaiTicketMajor, AllTicket, Ticketmaster, Eventpop, LiveNation etc. — shows Buy Ticket button on event card</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
        <div>
         <label class="form-label" for="ev-ticket1">
@@ -985,7 +1206,7 @@
        </div>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;">
-       <button type="button" class="btn-secondary" onclick="closeEventFormModal()">Cancel</button>
+       <button type="button" class="btn-secondary" onclick="closeEventFormModal()"  data-i18n="admin_cancel">ยกเลิก</button>
        <button type="button" class="btn-secondary" onclick="openPreviewPopup()" style="display:flex;align-items:center;gap:5px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         Preview
@@ -1013,17 +1234,13 @@
      <div id="preview-popup-card"></div>
     </div>
     <div style="padding:0 1.25rem 1.25rem;display:flex;justify-content:flex-end;gap:8px;">
-     <button class="btn-secondary" onclick="closePreviewPopup()">แก้ไขต่อ</button>
+     <button class="btn-secondary" onclick="closePreviewPopup()">Continue Editing</button>
      <button class="btn-primary" onclick="closePreviewPopup();handleEventFormSubmit()">Save Event</button>
     </div>
    </div>
   </div>
 
-  <footer>
-   <div style="max-width:1400px;margin:auto;padding:1.5rem 1rem;text-align:center;font-size:0.78rem;color:#9ca3af;letter-spacing:0.04em;">
-    © 2026 pondphuwin trend. Made with love.
-   </div>
-  </footer>
+ </div><!-- /#app -->
   <div id="toast"></div>
 
   <script>
@@ -1034,14 +1251,21 @@
 // ═══════════════════════════════════════════════════════════════════
 
 // ── SECURITY CONFIG ──────────────────────────────────────────────
-const PANEL_KEY  = 'pppsecret';
-const ADMIN_PASS = 'ppp1257pondphuwinppw';
-const SESS_KEY   = 'pppAdminSess';
-const PANL_FLAG  = 'pppPanelKey';
+// Passwords are stored as SHA-256 hashes — never as plaintext
+const PANEL_KEY       = 'pppsecret';
+// SHA-256 of 'ppp1257pondphuwinppw'
+const ADMIN_PASS_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+const SESS_KEY        = 'pppAdminSess';
+const PANL_FLAG       = 'pppPanelKey';
+
+async function hashPassword(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 // ── PERFORMANCE CONFIG ────────────────────────────────────────────
 const CACHE_VERSION    = 'ppp_v3';          // bump to invalidate all caches
-const CACHE_TTL_MS     = 60 * 1000;         // 60 seconds between API calls
+const CACHE_TTL_MS     = 5 * 60 * 1000;     // 5 minutes between API calls
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h max stale data age
 const FETCH_TIMEOUT_MS = 12000;             // 12s request timeout
 const RETRY_DELAYS     = [2000, 5000, 15000]; // exponential backoff delays
@@ -1070,6 +1294,255 @@ let calYear         = new Date().getFullYear();
 let calSelectedDate = null;
 let calFilter       = 'all';
 let homeFilter      = 'all';
+let homeSearch      = '';
+
+// ── Language ──────────────────────────────────────────────────────
+let _lang = localStorage.getItem('ppp_lang') || 'th';
+
+// ── i18n ──────────────────────────────────────────────────────────
+const i18n = {
+  th: {
+    nav_home: 'หน้าแรก', nav_calendar: 'ปฏิทิน', nav_admin: 'ผู้ดูแล',
+    filter_all: 'ทั้งหมด',
+    search_placeholder: 'ค้นหา event, สถานที่, ศิลปิน...',
+    next_today: 'วันนี้', next_1day: 'ถัดไป · 1 วัน', next_days: 'ถัดไป · %d วัน', next_event: 'งานถัดไป',
+    cal_next_today: 'วันนี้', cal_next_1day: 'งานถัดไป · 1 วัน', cal_next_days: 'งานถัดไป · %d วัน',
+    events_count: (n) => `${n} งาน`,
+    no_events_title: 'ยังไม่มี event ในขณะนี้',
+    no_events_sub: 'ติดตามข่าวสารจาก Pond · Phuwin · Permpoon',
+    cal_no_events: 'ไม่มีงานในวันนี้',
+    add_calendar: 'เพิ่มใน Calendar',
+    view_detail: 'ดูรายละเอียด →',
+    past_events: 'งานที่ผ่านมา',
+    countdown_label: 'นับถอยหลัง',
+    date_locale: 'th-TH',
+    date_opts_short: { month: 'short', day: 'numeric', year: 'numeric' },
+    footer: '© 2026 pondphuwin trend. Made with love.',
+    month_names: ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'],
+    day_abbr: ['อา','จ','อ','พ','พฤ','ศ','ส'],
+    login_error: 'รหัสผ่านไม่ถูกต้อง ลองอีกครั้ง',
+    back_to_schedule: '← กลับไปหน้าตาราง',
+    admin_manage: 'จัดการ event',
+    admin_password: 'รหัสผ่าน',
+    admin_login: 'เข้าสู่ระบบ',
+    admin_logout: 'ออกจากระบบ',
+    admin_add_event: 'เพิ่ม Event',
+    admin_edit_event: 'แก้ไข Event',
+    admin_save_event: 'บันทึก Event',
+    admin_update_event: 'อัปเดต Event',
+    admin_cancel: 'ยกเลิก',
+    admin_delete: 'ลบ',
+    admin_confirm_delete: 'ยืนยันลบ?',
+    admin_no_events: 'ยังไม่มี event',
+    admin_refresh: 'รีเฟรช',
+    admin_birthday_title: 'วันเกิด & ครบรอบ',
+    admin_add_birthday: 'เพิ่มวันเกิด',
+    admin_add_anniversary: 'เพิ่มครบรอบ',
+    admin_panel: 'แผงผู้ดูแล',
+    bday_suffix: (name) => `วันเกิด ${name}`,
+    bday_today: (name) => `สุขสันต์วันเกิด ${name}! 🎂`,
+    anniv_today: (label) => `🥂 ${label} — ขอให้มีความสุข!`,
+    toast_saved: 'บันทึกสำเร็จ ✓',
+    toast_deleted: 'ลบสำเร็จ ✓',
+    toast_error: 'เกิดข้อผิดพลาด',
+    toast_copied: 'คัดลอกลิงก์แล้ว ✓',
+    toast_refreshed: 'รีเฟรชแล้ว ✓',
+    toast_logged_out: 'ออกจากระบบแล้ว',
+    toast_limit: 'ถึงขีดจำกัดแล้ว',
+    toast_removed: 'ลบออกแล้ว (ถูกลบจาก Sheet แล้ว)',
+    toast_need_title: '❌ กรุณาใส่ชื่อ Event ก่อน',
+    toast_need_name: 'กรุณาใส่ชื่อศิลปิน',
+    toast_need_label: 'กรุณาใส่ชื่อ Anniversary',
+    toast_invalid_month: 'เดือนไม่ถูกต้อง',
+    toast_invalid_day: 'วันไม่ถูกต้อง',
+    toast_added: 'เพิ่ม Event แล้ว ✓',
+    toast_updated: 'อัปเดต Event แล้ว ✓',
+    toast_bday_deleted: 'ลบวันเกิดแล้ว ✓',
+    toast_anniv_saved: 'บันทึกครบรอบแล้ว ✓',
+    toast_anniv_deleted: 'ลบครบรอบแล้ว ✓',
+    stat_total_year: 'ทั้งหมดในปีนี้',
+    stat_past: 'ผ่านไปแล้ว',
+    stat_upcoming: 'ที่จะมาถึง',
+    stat_progress: 'ความคืบหน้า',
+    stat_events: 'งาน',
+    cal_no_events_day: 'ไม่มีงานในวันที่เลือก',
+    detail_add_cal: 'Google Calendar',
+    detail_ical: 'iCal / Outlook',
+    detail_map: 'แผนที่',
+    detail_links: 'ลิงก์',
+    detail_tickets: 'ตั๋ว',
+    detail_desc: 'รายละเอียด',
+    detail_share: 'แชร์',
+    yes: 'ใช่',
+    done_label: 'ผ่านแล้ว',
+    left_label: 'เหลือ',
+    remaining_label: 'เหลืออีก',
+    loading: 'กำลังโหลด...',
+    no_events_month: 'ไม่มี event ในเดือนนี้',
+    no_birthdays: 'ยังไม่มีวันเกิด',
+    no_anniversaries: 'ยังไม่มี Anniversary',
+    retry: 'ลองใหม่',
+    cache_warning: 'แสดงข้อมูลจาก cache — กำลังลองโหลดใหม่...',
+    connect_error_title: 'ไม่สามารถเชื่อมต่อ Google Sheets ได้',
+    connect_error_sub: 'กรุณาตรวจสอบว่า Apps Script ถูก Deploy แล้ว',
+    past_label: 'ผ่านแล้ว',
+    all_filter: 'ทั้งหมด',
+    year_total: (year) => `ปี ${year} · ทั้งหมด`,
+    time_suffix: (h, m) => `${String(h).padStart(2,'0')}:${m} น.`,
+  },
+  en: {
+    nav_home: 'Home', nav_calendar: 'Calendar', nav_admin: 'Admin',
+    filter_all: 'All',
+    search_placeholder: 'Search events, venues, artists...',
+    next_today: 'TODAY', next_1day: 'NEXT · 1 DAY', next_days: 'NEXT · %d DAYS', next_event: 'NEXT EVENT',
+    cal_next_today: 'TODAY', cal_next_1day: 'NEXT EVENT · 1 DAY', cal_next_days: 'NEXT EVENT · %d DAYS',
+    events_count: (n) => `${n} event${n !== 1 ? 's' : ''}`,
+    no_events_title: 'No upcoming events',
+    no_events_sub: 'Stay tuned for updates from Pond · Phuwin · Permpoon',
+    cal_no_events: 'No events on this day',
+    add_calendar: 'Add to Calendar',
+    view_detail: 'View details →',
+    past_events: 'Past Events',
+    countdown_label: 'COUNTDOWN',
+    date_locale: 'en-US',
+    date_opts_short: { month: 'short', day: 'numeric', year: 'numeric' },
+    footer: '© 2026 pondphuwin trend. Made with love.',
+    month_names: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    day_abbr: ['SUN','MON','TUE','WED','THU','FRI','SAT'],
+    login_error: 'Incorrect password. Try again.',
+    back_to_schedule: '← Back to schedule',
+    admin_manage: 'Manage events',
+    admin_password: 'Password',
+    admin_login: 'Login',
+    admin_logout: 'Logout',
+    admin_add_event: 'Add Event',
+    admin_edit_event: 'Edit Event',
+    admin_save_event: 'Save Event',
+    admin_update_event: 'Update Event',
+    admin_cancel: 'Cancel',
+    admin_delete: 'Delete',
+    admin_confirm_delete: 'Confirm Delete?',
+    admin_no_events: 'No events yet',
+    admin_refresh: 'Refresh',
+    admin_birthday_title: 'Birthdays & Anniversaries',
+    admin_add_birthday: 'Add Birthday',
+    admin_add_anniversary: 'Add Anniversary',
+    admin_panel: 'Admin Panel',
+    bday_suffix: (name) => `${name}'s Birthday`,
+    bday_today: (name) => `Happy Birthday ${name}! 🎂`,
+    anniv_today: (label) => `🥂 ${label} — Happy Anniversary!`,
+    toast_saved: 'Saved ✓',
+    toast_deleted: 'Deleted ✓',
+    toast_error: 'An error occurred',
+    toast_copied: 'Link copied ✓',
+    toast_refreshed: 'Refreshed ✓',
+    toast_logged_out: 'Logged out',
+    toast_limit: 'Limit reached.',
+    toast_removed: 'Removed. (already deleted from Sheet)',
+    toast_need_title: '❌ Please enter an Event title first',
+    toast_need_name: 'Please enter artist name',
+    toast_need_label: 'Please enter Anniversary label',
+    toast_invalid_month: 'Invalid month',
+    toast_invalid_day: 'Invalid day',
+    toast_added: 'Event added! ✓',
+    toast_updated: 'Event updated! ✓',
+    toast_bday_deleted: 'Birthday deleted ✓',
+    toast_anniv_saved: 'Anniversary saved ✓',
+    toast_anniv_deleted: 'Anniversary deleted ✓',
+    stat_total_year: 'Total this year',
+    stat_past: 'Completed',
+    stat_upcoming: 'Upcoming',
+    stat_progress: 'Progress',
+    stat_events: 'events',
+    cal_no_events_day: 'No events on selected date',
+    detail_add_cal: 'Google Calendar',
+    detail_ical: 'iCal / Outlook',
+    detail_map: 'Map',
+    detail_links: 'Links',
+    detail_tickets: 'TICKETS',
+    detail_desc: 'Description',
+    detail_share: 'Share',
+    yes: 'Yes',
+    done_label: 'Done',
+    left_label: 'Left',
+    remaining_label: 'Remaining',
+    loading: 'Loading...',
+    no_events_month: 'No events this month',
+    no_birthdays: 'No birthdays added yet',
+    no_anniversaries: 'No anniversaries added yet',
+    retry: 'Retry',
+    cache_warning: t('cache_warning'),
+    connect_error_title: 'Cannot connect to Google Sheets',
+    connect_error_sub: 'Please check that your Apps Script is deployed',
+    past_label: t('past_label'),
+    all_filter: 'All',
+    year_total: (year) => `${year} · Total`,
+    time_suffix: (h, m) => `${String(h).padStart(2,'0')}:${m}`,
+  }
+};
+function t(key, ...args) {
+  const dict = i18n[_lang] || i18n.en;
+  let val = dict[key] ?? i18n.en[key] ?? key;
+  if (typeof val === 'function') return val(...args);
+  if (args.length && typeof val === 'string') val = val.replace('%d', args[0]);
+  return val;
+}
+
+function fmtDate(dateStr, opts) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d)) return dateStr;
+  return d.toLocaleDateString(t('date_locale'), opts || {month:'short', day:'numeric', year:'numeric'});
+}
+
+function fmtTime(timeStr) {
+  if (!timeStr) return '';
+  // extract HH:MM from strings like "18:00 PM", "18.00", "6:00 PM"
+  const clean = timeStr.trim();
+  const match = clean.match(/(\d{1,2})[:\.](\d{2})\s*(AM|PM|am|pm)?/);
+  if (!match) return clean;
+  let h = parseInt(match[1]);
+  const m = match[2];
+  const period = (match[3] || '').toUpperCase();
+  if (period === 'PM' && h < 12) h += 12;
+  if (period === 'AM' && h === 12) h = 0;
+  return (i18n[_lang] || i18n.en).time_suffix(h, m);
+}
+
+function fmtDateRange(dateStart, dateEnd) {
+  if (!dateStart) return '';
+  const s = fmtDate(dateStart);
+  if (!dateEnd || dateEnd === dateStart) return s;
+  return `${s} – ${fmtDate(dateEnd)}`;
+}
+function setLang(lang) {
+  _lang = lang;
+  localStorage.setItem('ppp_lang', lang);
+  // update button styles
+  const thBtn = document.getElementById('lang-th-btn');
+  const enBtn = document.getElementById('lang-en-btn');
+  if (thBtn) { thBtn.style.background = lang==='th'?'#111':'transparent'; thBtn.style.color = lang==='th'?'#fff':'#9ca3af'; }
+  if (enBtn) { enBtn.style.background = lang==='en'?'#111':'transparent'; enBtn.style.color = lang==='en'?'#fff':'#9ca3af'; }
+  // update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+  // update search placeholder
+  const searchEl = document.getElementById('home-search');
+  if (searchEl) searchEl.placeholder = t('search_placeholder');
+  // update filter All buttons
+  document.querySelectorAll('.artist-filter-btn[data-artist="all"]').forEach(b => b.textContent = t('filter_all'));
+  document.querySelectorAll('.cal-filter-btn[data-artist="all"]').forEach(b => b.textContent = t('filter_all'));
+  // update calendar day-of-week headers
+  const dayAbbr = t('day_abbr');
+  document.querySelectorAll('#cal-dow-headers [data-dow]').forEach(el => {
+    el.textContent = dayAbbr[parseInt(el.getAttribute('data-dow'))][0];
+  });
+  // re-render everything
+  scheduleRender();
+  if (document.getElementById('page-calendar')?.classList.contains('active')) renderCalendar();
+}
 let editingEventId  = null;
 let editingEventRowNumber = null;
 let deleteConfirmIds = new Set();
@@ -1085,7 +1558,11 @@ let _renderTimer    = null;
 let _resizeTimer    = null;
 let _lucideTimer    = null;
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbwOqV8FAzHRl4jlNTebwOqzm5Si34J8IEW8UijV2grusYeF7TcilC9Lp5E40d-1cwf5/exec';
+// ═══════════════════════════════════════════════════════════════════
+// ⚙️  วาง Apps Script Web App URL ของคุณตรงนี้
+//    Apps Script → Deploy → Manage deployments → Copy Web App URL
+// ═══════════════════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
 
 // ═══════════════════════════════════════════════════════════════════
 // CACHE LAYER — localStorage with TTL + version control
@@ -1261,6 +1738,7 @@ function processEvents(raw) {
     timezone:    safeText(r.timezone || ''),
     title:       safeText(r.title       || r.event_name    || ''),
     image:       rawStr(r.image         || r.image_url     || ''),
+    heroImage:   rawStr(r.heroImage     || r.hero_image    || ''),
     artists:     safeText(r.artists     || ''),
     country:     safeText(r.country     || ''),
     city:        safeText(r.city        || ''),
@@ -1453,7 +1931,7 @@ function scheduleAutoRefresh() {
     loadEventsFromSheets().catch(() => {});
     loadBirthdaysFromSheets().catch(() => {});
     loadAnniversariesFromSheets().catch(() => {});
-  }, CACHE_TTL_MS); // exactly 60 seconds
+  }, CACHE_TTL_MS); // refresh interval matches cache TTL
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1487,23 +1965,30 @@ function showSkeletons() {
   const noEv = document.getElementById('no-events');
   if (!grid) return;
   if (noEv) noEv.style.display = 'none';
-  let html = '';
-  for (let i = 0; i < SKELETON_COUNT; i++) {
-    html += `<div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07);">
-      <div style="height:180px;background:linear-gradient(90deg,#f3f4f6 25%,#e9ebee 50%,#f3f4f6 75%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;"></div>
-      <div style="padding:0.85rem;">
-        <div style="height:14px;background:#f3f4f6;border-radius:4px;margin-bottom:10px;width:60%;animation:shimmer 1.4s ease-in-out infinite;background-size:200% 100%;"></div>
-        <div style="height:20px;background:#f3f4f6;border-radius:4px;margin-bottom:8px;animation:shimmer 1.4s ease-in-out infinite;background-size:200% 100%;"></div>
-        <div style="height:12px;background:#f3f4f6;border-radius:4px;width:80%;animation:shimmer 1.4s ease-in-out infinite;background-size:200% 100%;"></div>
+  const skel = (w1,w2) => `
+    <div style="background:#fff;border-radius:16px;overflow:hidden;border:1.5px solid #f0f0f0;">
+      <div style="height:190px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;"></div>
+      <div style="padding:0.9rem;">
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <div style="height:10px;width:40px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
+          <div style="height:10px;width:30px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
+        </div>
+        <div style="height:16px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:8px;width:${w1};"></div>
+        <div style="height:13px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:6px;width:${w2};"></div>
+        <div style="height:11px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;width:55%;"></div>
       </div>
     </div>`;
+  const widths = [['85%','70%'],['75%','60%'],['90%','75%'],['80%','65%'],['70%','80%'],['88%','72%']];
+  let html = '';
+  for (let i = 0; i < SKELETON_COUNT; i++) {
+    const [w1,w2] = widths[i % widths.length];
+    html += skel(w1,w2);
   }
-  // Wrap in a cards-grid for layout
   grid.innerHTML = '';
   grid.style.display = 'block';
   const wrap = document.createElement('div');
   wrap.className = 'cards-grid';
-  wrap.style.cssText = 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;';
+  wrap.style.cssText = 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;align-items:stretch;';
   wrap.innerHTML = html;
   grid.appendChild(wrap);
 }
@@ -1534,7 +2019,7 @@ function showStaleWarning() {
   const warn = document.createElement('div');
   warn.id = 'stale-warn';
   warn.style.cssText = 'background:#fef3c7;border-radius:8px;padding:8px 14px;font-size:0.78rem;color:#92400e;margin-bottom:1rem;display:flex;align-items:center;gap:8px;';
-  warn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>แสดงข้อมูลจาก cache — กำลังลองโหลดใหม่...`;
+  warn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Showing cached data — retrying...`;
   grid.insertBefore(warn, grid.firstChild);
   setTimeout(() => { if (warn.parentNode) warn.parentNode.removeChild(warn); }, 8000);
 }
@@ -1581,7 +2066,7 @@ function getArtistLabel(artists) {
 }
 function getFullDateDisplay(dateStr) {
   if (!dateStr) return '';
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString(t('date_locale'), { month: 'long', day: 'numeric', year: 'numeric' });
 }
 function escHtml(str) {
   if (!str) return '';
@@ -1590,20 +2075,92 @@ function escHtml(str) {
 
 function renderHome() {
   renderBirthdayBanners();
+  const q = homeSearch.trim().toLowerCase();
   const events = allEvents.filter(ev => {
     if (!ev.title || !ev.title.trim()) return false;
     if (isEventPast(ev)) return false;
-    if (homeFilter === 'all') return true;
-    if (!ev.artists) return false;
-    return ev.artists.split(',').map(a => a.trim()).includes(homeFilter);
+    if (homeFilter !== 'all') {
+      if (!ev.artists) return false;
+      if (!ev.artists.split(',').map(a => a.trim()).includes(homeFilter)) return false;
+    }
+    if (q) {
+      const haystack = [ev.title, ev.location, ev.city, ev.country, ev.artists, ev.type, ev.tv].join(' ').toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
   });
+
+  // ── Hero background image from first event ──
+  const heroImg = document.getElementById('home-hero-img');
+  if (heroImg) {
+    const firstWithImg = events.find(ev => ev.image);
+    if (firstWithImg) {
+      heroImg.style.backgroundImage = `url('${firstWithImg.image}')`;
+      heroImg.style.display = 'block';
+    } else {
+      heroImg.style.display = 'none';
+    }
+  }
 
   const grid = document.getElementById('events-grid');
   const noEv = document.getElementById('no-events');
   const count = document.getElementById('events-count');
   if (!grid) return;
 
-  if (count) count.textContent = events.length + ' event' + (events.length !== 1 ? 's' : '');
+  if (count) count.textContent = t('events_count', events.length);
+
+  // ── Bento grid update ──
+  const upAll = allEvents.filter(ev => ev.title && !isEventPast(ev));
+  const cPond     = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Pond')).length;
+  const cPhuwin   = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Phuwin')).length;
+  const cPermpoon = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Permpoon')).length;
+  const el = id => document.getElementById(id);
+  if (el('bento-count-pond'))     el('bento-count-pond').textContent     = cPond;
+  if (el('bento-count-phuwin'))   el('bento-count-phuwin').textContent   = cPhuwin;
+  if (el('bento-count-permpoon')) el('bento-count-permpoon').textContent = cPermpoon;
+  if (el('bento-count-total'))    el('bento-count-total').textContent    = upAll.length;
+  const next  = upAll[0];
+  const next2 = upAll[1] || null;
+  if (next && el('bento-next-title')) {
+    _nextEventId = next.__backendId || null;
+    const days = daysUntilEvent(next.dateStart);
+    const color = getArtistColor(next.artists);
+    const dayLabel = days === 0 ? t('next_today') : days === 1 ? t('next_1day') : days !== null && days <= 30 ? t('next_days', days) : t('next_event');
+    el('bento-next-label').textContent = dayLabel;
+    el('bento-next-label').style.color = color;
+    el('bento-next-title').textContent = next.title;
+    const meta = [next.dateStart ? fmtDate(next.dateStart) : '', next.startTime ? fmtTime(next.startTime) : '', next.location].filter(Boolean).join(' · ');
+    el('bento-next-meta').textContent = meta;
+    if (el('bento-next-bg')) {
+      const heroSrc = next.heroImage || next.image;
+      if (heroSrc) {
+        el('bento-next-bg').style.backgroundImage = `url('${heroSrc}')`;
+      }
+    }
+    startCountdown(next.dateStart, next.startTime);
+    if (el('bento-next')) el('bento-next').dataset.id = next.__backendId;
+  }
+  // Event 2
+  if (next2 && el('bento-next2-title')) {
+    const days2 = daysUntilEvent(next2.dateStart);
+    const color2 = getArtistColor(next2.artists);
+    const dayLabel2 = days2 === 0 ? t('next_today') : days2 === 1 ? t('next_1day') : days2 !== null && days2 <= 30 ? t('next_days', days2) : t('next_event');
+    const meta2 = [next2.dateStart ? fmtDate(next2.dateStart) : '', next2.startTime ? fmtTime(next2.startTime) : '', next2.location].filter(Boolean).join(' · ');
+    el('bento-next2-label').textContent = dayLabel2;
+    el('bento-next2-label').style.color = color2;
+    el('bento-next2-label').style.display = 'block';
+    el('bento-next2-title').textContent = next2.title;
+    el('bento-next2-title').style.display = 'block';
+    el('bento-next2-meta').textContent = meta2;
+    el('bento-next2-meta').style.display = 'block';
+    const hero2Src = next2.heroImage || next2.image;
+    if (hero2Src && el('bento-next2-bg')) {
+      el('bento-next2-bg').style.backgroundImage = `url('${hero2Src}')`;
+    }
+    if (el('bento-ev2')) el('bento-ev2').dataset.id = next2.__backendId;
+  } else if (el('bento-ev2')) {
+    el('bento-ev2').style.display = 'none';
+  }
 
   if (events.length === 0 && !apiLoaded) { showSkeletons(); return; }
   if (events.length === 0) {
@@ -1619,32 +2176,120 @@ function renderHome() {
     if (!ev.dateStart) { key = 'zzz-no-date'; label = 'Date TBA'; }
     else {
       key = ev.dateStart.slice(0, 7);
-      label = new Date(ev.dateStart + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      label = new Date(ev.dateStart + 'T00:00:00').toLocaleDateString(t('date_locale'), { month: 'long', year: 'numeric' });
     }
     if (!dateMap.has(key)) dateMap.set(key, { label, events: [] });
     dateMap.get(key).events.push(ev);
   });
 
+  // Timeline mode — bypass per-month loop, use buildTimelineView directly
+  if (_viewMode === 'timeline') {
+    grid.style.display = 'flex';
+    grid.style.flexDirection = 'column';
+    grid.innerHTML = '';
+    grid.appendChild(buildTimelineView(events));
+    debounceLucide();
+    return;
+  }
+
   // Build DOM via fragment for minimal reflow
   const frag = document.createDocumentFragment();
+  const onlyOneMonth = dateMap.size === 1;
   dateMap.forEach(({ label, events: group }) => {
     const gw = document.createElement('div');
     gw.className = 'month-group';
-    const hdr = document.createElement('div');
-    hdr.className = 'month-group-header';
-    hdr.innerHTML = `<span class="month-group-header-label">${label}</span>
-      <span class="month-group-header-count">${group.length} event${group.length !== 1 ? 's' : ''}</span>
-      <span class="month-group-header-line"></span>`;
-    gw.appendChild(hdr);
+    if (!onlyOneMonth) {
+      const hdr = document.createElement('div');
+      hdr.className = 'month-group-header';
+      hdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${label}</span><span class="month-group-header-count">${group.length} event${group.length !== 1 ? 's' : ''}</span></div><span class="month-group-header-line"></span>`;
+      gw.appendChild(hdr);
+    }
 
-    const cg = document.createElement('div');
-    cg.className = 'cards-grid';
-    cg.style.cssText = 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;align-items:stretch;';
-    group.forEach(ev => {
-      const card = createCard(ev);
-      if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) cg.appendChild(card);
-    });
-    gw.appendChild(cg);
+    if (_viewMode === 'list') {
+      // LIST VIEW
+      const listWrap = document.createElement('div');
+      listWrap.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+      group.forEach(ev => {
+        const color = getArtistColor(ev.artists);
+        const item = document.createElement('div');
+        item.className = 'list-card';
+        item.style.borderLeftColor = color;
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-label', ev.title);
+        item.onclick = () => openDetailModal(ev.__backendId);
+        item.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetailModal(ev.__backendId); } };
+        const days = daysUntilEvent(ev.dateStart);
+        const isNextEv = _nextEventId && ev.__backendId === _nextEventId;
+        const countdownBadge = (!isNextEv && days !== null && days >= 0 && days <= 7)
+          ? `<div style="background:${color};color:#fff;font-size:0.6rem;font-weight:800;padding:2px 8px;border-radius:99px;flex-shrink:0;letter-spacing:0.04em;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</div>` : '';
+        const dateStr = ev.dateStart ? fmtDate(ev.dateStart) : '';
+        const timeStr = ev.startTime ? fmtTime(ev.startTime) : '';
+        const artistLabel = ev.artists ? ev.artists.split(',').map(a=>a.trim()).join(' · ') : '';
+        item.innerHTML = `
+          ${ev.image ? `<img src="${escHtml(ev.image)}" class="list-card-img" loading="lazy" onerror="this.style.display='none'">` : `<div style="width:56px;height:56px;border-radius:10px;background:${color}18;border:1.5px solid ${color}44;flex-shrink:0;"></div>`}
+          <div class="list-card-body">
+            <div class="list-card-title">${escHtml(ev.title)}</div>
+            <div class="list-card-meta">
+              ${dateStr ? `<span>${dateStr}</span>` : ''}
+              ${timeStr ? `<span>${timeStr}</span>` : ''}
+              ${artistLabel ? `<span style="color:${color};font-weight:600;">${escHtml(artistLabel)}</span>` : ''}
+            </div>
+          </div>
+          ${countdownBadge}
+          <svg width="14" height="14" fill="none" stroke="#d1d5db" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>`;
+        listWrap.appendChild(item);
+      });
+      gw.appendChild(listWrap);
+    } else if (_viewMode === 'timeline') {
+      // TIMELINE VIEW
+      const days_abbr = t('day_abbr');
+      const tlWrap = document.createElement('div');
+      tlWrap.style.cssText = 'display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px;';
+      // vertical line
+      const line = document.createElement('div');
+      line.style.cssText = 'position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px;';
+      tlWrap.appendChild(line);
+      group.forEach((ev, idx) => {
+        const color = getArtistColor(ev.artists);
+        const artistLabel = ev.artists ? ev.artists.split(',').map(a=>a.trim()).join(' · ') : '';
+        const days = daysUntilEvent(ev.dateStart);
+        const countdownBadge = (days !== null && days >= 0 && days <= 7)
+          ? `<span style="background:${color};color:#fff;font-size:0.58rem;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:0.04em;margin-left:auto;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
+        const row = document.createElement('div');
+        row.style.cssText = `display:flex;gap:14px;align-items:flex-start;padding-bottom:${idx === group.length-1 ? '0' : '14px'};`;
+        // dot / date circle
+        let dateCircle = `<div style="width:36px;height:36px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:absolute;left:9px;"><span style="font-size:0.72rem;font-weight:800;color:#6b7280;">?</span></div>`;
+        if (ev.dateStart) {
+          const d = new Date(ev.dateStart+'T00:00:00');
+          dateCircle = `<div style="position:absolute;left:9px;text-align:center;"><div style="font-size:0.5rem;font-weight:700;color:#9ca3af;line-height:1;margin-bottom:1px;">${days_abbr[d.getDay()]}</div><div style="width:36px;height:36px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;"><span style="font-size:0.8rem;font-weight:800;color:#fff;">${d.getDate()}</span></div></div>`;
+        }
+        row.innerHTML = `
+          ${dateCircle}
+          <div style="flex:1;background:#f9fafb;border-radius:12px;padding:10px 12px;border-left:3px solid ${color};cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;">
+              <span style="font-size:0.65rem;font-weight:700;color:${color};">${escHtml(artistLabel)}</span>
+              ${countdownBadge}
+            </div>
+            <div style="font-size:0.82rem;font-weight:700;color:#111;line-height:1.3;margin-bottom:4px;">${escHtml(ev.title)}</div>
+            <div style="font-size:0.65rem;color:#9ca3af;">
+              ${ev.startTime ? fmtTime(ev.startTime)+' · ' : ''}${ev.location ? escHtml(ev.location) : ''}
+            </div>
+          </div>`;
+        tlWrap.appendChild(row);
+      });
+      gw.appendChild(tlWrap);
+    } else {
+      // GRID VIEW
+      const cg = document.createElement('div');
+      cg.className = 'cards-grid';
+      cg.style.cssText = 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;align-items:stretch;';
+      group.forEach(ev => {
+        const card = createCard(ev);
+        if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) cg.appendChild(card);
+      });
+      gw.appendChild(cg);
+    }
     frag.appendChild(gw);
   });
 
@@ -1653,67 +2298,110 @@ function renderHome() {
   grid.innerHTML = '';
   grid.appendChild(frag);
 
-  // ── Past events section ───────────────────────────────────────
-  const pastEvents = allEvents.filter(ev => {
+  debounceLucide();
+}
+
+function renderPastEvents(grid) {
+  const pastFilter = homeFilter === 'all' ? null : homeFilter;
+  const q = homeSearch.trim().toLowerCase();
+  let pastEvs = allEvents.filter(ev => {
     if (!ev.title || !ev.title.trim()) return false;
     if (!isEventPast(ev)) return false;
-    if (homeFilter === 'all') return true;
-    if (!ev.artists) return false;
-    return ev.artists.split(',').map(a => a.trim()).includes(homeFilter);
-  }).slice(0, 10); // show max 10 past events
+    if (pastFilter) {
+      if (!ev.artists) return false;
+      if (!ev.artists.split(',').map(a=>a.trim()).includes(pastFilter)) return false;
+    }
+    if (q) {
+      const hay = [ev.title, ev.location, ev.city, ev.artists].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  pastEvs.sort((a,b) => (b.dateStart||'').localeCompare(a.dateStart||''));
+  if (pastEvs.length === 0) return;
 
-  if (pastEvents.length > 0) {
-    const pastWrap = document.createElement('div');
-    pastWrap.style.cssText = 'margin-top:2rem;';
+  // build list of months that have events
+  const monthSet = new Map();
+  pastEvs.forEach(ev => {
+    if (!ev.dateStart) return;
+    const key = ev.dateStart.slice(0,7);
+    if (!monthSet.has(key)) {
+      const d = new Date(key+'-01');
+      monthSet.set(key, d.toLocaleDateString(t('date_locale'),{month:'short',year:'numeric'}));
+    }
+  });
+  const months = Array.from(monthSet.entries()).sort((a,b)=>b[0].localeCompare(a[0]));
+  const selectedMonth = window._pastMonthFilter || 'all';
 
-    const pastHdr = document.createElement('div');
-    pastHdr.className = 'month-group-header';
-    pastHdr.style.marginBottom = '0.75rem';
-    pastHdr.innerHTML = `
-      <span class="month-group-header-label" style="color:#9ca3af;">Past Events</span>
-      <span class="month-group-header-count">${pastEvents.length}</span>
-      <span class="month-group-header-line"></span>`;
-    pastWrap.appendChild(pastHdr);
+  let filtered = selectedMonth === 'all' ? pastEvs : pastEvs.filter(ev => ev.dateStart && ev.dateStart.startsWith(selectedMonth));
 
-    const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    const pastList = document.createElement('div');
-    pastList.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+  const section = document.createElement('div');
+  section.style.cssText = 'margin-bottom:2rem;';
+  const isOpen = (window._pastEventsOpen === true);
 
-    pastEvents.forEach(ev => {
-      const color = getArtistColor(ev.artists);
-      const item = document.createElement('div');
-      item.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:#fff;border:0.5px solid #f0f0f0;cursor:pointer;opacity:0.72;transition:opacity 0.15s;';
-      item.onmouseenter = () => { item.style.opacity='0.95'; };
-      item.onmouseleave = () => { item.style.opacity='0.72'; };
-      item.onclick = () => openDetailModal(ev.__backendId);
+  const monthOptions = `<option value="all">${t('all_filter')} (${pastEvs.length})</option>`
+    + months.map(([k,label]) => {
+        const cnt = pastEvs.filter(ev => ev.dateStart && ev.dateStart.startsWith(k)).length;
+        return `<option value="${k}" ${selectedMonth===k?'selected':''}>${label} (${cnt})</option>`;
+      }).join('');
 
-      let dateCol = '<div style="width:48px;flex-shrink:0;"></div>';
-      if (ev.dateStart) {
-        const d = new Date(ev.dateStart + 'T00:00:00');
-        dateCol = `<div style="flex-shrink:0;width:48px;text-align:center;">
-          <div style="font-size:0.62rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;text-transform:uppercase;">${days[d.getDay()]}</div>
-          <div style="font-size:1.1rem;font-weight:700;color:#9ca3af;line-height:1.1;">${d.getDate()}</div>
-        </div>`;
-      }
-      const artistLabel = ev.artists ? ev.artists.split(',').map(a=>a.trim()).join(' · ') : '';
-      const loc = [ev.location, ev.city, ev.country].filter(Boolean).join(', ');
+  section.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:${isOpen?'0.75rem':'0'};">
+      <div style="display:flex;gap:4px;"><div style="width:7px;height:7px;border-radius:50%;background:#d1d5db;"></div><div style="width:7px;height:7px;border-radius:50%;background:#d1d5db;"></div><div style="width:7px;height:7px;border-radius:50%;background:#d1d5db;"></div></div>
+      <button onclick="togglePastEvents()" id="past-toggle-btn" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0;">
+        <span style="font-size:0.9rem;font-weight:700;color:#6b7280;">Past Events</span>
+        <span style="font-size:0.72rem;font-weight:700;color:#9ca3af;background:#f3f4f6;border-radius:99px;padding:2px 10px;">${pastEvs.length} event${pastEvs.length!==1?'s':''}</span>
+        <svg id="past-toggle-icon" width="14" height="14" fill="none" stroke="#9ca3af" stroke-width="2.5" viewBox="0 0 24 24" style="transition:transform 0.2s;transform:rotate(${isOpen?'180':'0'}deg)"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div style="flex:1;height:1px;background:#f0f0f0;border-radius:99px;"></div>
+      <select id="past-month-select" onchange="onPastMonthChange(this.value)" style="font-size:0.75rem;font-weight:600;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:4px 10px;cursor:pointer;outline:none;display:${isOpen?'block':'none'};">
+        ${monthOptions}
+      </select>
+    </div>
+    <div id="past-events-body" style="display:${isOpen?'block':'none'};">
+      <div id="past-events-grid" class="cards-grid" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;align-items:stretch;filter:grayscale(30%);opacity:0.75;"></div>
+    </div>`;
+  grid.appendChild(section);
 
-      item.innerHTML = `
-        ${dateCol}
-        <div style="width:3px;border-radius:99px;align-self:stretch;flex-shrink:0;background:#d1d5db;"></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:0.82rem;font-weight:700;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div>
-          <div style="font-size:0.7rem;color:#9ca3af;margin-top:2px;">${escHtml(artistLabel)}${loc?' · '+escHtml(loc):''}</div>
-        </div>
-        <span style="font-size:0.6rem;font-weight:600;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;flex-shrink:0;">Past</span>`;
-      pastList.appendChild(item);
+  if (isOpen) {
+    const pg = section.querySelector('#past-events-grid');
+    filtered.forEach(ev => {
+      const card = createCard(ev);
+      if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) pg.appendChild(card);
     });
-
-    pastWrap.appendChild(pastList);
-    grid.appendChild(pastWrap);
   }
+  window._pastEventsOpen = isOpen;
+  window._pastEvsList    = pastEvs;
+  window._pastFiltered   = filtered;
+}
 
-  debounceLucide();
+function onPastMonthChange(val) {
+  window._pastMonthFilter = val;
+  scheduleRender();
+}
+
+function togglePastEvents() {
+  window._pastEventsOpen = !window._pastEventsOpen;
+  const body   = document.getElementById('past-events-body');
+  const icon   = document.getElementById('past-toggle-icon');
+  const btn    = document.getElementById('past-toggle-btn');
+  const select = document.getElementById('past-month-select');
+  const wrap   = btn ? btn.closest('div') : null;
+  if (!body) return;
+  body.style.display   = window._pastEventsOpen ? 'block' : 'none';
+  if (icon)   icon.style.transform   = window._pastEventsOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+  if (wrap)   wrap.style.marginBottom = window._pastEventsOpen ? '0.75rem' : '0';
+  if (select) select.style.display   = window._pastEventsOpen ? 'block' : 'none';
+  if (window._pastEventsOpen) {
+    const pg = document.getElementById('past-events-grid');
+    if (pg && pg.children.length === 0 && window._pastFiltered) {
+      window._pastFiltered.forEach(ev => {
+        const card = createCard(ev);
+        if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) pg.appendChild(card);
+      });
+      debounceLucide();
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1722,11 +2410,11 @@ function renderHome() {
 function getLiveIcon(url) {
   if (!url) return null;
   const u = url.toLowerCase();
-  if (u.includes('youtube.com') || u.includes('youtu.be')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
-  if (u.includes('facebook.com') || u.includes('fb.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="white" d="M16.671 15.469l.525-3.424h-3.284v-2.22c0-.937.459-1.849 1.932-1.849h1.495V5.023S15.918 4.8 14.6 4.8c-2.703 0-4.471 1.638-4.471 4.603v2.641H7.227v3.424h2.902V23.9a12.1 12.1 0 003.783 0v-8.431h2.759z"/></svg>`;
-  if (u.includes('tiktok.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M17.59 8.69a4.83 4.83 0 01-3.77-4.25V4h-3.45v11.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05A6.34 6.34 0 001.15 15.3a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V10.7a8.18 8.18 0 004.78 1.52V8.76a4.85 4.85 0 01-1.01-.07z"/></svg>`;
-  if (u.includes('instagram.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><defs><radialGradient id="ig-live-g" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect width="24" height="24" rx="6" fill="url(#ig-live-g)"/><path fill="white" d="M12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 7.4a2.9 2.9 0 110-5.8 2.9 2.9 0 010 5.8zm4.68-7.57a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1z"/></svg>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="11" fill="#EF4444"/><circle cx="12" cy="12" r="4" fill="white"/></svg>`;
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+  if (u.includes('facebook.com') || u.includes('fb.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="white" d="M16.671 15.469l.525-3.424h-3.284v-2.22c0-.937.459-1.849 1.932-1.849h1.495V5.023S15.918 4.8 14.6 4.8c-2.703 0-4.471 1.638-4.471 4.603v2.641H7.227v3.424h2.902V23.9a12.1 12.1 0 003.783 0v-8.431h2.759z"/></svg>`;
+  if (u.includes('tiktok.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M17.59 8.69a4.83 4.83 0 01-3.77-4.25V4h-3.45v11.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05A6.34 6.34 0 001.15 15.3a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V10.7a8.18 8.18 0 004.78 1.52V8.76a4.85 4.85 0 01-1.01-.07z"/></svg>`;
+  if (u.includes('instagram.com')) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="ig-live-g" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect width="24" height="24" rx="6" fill="url(#ig-live-g)"/><path fill="white" d="M12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zm0 7.4a2.9 2.9 0 110-5.8 2.9 2.9 0 010 5.8zm4.68-7.57a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1z"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="11" fill="#EF4444"/><circle cx="12" cy="12" r="4" fill="white"/></svg>`;
 }
 function getLiveLabelFromUrl(url) {
   if (!url) return 'Live Stream';
@@ -1738,22 +2426,22 @@ function getLiveLabelFromUrl(url) {
   return 'Live Stream';
 }
 const SOCIAL_ICONS = {
-  youtube:   `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
-  instagram: `<svg viewBox="0 0 24 24" width="22" height="22"><defs><radialGradient id="ig2" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><path fill="url(#ig2)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`,
-  facebook:  `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
-  x:         `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.629L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
-  tiktok:    `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>`,
-  whatsapp:  `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`,
-  shopee:    `<svg viewBox="0 0 24 24" width="22" height="22"><rect width="24" height="24" rx="6" fill="#EE4D2D"/><path fill="white" d="M18.332 9.273h-1.457a4.875 4.875 0 10-9.75 0H5.668a1.667 1.667 0 00-1.66 1.82l.78 8.874A1.667 1.667 0 006.45 21.5h11.1a1.667 1.667 0 001.662-1.533l.78-8.874a1.667 1.667 0 00-1.66-1.82zM12 5.7a2.875 2.875 0 012.875 2.873v.3H9.125v-.3A2.875 2.875 0 0112 5.7zm2.354 7.97a.4.4 0 01-.566 0l-1.288-1.288v4.018a.4.4 0 01-.8 0v-4.018l-1.288 1.288a.4.4 0 01-.566-.566l2-2a.4.4 0 01.566 0l2 2a.4.4 0 010 .566z"/></svg>`,
-  website:   `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B7280" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-  download:  `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B7280" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+  youtube:   `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+  instagram: `<svg viewBox="0 0 24 24" width="16" height="16"><defs><radialGradient id="ig2" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><path fill="url(#ig2)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`,
+  facebook:  `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
+  x:         `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.629L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+  tiktok:    `<svg viewBox="0 0 24 24" width="16" height="16"><rect width="24" height="24" rx="6" fill="#010101"/><path fill="white" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.31 6.31 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>`,
+  whatsapp:  `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`,
+  shopee:    `<svg viewBox="0 0 24 24" width="16" height="16"><rect width="24" height="24" rx="6" fill="#EE4D2D"/><path fill="white" d="M18.332 9.273h-1.457a4.875 4.875 0 10-9.75 0H5.668a1.667 1.667 0 00-1.66 1.82l.78 8.874A1.667 1.667 0 006.45 21.5h11.1a1.667 1.667 0 001.662-1.533l.78-8.874a1.667 1.667 0 00-1.66-1.82zM12 5.7a2.875 2.875 0 012.875 2.873v.3H9.125v-.3A2.875 2.875 0 0112 5.7zm2.354 7.97a.4.4 0 01-.566 0l-1.288-1.288v4.018a.4.4 0 01-.8 0v-4.018l-1.288 1.288a.4.4 0 01-.566-.566l2-2a.4.4 0 01.566 0l2 2a.4.4 0 010 .566z"/></svg>`,
+  website:   `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6B7280" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  download:  `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6B7280" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
 };
 
 function isValidUrl(v) { return v && typeof v === 'string' && /^https?:\/\/.+/.test(v.trim()); }
 function makeSocialBtn(href, iconSvg, label) {
   if (!isValidUrl(href)) return '';
   const url = href.trim().replace(/'/g, "\\'");
-  return `<button type="button" onclick="event.stopPropagation();window.open('${url}','_blank','noopener,noreferrer')" style="display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:none;cursor:pointer;flex-shrink:0;overflow:hidden;" title="${escHtml(label)}">${iconSvg}</button>`;
+  return `<button type="button" onclick="event.stopPropagation();window.open('${url}','_blank','noopener,noreferrer')" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:none;cursor:pointer;flex-shrink:0;overflow:hidden;" title="${escHtml(label)}">${iconSvg}</button>`;
 }
 function buildSocialIcons(ev) {
   let h = '';
@@ -1831,15 +2519,19 @@ function isEventToday(ev) {
   const evDate = new Date(ev.dateStart + 'T00:00:00');
   return evDate.getTime() === today.getTime();
 }
+let _nextEventId = null;
 function buildCountdownImgBadge(ev) {
   if (!ev.dateStart) return '';
+  if (_nextEventId && ev.__backendId === _nextEventId) return '';
   const days = daysUntilEvent(ev.dateStart);
   if (days === null) return '';
+  const color = getArtistColor(ev.artists);
   if (days === 0) {
-    return `<div style="position:absolute;bottom:10px;left:10px;background:#ef4444;color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;box-shadow:0 2px 8px rgba(0,0,0,0.25);">TODAY</div>`;
+    return `<div style="position:absolute;bottom:10px;left:10px;background:${color};color:#fff;font-size:0.62rem;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:0.04em;">TODAY</div>`;
   }
   if (days > 0 && days <= 7) {
-    return `<div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.52);color:#fff;font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:99px;">in ${days} day${days !== 1 ? 's' : ''}</div>`;
+    const label = days === 1 ? '1 DAY' : `${days} DAYS`;
+    return `<div style="position:absolute;bottom:10px;left:10px;background:${color};color:#fff;font-size:0.62rem;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:0.04em;">${label}</div>`;
   }
   return '';
 }
@@ -1859,31 +2551,52 @@ function createCard(ev) {
   const card = document.createElement('div');
   card.className = 'event-card';
   card.dataset.eventId = ev.__backendId;
+  card.setAttribute('role', 'button');
+  card.setAttribute('tabindex', '0');
+  card.setAttribute('aria-label', ev.title);
   card.onclick = () => openDetailModal(ev.__backendId);
+  card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetailModal(ev.__backendId); } };
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div style="position:relative;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div style="position:relative;overflow:hidden;"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
 
-  const artistBadge = ev.artists
-    ? `<div style="margin-bottom:7px;"><span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:7px;background:${color}18;color:${color};border:1px solid ${color}44;">${getArtistLabel(ev.artists)}</span></div>`
-    : '';
+  const artistColors = { Pond:'#f97316', Phuwin:'#6b7280', Permpoon:'#22c55e' };
+  const artistTextColors = { Pond:'#ea580c', Phuwin:'#4b5563', Permpoon:'#16a34a' };
+  let artistBadge = '';
+  if (ev.artists) {
+    const artistArr = ev.artists.split(',').map(a => a.trim()).filter(Boolean);
+    const parts = artistArr.map((a, i) => {
+      const dot = artistColors[a] || color;
+      const txt = artistTextColors[a] || color;
+      const divider = i > 0 ? `<span style="width:1px;height:10px;background:#e5e7eb;display:inline-block;flex-shrink:0;"></span>` : '';
+      return `${divider}<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;color:${txt};"><span style="width:6px;height:6px;border-radius:50%;background:${dot};display:inline-block;flex-shrink:0;"></span>${a}</span>`;
+    }).join('');
+    artistBadge = `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px;">${parts}</div>`;
+  }
 
   let dtRow = '';
   if (ev.dateStart) {
-    const d = new Date(ev.dateStart + 'T00:00:00');
-    const dateLabel = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
-      + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + new Date(ev.dateEnd+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '');
-    const timeHtml = ev.startTime
-      ? `<span style="width:1px;height:13px;background:#e5e7eb;margin:0 8px;flex-shrink:0;display:inline-block;"></span><span style="display:flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:700;color:#111;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(ev.startTime)}${ev.endTime?' – '+escHtml(ev.endTime):''}</span>`
-      : '';
-    dtRow = `<div style="display:flex;align-items:center;margin-bottom:5px;"><span style="display:flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:700;color:${color};"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escHtml(dateLabel)}</span>${timeHtml}</div>`;
+    const dateLabel = fmtDateRange(ev.dateStart, ev.dateEnd);
+    let timeHtml = '';
+    if (ev.startTime) {
+      const allTimes = ev.startTime.split('/').map(s => fmtTime(s.trim())).filter(Boolean).join(' / ');
+      const timeText = allTimes + (ev.endTime ? ' – ' + fmtTime(ev.endTime) : '');
+      const timeFontSize = timeText.length > 20 ? '0.65rem' : '0.78rem';
+      const clockSvg = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+      const divider = `<span style="width:1px;height:12px;background:#e5e7eb;margin:0 6px;flex-shrink:0;display:inline-block;"></span>`;
+      timeHtml = `${divider}<span style="display:flex;align-items:center;gap:3px;font-size:${timeFontSize};font-weight:700;color:#111;white-space:nowrap;overflow:hidden;flex-shrink:1;min-width:0;">${clockSvg}<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(timeText)}</span></span>`;
+    }
+    dtRow = `<div style="display:flex;align-items:center;margin-bottom:5px;min-width:0;overflow:hidden;"><span style="display:flex;align-items:center;gap:4px;font-size:0.78rem;font-weight:700;color:${color};white-space:nowrap;flex-shrink:0;"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escHtml(dateLabel)}</span>${timeHtml}</div>`;
   }
 
+  // Rule 3: location — truncate long text, auto font size, never overflow
   const lp = [ev.location, ev.city, ev.country].filter(x => x && x.trim() && !/^GMT[+-]?\d*/i.test(x.trim()) && !hasHtml(x));
+  const locText = lp.join(', ');
+  const locFontSize = locText.length > 40 ? '0.60rem' : locText.length > 25 ? '0.65rem' : '0.72rem';
   const locRow = lp.length
-    ? `<div style="margin-bottom:5px;"><span style="display:inline-flex;align-items:center;gap:5px;font-size:0.72rem;font-weight:600;color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;padding:3px 9px;border-radius:6px;"><svg width="10" height="10" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${lp.join(', ')}</span></div>`
+    ? `<div style="margin-bottom:5px;min-width:0;overflow:hidden;"><span style="display:flex;align-items:center;gap:5px;font-size:${locFontSize};font-weight:600;color:#374151;background:#f3f4f6;border:1px solid #e5e7eb;padding:3px 9px;border-radius:6px;overflow:hidden;min-width:0;"><svg width="10" height="10" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(locText)}</span></span></div>`
     : '';
 
   const typePill = buildTypePill(ev.type, 'sm');
@@ -1899,10 +2612,16 @@ function createCard(ev) {
     : '';
 
   const socialHtml = buildSocialIcons(ev);
-  card.innerHTML = `${imgHtml}
-    <div style="padding:0.85rem;display:flex;flex-direction:column;flex:1;">
+  const shareBtn = `<button onclick="event.stopPropagation();shareEvent('${escHtml(ev.title)}','${ev.__backendId}')" style="position:absolute;top:8px;left:8px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.12);z-index:4;" title="Share"><svg width="13" height="13" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>`;
+  const hoverOverlay = `<div class="card-hover-overlay"><div class="oh-title">${escHtml(ev.title)}</div>${ev.description && !hasHtml(ev.description) ? `<div class="oh-desc">${escHtml(ev.description)}</div>` : ''}<div style="margin-top:10px;display:flex;gap:6px;align-items:center;">${ev.dateStart ? `<button onclick="event.stopPropagation();quickAddCalendar('${ev.__backendId}')" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:6px;color:#fff;font-size:0.62rem;font-weight:700;padding:4px 9px;cursor:pointer;letter-spacing:0.03em;"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Add to Calendar</button>` : ''}<div class="oh-cta" style="margin-top:0;">View details →</div></div></div>`;
+  const imgSection = ev.image
+    ? `<div style="position:relative;overflow:hidden;">${shareBtn}<img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
+  card.style.flexDirection = '';
+  card.innerHTML = `${imgSection}${hoverOverlay}
+    <div style="padding:0.85rem;display:flex;flex-direction:column;flex:1;min-height:0;">
       ${artistBadge}
-      <h3 style="font-weight:700;font-size:0.9rem;letter-spacing:-0.01em;margin-bottom:6px;line-height:1.35;">${escHtml(ev.title)}</h3>
+      <h3 style="font-weight:700;font-size:0.88rem;letter-spacing:-0.01em;margin-bottom:6px;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.title)}</h3>
       ${dtRow}${locRow}${pillsRow}${noteRow}${descRow}
       ${socialHtml ? `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:5px;" onclick="event.stopPropagation()">${socialHtml}</div>` : ''}
       <div style="flex:1;"></div>
@@ -1937,9 +2656,9 @@ function openDetailModal(id) {
 
   if (ev.dateStart) {
     const d = new Date(ev.dateStart + 'T00:00:00');
-    const dateLabel = getFullDateDisplay(ev.dateStart) + (ev.dateEnd && ev.dateEnd !== ev.dateStart ? ' – ' + getFullDateDisplay(ev.dateEnd) : '');
+    const dateLabel = fmtDateRange(ev.dateStart, ev.dateEnd);
     const timeHtml = ev.startTime
-      ? `<span style="width:1px;height:14px;background:#e5e7eb;margin:0 10px;flex-shrink:0;display:inline-block;"></span><span style="display:flex;align-items:center;gap:5px;font-size:0.88rem;font-weight:700;color:#111;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(ev.startTime)}${ev.endTime?' – '+escHtml(ev.endTime):''}</span>`
+      ? `<span style="width:1px;height:14px;background:#e5e7eb;margin:0 10px;flex-shrink:0;display:inline-block;"></span><span style="display:flex;align-items:center;gap:5px;font-size:0.88rem;font-weight:700;color:#111;"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${escHtml(fmtTime(ev.startTime))}${ev.endTime?' – '+escHtml(fmtTime(ev.endTime)):''}</span>`
       : '';
     metaRows.push(`<div style="display:flex;align-items:center;margin-bottom:2px;"><span style="display:flex;align-items:center;gap:5px;font-size:0.88rem;font-weight:700;color:${color};"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escHtml(dateLabel)}</span>${timeHtml}</div>`);
   }
@@ -1959,6 +2678,22 @@ function openDetailModal(id) {
   const linksHtml = buildSocialIcons(ev);
   if (linksHtml) { linksWrap.style.display = 'block'; document.getElementById('detail-links').innerHTML = linksHtml; }
   else linksWrap.style.display = 'none';
+
+  // Add to Calendar
+  const calWrap = document.getElementById('detail-cal-wrap');
+  if (calWrap && ev.dateStart) {
+    const title = encodeURIComponent(ev.title || '');
+    const loc   = encodeURIComponent([ev.location, ev.city, ev.country].filter(Boolean).join(', '));
+    const dateStr = ev.dateStart.replace(/-/g,'');
+    const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}/${dateStr}&location=${loc}`;
+    const ical = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:${title}%0ADTSTART:${dateStr}%0ADTEND:${dateStr}%0ALOCATION:${loc}%0AEND:VEVENT%0AEND:VCALENDAR`;
+    calWrap.style.display = 'block';
+    calWrap.innerHTML = `<div style="margin-bottom:0.75rem;font-size:0.78rem;font-weight:700;color:#374151;">${t('add_calendar')}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="${gcal}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:0.78rem;font-weight:600;color:#374151;text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''"  onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_add_cal')}</a>
+        <a href="${ical}" download="${(ev.title||'event').replace(/\s+/g,'_')}.ics" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:0.78rem;font-weight:600;color:#374151;text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''" onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_ical')}</a>
+      </div>`;
+  } else if (calWrap) { calWrap.style.display = 'none'; }
 
   // Ticket buttons
   const ticketWrap = document.getElementById('detail-ticket-wrap');
@@ -1995,18 +2730,38 @@ function openDetailModal(id) {
   } else mapWrap.style.display = 'none';
 
   document.getElementById('detail-modal').style.display = 'flex';
+  const modalBox = document.querySelector('#detail-modal .modal-box');
+  if (modalBox) modalBox.scrollTop = 0;
   document.body.style.overflow = 'hidden';
+  const activePage = document.querySelector('.page.active');
+  if (activePage) activePage.dataset.scrollY = activePage.scrollTop;
+
+  // Share button visibility
+  const shareBtn2 = document.getElementById('detail-share-btn');
+  if (shareBtn2) shareBtn2.style.display = ev.image ? 'flex' : 'none';
+
   debounceLucide();
+}
+
+function shareDetailModal() {
+  const id = window._currentDetailId;
+  if (!id) return;
+  const ev = allEvents.find(e => e.__backendId === id);
+  if (!ev) return;
+  shareEvent(ev.title, id);
 }
 function closeDetailModal() {
   const modal = document.getElementById('detail-modal');
   if (modal) {
     modal.style.display = 'none';
-    // Remove map iframe when closing to free memory
     const mapDiv = document.getElementById('detail-map');
     if (mapDiv) mapDiv.innerHTML = '';
   }
   document.body.style.overflow = '';
+  const activePage = document.querySelector('.page.active');
+  if (activePage && activePage.dataset.scrollY !== undefined) {
+    activePage.scrollTop = parseFloat(activePage.dataset.scrollY) || 0;
+  }
 }
 function closeDetailModalBackdrop(e) { if (e.target === document.getElementById('detail-modal')) closeDetailModal(); }
 
@@ -2039,12 +2794,12 @@ function makeBannerHtml(item, days) {
   const isBday = item.type === 'birthday';
   const icon = isToday ? '🎉' : (isBday ? '🎂' : '🥂');
   const color = item.color || '#a855f7';
-  const label = isBday ? item.name + "'s Birthday" : item.label;
-  const todayMsg = isBday ? `Happy Birthday ${item.name}! 🎂` : `🥂 ${item.label} — Happy Anniversary!`;
+  const label = isBday ? t('bday_suffix', item.name) : item.label;
+  const todayMsg = isBday ? t('bday_today', item.name) : t('anniv_today', item.label);
   const now = new Date();
   let nextDate = new Date(now.getFullYear(), item.month - 1, item.day);
   if (nextDate < now) nextDate = new Date(now.getFullYear() + 1, item.month - 1, item.day);
-  const dateLabel = nextDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  const dateLabel = nextDate.toLocaleDateString(t('date_locale'), { month: 'long', day: 'numeric' });
   let yearsHtml = '';
   if (!isBday && item.startYear) {
     const yrs = nextDate.getFullYear() - item.startYear;
@@ -2083,8 +2838,9 @@ function filterCalendar(artist) {
 }
 
 function renderCalendar() {
+  renderCalYearStats();
   const year = calYear, month = calMonth;
-  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthNames = t('month_names');
   const labelEl = document.getElementById('cal-month-label');
   if (labelEl) labelEl.textContent = monthNames[month] + ' ' + year;
 
@@ -2132,14 +2888,21 @@ function renderCalendar() {
     const dateStr  = `${monthStr}-${String(d).padStart(2,'0')}`;
     const isToday  = dateStr === todayStr;
     const isSelect = dateStr === calSelectedDate;
-    const hasEvent = !!monthEvents[dateStr];
+    const eventsOnDay = monthEvents[dateStr] || [];
+    const hasEvent = eventsOnDay.length > 0;
+    const evCount  = eventsOnDay.length;
     const cell = document.createElement('div');
     cell.className = 'cal-day' + (hasEvent ? ' cal-day-has-event' : '') + (isSelect ? ' cal-day-selected' : '');
     const fs = isMobile ? '0.82rem' : '1rem';
     const numStyle = isSelect ? `font-size:${fs};font-weight:800;color:#fff;`
       : isToday  ? `font-size:${fs};font-weight:800;color:#111;text-decoration:underline;text-underline-offset:3px;`
       : `font-size:${fs};font-weight:600;color:#374151;`;
-    cell.innerHTML = `<span style="${numStyle}">${d}</span>`;
+    let dotsHtml = '';
+    if (hasEvent) {
+      const colors = (eventsOnDay.slice(0,3)).map(ev => getArtistColor(ev.artists));
+      dotsHtml = `<div style="position:absolute;bottom:3px;left:50%;transform:translateX(-50%);display:flex;gap:2px;">${colors.map(c=>`<div style="width:4px;height:4px;border-radius:50%;background:${isSelect?'#fff':c};"></div>`).join('')}${evCount>3?`<div style="width:4px;height:4px;border-radius:50%;background:${isSelect?'rgba(255,255,255,0.6)':'#d1d5db'};"></div>`:''}</div>`;
+    }
+    cell.innerHTML = `<span style="${numStyle}">${d}</span>${dotsHtml}`;
     cell.onclick = () => { calSelectedDate = dateStr; renderCalendar(); };
     frag.appendChild(cell);
   }
@@ -2149,6 +2912,29 @@ function renderCalendar() {
   grid.appendChild(frag);
 
   renderCalendarEventList(monthEvents, daysInMonth);
+
+  // ── Next event banner ──
+  const upcomingAll = allEvents.filter(ev => ev.title && !isEventPast(ev));
+  const calBanner = document.getElementById('cal-next-event-banner');
+  if (calBanner && upcomingAll.length > 0) {
+    const next = upcomingAll[0];
+    const days = daysUntilEvent(next.dateStart);
+    const color = getArtistColor(next.artists);
+    const dayLabel = days === 0 ? t('cal_next_today') : days === 1 ? t('cal_next_1day') : t('cal_next_days', days);
+    const meta = [next.dateStart ? fmtDate(next.dateStart) : '', next.startTime ? fmtTime(next.startTime) : '', next.location].filter(Boolean).join(' · ');
+    document.getElementById('cal-next-event-label').textContent = dayLabel;
+    document.getElementById('cal-next-event-label').style.color = color;
+    document.getElementById('cal-next-event-title').textContent = next.title;
+    document.getElementById('cal-next-event-meta').textContent = meta;
+    document.getElementById('cal-next-event-icon').style.background = color + '18';
+    document.getElementById('cal-next-event-icon').style.borderColor = color + '44';
+    document.getElementById('cal-next-event-icon').querySelector('svg').style.stroke = color;
+    calBanner.dataset.eventId = next.__backendId;
+    calBanner.style.display = 'flex';
+  } else if (calBanner) {
+    calBanner.style.display = 'none';
+  }
+
   debounceLucide();
 }
 
@@ -2178,7 +2964,7 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
   }
   list.style.display = 'flex'; if (noEv) noEv.style.display = 'none';
 
-  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const days = t('day_abbr');
   const parts = sortedDates.map(ds => {
     const d = new Date(ds + 'T00:00:00');
     const dow = days[d.getDay()];
@@ -2187,32 +2973,51 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
       if (ev.__bday) {
         const isAnniv = ev.type === 'anniversary';
         const color = ev.color || '#9ca3af';
-        return `<div class="cal-list-item" style="opacity:0.8;">
-          ${i === 0 ? `<div class="cal-list-date"><div class="cal-list-dow">${dow}</div><div class="cal-list-num">${dayNum}</div></div>` : '<div style="width:48px;flex-shrink:0;"></div>'}
-          <div class="cal-list-bar" style="background:${color};"></div>
-          <div class="cal-list-body"><div class="cal-list-title">${isAnniv ? ev.label + ' 🥂' : ev.name + "'s Birthday 🎂"}</div></div>
+        return `<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:12px;position:relative;">
+          ${i === 0 ? `<div style="flex-shrink:0;width:56px;text-align:center;position:relative;z-index:1;">
+            <div style="font-size:0.58rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;line-height:1;margin-bottom:2px;">${dow}</div>
+            <div style="width:36px;height:36px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;margin:0 auto;"><span style="font-size:0.8rem;font-weight:800;color:#6b7280;">${dayNum}</span></div>
+          </div>` : `<div style="width:56px;flex-shrink:0;"></div>`}
+          <div style="flex:1;background:#f9fafb;border-radius:12px;padding:10px 12px;border-left:3px solid ${color};opacity:0.8;">
+            <div style="font-size:0.78rem;font-weight:700;color:#374151;">${isAnniv ? ev.label + ' 🥂' : t('bday_suffix', ev.name) + ' 🎂'}</div>
+          </div>
         </div>`;
       }
       const color = getArtistColor(ev.artists);
       const loc = [ev.location, ev.city, ev.country].filter(Boolean).join(', ');
-      const artistLabel = ev.artists ? ev.artists.split(',').map(a=>a.trim()).join(' · ') : '';
+      const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
       const past = isEventPast(ev);
-      const pastBadge = past ? '<span style="font-size:0.62rem;background:#f3f4f6;color:#9ca3af;padding:1px 5px;border-radius:4px;font-weight:600;margin-left:5px;">Past</span>' : '';
-      return `<div class="cal-list-item" onclick="openDetailModal('${ev.__backendId}')">
-        ${i === 0 ? `<div class="cal-list-date"><div class="cal-list-dow">${dow}</div><div class="cal-list-num" style="color:${past?'#9ca3af':color};">${dayNum}</div></div>` : '<div style="width:48px;flex-shrink:0;"></div>'}
-        <div class="cal-list-bar" style="background:${past?'#d1d5db':color};"></div>
-        <div class="cal-list-body">
-          <div class="cal-list-title">${escHtml(ev.title)}${pastBadge}</div>
-          <div class="cal-list-meta">
-            ${artistLabel ? `<span style="color:${past?'#9ca3af':color};font-weight:700;">${escHtml(artistLabel)}</span>` : ''}
-            ${loc ? `<span>${escHtml(loc)}</span>` : ''}
+      const days2 = daysUntilEvent(ev.dateStart);
+      const countdownBadge = (!past && days2 !== null && days2 >= 0 && days2 <= 7)
+        ? `<span style="background:${color};color:#fff;font-size:0.58rem;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:0.04em;margin-left:auto;flex-shrink:0;">${days2 === 0 ? t('next_today') : days2 === 1 ? '1 DAY' : days2+' DAYS'}</span>` : '';
+      const pastBadge = past ? `<span style="font-size:0.58rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:auto;flex-shrink:0;">${t('past_label')}</span>` : '';
+      const artistDots = artistArr.map(a => {
+        const ac = getArtistColor(a);
+        const tc = a==='Pond'?'#ea580c':a==='Phuwin'?'#4b5563':'#16a34a';
+        return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;font-weight:700;color:${past?'#9ca3af':tc};"><span style="width:6px;height:6px;border-radius:50%;background:${past?'#d1d5db':ac};display:inline-block;flex-shrink:0;"></span>${a}</span>`;
+      }).join('<span style="color:#e5e7eb;font-size:0.65rem;margin:0 2px;">·</span>');
+      return `<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:14px;position:relative;cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
+        ${i === 0 ? `<div style="flex-shrink:0;width:56px;text-align:center;position:relative;z-index:1;">
+          <div style="font-size:0.58rem;font-weight:700;color:#9ca3af;letter-spacing:0.07em;line-height:1;margin-bottom:2px;">${dow}</div>
+          <div style="width:36px;height:36px;border-radius:50%;background:${past?'#e5e7eb':color};display:flex;align-items:center;justify-content:center;margin:0 auto;"><span style="font-size:0.8rem;font-weight:800;color:#fff;">${dayNum}</span></div>
+        </div>` : `<div style="width:56px;flex-shrink:0;"></div>`}
+        <div style="flex:1;background:#f9fafb;border-radius:12px;padding:10px 12px;border-left:3px solid ${past?'#e5e7eb':color};min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px;">
+            ${artistDots}
+            ${countdownBadge}${pastBadge}
           </div>
+          <div style="font-size:0.82rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.35;margin-bottom:${loc||ev.startTime?'4px':'0'};">${escHtml(ev.title)}</div>
+          ${(ev.startTime||loc) ? `<div style="font-size:0.65rem;color:#9ca3af;">${[ev.startTime?fmtTime(ev.startTime):null,loc?escHtml(loc):null].filter(Boolean).join(' · ')}</div>` : ''}
         </div>
-        <div class="cal-list-time">${ev.startTime ? escHtml(ev.startTime) : ''}</div>
       </div>`;
     }).join('');
   });
-  list.innerHTML = parts.join('');
+
+  // wrap all in timeline container with vertical line
+  list.innerHTML = `<div style="position:relative;padding-left:0;">
+    <div style="position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px;z-index:0;"></div>
+    ${parts.join('')}
+  </div>`;
 
   // Scroll to selected date
   if (calSelectedDate && monthEvents[calSelectedDate]) {
@@ -2226,6 +3031,46 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
   }
 }
 
+let _calStatYear = 2026;
+
+function onCalYearChange(val) {
+  _calStatYear = parseInt(val);
+  renderCalYearStats();
+}
+
+function renderCalYearStats() {
+  const year = _calStatYear;
+  const eventsInYear = allEvents.filter(ev => {
+    if (!ev.title || !ev.dateStart) return false;
+    return ev.dateStart.startsWith(String(year));
+  });
+  const past     = eventsInYear.filter(ev => isEventPast(ev)).length;
+  const upcoming = eventsInYear.filter(ev => !isEventPast(ev)).length;
+  const total    = eventsInYear.length;
+  const pct      = total > 0 ? Math.round((past / total) * 100) : 0;
+
+  const g = id => document.getElementById(id);
+  if (g('cal-stat-year-label')) g('cal-stat-year-label').textContent = t('year_total', year);
+  if (g('cal-stat-total'))    g('cal-stat-total').textContent    = total;
+  if (g('cal-stat-past'))     g('cal-stat-past').textContent     = past;
+  if (g('cal-stat-upcoming')) g('cal-stat-upcoming').textContent = upcoming;
+  if (g('cal-stat-pct'))      g('cal-stat-pct').textContent      = pct + '%';
+
+  // Artist breakdown
+  const artists = ['Pond', 'Phuwin', 'Permpoon'];
+  const keys    = ['pond', 'phuwin', 'permpoon'];
+  artists.forEach((artist, i) => {
+    const k = keys[i];
+    const evs   = eventsInYear.filter(ev => ev.artists && ev.artists.split(',').map(a=>a.trim()).includes(artist));
+    const aPast = evs.filter(ev => isEventPast(ev)).length;
+    const aUp   = evs.filter(ev => !isEventPast(ev)).length;
+    const aTotal = evs.length;
+    if (g(`cs-${k}-total`)) g(`cs-${k}-total`).textContent = aTotal;
+    if (g(`cs-${k}-past`))  g(`cs-${k}-past`).textContent  = aPast;
+    if (g(`cs-${k}-up`))    g(`cs-${k}-up`).textContent    = aUp;
+  });
+}
+
 function prevMonth() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} calSelectedDate=null; renderCalendar(); }
 function nextMonth() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} calSelectedDate=null; renderCalendar(); }
 
@@ -2236,10 +3081,105 @@ function filterHome(artist) {
   homeFilter = artist;
   document.querySelectorAll('.artist-filter-btn').forEach(btn => {
     const a = btn.dataset.artist;
-    if (a === artist) { const ac=a==='all'?'#111':getArtistColor(a); btn.style.background=ac; btn.style.color='#fff'; btn.style.borderColor=ac; }
-    else { const c=a==='Pond'?'#f97316':a==='Phuwin'?'#6b7280':a==='Permpoon'?'#22c55e':'#111'; btn.style.background='#fff'; btn.style.color=c; btn.style.borderColor=c; }
+    if (a === artist) {
+      btn.style.background = '#111'; btn.style.color = '#fff'; btn.style.borderColor = '#111';
+    } else {
+      btn.style.background = '#fff'; btn.style.color = '#6b7280'; btn.style.borderColor = '#f0f0f0';
+    }
+  });
+  // Bento card active state
+  const bentoMap = { Pond:'pond', Phuwin:'phuwin', Permpoon:'permpoon', all:'total' };
+  const colorMap = { pond:'#f97316', phuwin:'#6b7280', permpoon:'#22c55e', total:'#a855f7' };
+  ['pond','phuwin','permpoon','total'].forEach(k => {
+    const c = document.getElementById('bento-card-'+k);
+    if (!c) return;
+    const isActive = bentoMap[artist] === k;
+    c.style.boxShadow = isActive ? `0 0 0 2px ${colorMap[k]}` : 'none';
+    c.style.transform = isActive ? 'scale(1.03)' : 'scale(1)';
+    c.style.borderColor = isActive ? colorMap[k] : '#f0f0f0';
   });
   scheduleRender();
+}
+
+function onHomeSearch(val) {
+  homeSearch = val;
+  const clearBtn = document.getElementById('home-search-clear');
+  if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+  scheduleRender();
+}
+
+function clearHomeSearch() {
+  homeSearch = '';
+  const inp = document.getElementById('home-search');
+  if (inp) inp.value = '';
+  const clearBtn = document.getElementById('home-search-clear');
+  if (clearBtn) clearBtn.style.display = 'none';
+  scheduleRender();
+}
+
+let _countdownTarget = null;
+let _countdownTimer  = null;
+function startCountdown(dateStr, timeStr) {
+  if (_countdownTimer) clearInterval(_countdownTimer);
+  const cdEl = document.getElementById('bento-countdown');
+  if (!cdEl || !dateStr) return;
+  let t = (timeStr || '').replace(/[^\d:]/g,'').trim();
+  if (!t) t = '00:00';
+  if (!t.includes(':')) t = t.slice(0,2)+':'+t.slice(2);
+  const target = new Date(dateStr + 'T' + t + ':00');
+  if (isNaN(target)) { cdEl.style.display = 'none'; return; }
+  _countdownTarget = target;
+  function tick() {
+    const now  = new Date();
+    const diff = target - now;
+    if (diff <= 0) {
+      clearInterval(_countdownTimer);
+      document.getElementById('cd-days').textContent  = '0';
+      document.getElementById('cd-hours').textContent = '0';
+      document.getElementById('cd-mins').textContent  = '0';
+      document.getElementById('cd-secs').textContent  = '0';
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000)  / 60000);
+    const s = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('cd-days').textContent  = d;
+    document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-mins').textContent  = String(m).padStart(2,'0');
+    document.getElementById('cd-secs').textContent  = String(s).padStart(2,'0');
+  }
+  cdEl.style.display = 'flex';
+  tick();
+  _countdownTimer = setInterval(tick, 1000);
+}
+
+function previewAdminImg(inputId, previewId) {
+  const inp = document.getElementById(inputId);
+  const wrap = document.getElementById(previewId);
+  if (!inp || !wrap) return;
+  const url = inp.value.trim();
+  if (!url) { wrap.style.display = 'none'; return; }
+  const img = wrap.querySelector('img');
+  img.src = url;
+  img.onload  = () => { wrap.style.display = 'block'; };
+  img.onerror = () => { wrap.style.display = 'none'; };
+}
+
+function quickAddCalendar(id) {
+  const ev = allEvents.find(e => e.__backendId === id);
+  if (!ev || !ev.dateStart) return;
+  const title = encodeURIComponent(ev.title || '');
+  const loc   = encodeURIComponent([ev.location, ev.city, ev.country].filter(Boolean).join(', '));
+  const desc  = encodeURIComponent(ev.description || '');
+  const startTime = (ev.startTime || '00:00').replace(/[^0-9:]/g,'').replace(':','') + '00';
+  const endTime   = (ev.endTime   || ev.startTime || '23:59').replace(/[^0-9:]/g,'').replace(':','') + '00';
+  const dateClean = ev.dateStart.replace(/-/g,'');
+  const endDateClean = (ev.dateEnd || ev.dateStart).replace(/-/g,'');
+  const dtStart = dateClean + 'T' + startTime;
+  const dtEnd   = endDateClean + 'T' + endTime;
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dtStart}/${dtEnd}&details=${desc}&location=${loc}`;
+  window.open(url, '_blank');
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2280,12 +3220,12 @@ function updateAdminRow(row, ev) {
     : '';
   row.innerHTML = `<div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
     <div style="flex:1;min-width:150px;">
-      <p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${idBadge}${past?'<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">Past</span>':''}</p>
-      <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${getFullDateDisplay(ev.dateStart)} · ${getArtistLabel(ev.artists)}</p>
+      <p style="font-weight:700;font-size:1rem;${past?'color:#9ca3af;':''}">${escHtml(ev.title)}${idBadge}${past?`<span style="font-size:0.7rem;background:#f3f4f6;color:#9ca3af;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px;">${t('past_events')}</span>`:''}</p>
+      <p style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">${fmtDate(ev.dateStart)} · ${getArtistLabel(ev.artists)}</p>
     </div>
     <div style="display:flex;gap:6px;align-items:center;">${isConf
-      ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">Delete?</span><button class="btn-danger" onclick="confirmDelete('${rowKey}')">Yes</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${rowKey}')">Cancel</button>`
-      :`<button class="btn-secondary" style="font-size:0.8rem;padding:6px 10px;" onclick="openEditModal('${rowKey}')"><i data-lucide="edit-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>Edit</button><button class="btn-danger" onclick="startDelete('${rowKey}')"><i data-lucide="trash-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:2px;"></i>Delete</button>`
+      ?`<span style="font-size:0.78rem;color:#dc2626;font-weight:600;">${t('admin_confirm_delete')}</span><button class="btn-danger" onclick="confirmDelete('${rowKey}')">${t('yes')}</button><button class="btn-secondary" style="font-size:0.8rem;padding:5px 10px;" onclick="cancelDelete('${rowKey}')">${t('admin_cancel')}</button>`
+      :`<button class="btn-secondary" style="font-size:0.8rem;padding:6px 10px;" onclick="openEditModal('${rowKey}')"><i data-lucide="edit-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:3px;"></i>${'Edit'}</button><button class="btn-danger" onclick="startDelete('${rowKey}')"><i data-lucide="trash-2" style="width:13px;height:13px;display:inline;vertical-align:-2px;margin-right:2px;"></i>${t('admin_delete')}</button>`
     }</div>`;
   debounceLucide();
 }
@@ -2299,12 +3239,12 @@ async function confirmDelete(key) {
   if (rowEl) rowEl.style.opacity = '0.5';
   try {
     const result = await deleteEventInSheets(ev.__backendId || ev.__rawId, ev.__rowNumber);
-    showToast(result.status === 'not_found' ? 'Removed. (already deleted from Sheet)' : 'Event deleted.');
+    showToast(result.status === 'not_found' ? t('toast_removed') : t('toast_deleted'));
     Cache.clearAll();
     await loadEventsFromSheets(true);
   } catch(err) {
     if (rowEl) rowEl.style.opacity = '1';
-    showToast('Error: ' + (err.message || 'try again'));
+    showToast(t('toast_error') + ': ' + (err.message || ''));
   }
 }
 
@@ -2314,32 +3254,32 @@ function renderAnniversaryAdmin() {
   const bdayListEl = document.getElementById('bday-admin-list');
   if (bdayListEl) {
     if (allBirthdays.length === 0) {
-      bdayListEl.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ยังไม่มีวันเกิด</p>';
+      bdayListEl.innerHTML = t('no_birthdays') && `<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">${t('no_birthdays')}</p>`;
     } else {
       const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       bdayListEl.innerHTML = allBirthdays.map(b => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
         <span style="width:10px;height:10px;border-radius:50%;background:${b.color||'#6b7280'};flex-shrink:0;display:inline-block;"></span>
         <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${b.artist_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[b.birthday_month-1]} ${b.birthday_day}</p></div>
-        <button onclick="deleteBirthday('${b.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">ลบ</button>
+        <button onclick="deleteBirthday('${b.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">Delete</button>
       </div>`).join('');
     }
   }
-  if (allAnniversaries.length === 0) { list.innerHTML = '<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">ยังไม่มี Anniversary</p>'; return; }
+  if (allAnniversaries.length === 0) { list.innerHTML = `<p style="font-size:0.82rem;color:#9ca3af;padding:0.5rem 0;">${t('no_anniversaries')}</p>`; return; }
   const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   list.innerHTML = allAnniversaries.map(a => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:6px;">
     <span style="width:10px;height:10px;border-radius:50%;background:${a.color||'#a855f7'};flex-shrink:0;display:inline-block;"></span>
     <div style="flex:1;"><p style="font-weight:700;font-size:0.85rem;margin:0;">${a.anniversary_name}</p><p style="font-size:0.75rem;color:#9ca3af;margin:1px 0 0;">${mn[a.anniversary_month-1]} ${a.anniversary_day}${a.anniversary_year?' (since '+a.anniversary_year+')':''}</p></div>
-    <button onclick="deleteAnniversary('${a.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">ลบ</button>
+    <button onclick="deleteAnniversary('${a.__backendId}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:600;cursor:pointer;">Delete</button>
   </div>`).join('');
 }
 
 async function deleteBirthday(id) {
-  try { await deleteBirthdayInSheets(id); showToast('Birthday deleted.'); Cache.del(LC.BDAYS); Cache.del(LC.TS_BD); await loadBirthdaysFromSheets(true); }
-  catch(e) { showToast('Error: ' + (e.message||'delete failed')); }
+  try { await deleteBirthdayInSheets(id); showToast(t('toast_bday_deleted')); Cache.del(LC.BDAYS); Cache.del(LC.TS_BD); await loadBirthdaysFromSheets(true); }
+  catch(e) { showToast(t('toast_error') + ': ' + (e.message||'')); }
 }
 async function deleteAnniversary(id) {
-  try { await deleteAnniversaryInSheets(id); showToast('Anniversary deleted.'); Cache.del(LC.ANNIVS); Cache.del(LC.TS_AN); await loadAnniversariesFromSheets(true); }
-  catch(e) { showToast('Error: ' + (e.message||'delete failed')); }
+  try { await deleteAnniversaryInSheets(id); showToast(t('toast_anniv_deleted')); Cache.del(LC.ANNIVS); Cache.del(LC.TS_AN); await loadAnniversariesFromSheets(true); }
+  catch(e) { showToast(t('toast_error') + ': ' + (e.message||'')); }
 }
 
 function openAnnivForm() { document.getElementById('anniv-form-wrap').style.display = 'block'; }
@@ -2354,13 +3294,13 @@ async function saveAnniversary() {
   const day   = parseInt(document.getElementById('anniv-day').value);
   const year  = document.getElementById('anniv-year').value.trim();
   const color = document.getElementById('anniv-color').value || '#a855f7';
-  if (!label) { showToast('กรุณาใส่ชื่อ Anniversary'); return; }
-  if (!month||month<1||month>12) { showToast('เดือนไม่ถูกต้อง'); return; }
-  if (!day||day<1||day>31) { showToast('วันไม่ถูกต้อง'); return; }
+  if (!label) { showToast(t('toast_need_label')); return; }
+  if (!month||month<1||month>12) { showToast(t('toast_invalid_month')); return; }
+  if (!day||day<1||day>31) { showToast(t('toast_invalid_day')); return; }
   try {
     await createAnniversaryInSheets({ anniversary_name:label, anniversary_month:String(month), anniversary_day:String(day), anniversary_year:year||'', color });
-    closeAnnivForm(); showToast('Anniversary saved!'); Cache.del(LC.ANNIVS); Cache.del(LC.TS_AN); await loadAnniversariesFromSheets(true);
-  } catch(e) { showToast('Error: '+(e.message||'save failed')); }
+    closeAnnivForm(); showToast(t('toast_anniv_saved')); Cache.del(LC.ANNIVS); Cache.del(LC.TS_AN); await loadAnniversariesFromSheets(true);
+  } catch(e) { showToast(t('toast_error') + ': ' + (e.message||'')); }
 }
 function openBdayForm() { document.getElementById('bday-form-wrap').style.display = 'block'; }
 function closeBdayForm() {
@@ -2373,13 +3313,13 @@ async function saveBirthday() {
   const month = parseInt(document.getElementById('bday-month').value);
   const day   = parseInt(document.getElementById('bday-day').value);
   const color = document.getElementById('bday-color').value || '#6b7280';
-  if (!name)  { showToast('กรุณาใส่ชื่อศิลปิน'); return; }
-  if (!month||month<1||month>12) { showToast('เดือนไม่ถูกต้อง'); return; }
-  if (!day||day<1||day>31)       { showToast('วันไม่ถูกต้อง'); return; }
+  if (!name)  { showToast(t('toast_need_name')); return; }
+  if (!month||month<1||month>12) { showToast(t('toast_invalid_month')); return; }
+  if (!day||day<1||day>31)       { showToast(t('toast_invalid_day')); return; }
   try {
     await createBirthdayInSheets({ artist_name:name, birthday_month:String(month), birthday_day:String(day), color });
-    closeBdayForm(); showToast('Birthday saved!'); Cache.del(LC.BDAYS); Cache.del(LC.TS_BD); await loadBirthdaysFromSheets(true);
-  } catch(e) { showToast('Error: '+(e.message||'save failed')); }
+    closeBdayForm(); showToast(t('toast_bday_saved')); Cache.del(LC.BDAYS); Cache.del(LC.TS_BD); await loadBirthdaysFromSheets(true);
+  } catch(e) { showToast(t('toast_error') + ': ' + (e.message||'')); }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2396,10 +3336,11 @@ function checkPanelKey() {
   }
 }
 function isLoggedIn() { try { return sessionStorage.getItem(SESS_KEY) === '1'; } catch(e) { return false; } }
-function doAdminLogin() {
+async function doAdminLogin() {
   const pw  = document.getElementById('login-pw-field').value;
   const err = document.getElementById('login-pw-err');
-  if (pw === ADMIN_PASS) {
+  const hash = await hashPassword(pw);
+  if (hash === ADMIN_PASS_HASH) {
     try { sessionStorage.setItem(SESS_KEY, '1'); } catch(e) {}
     isAdmin = true;
     err.style.display = 'none';
@@ -2421,7 +3362,7 @@ function adminLogout() {
   document.getElementById('login-pw-field').value = '';
   document.getElementById('login-pw-err').style.display = 'none';
   const navAdmin = document.getElementById('nav-admin-link'); if(navAdmin) navAdmin.style.display = 'none';
-  navigate('home'); showToast('Logged out');
+  navigate('home'); showToast(t('toast_logged_out'));
 }
 
 async function adminRefresh() {
@@ -2431,7 +3372,7 @@ async function adminRefresh() {
   try { await apiPost({ action: 'clearCache' }); } catch(e) {}
   await loadEventsFromSheets(true);
   if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>Refresh'; debounceLucide(); }
-  showToast('Refreshed ✓');
+  showToast(t('toast_refreshed'));
 }
 
 function navigate(page) {
@@ -2451,10 +3392,10 @@ function navigate(page) {
 // ADMIN EVENT FORM
 // ═══════════════════════════════════════════════════════════════════
 function openAddModal() {
-  if (allEvents.length >= 999) { showToast('Limit reached.'); return; }
+  if (allEvents.length >= 999) { showToast(t('toast_limit')); return; }
   editingEventId = null; editingEventRowNumber = null;
-  document.getElementById('form-modal-title').textContent = 'Add New Event';
-  document.getElementById('form-submit-text').textContent = 'Save Event';
+  document.getElementById('form-modal-title').textContent = t('admin_add_event');
+  document.getElementById('form-submit-text').textContent = t('admin_save_event');
   document.getElementById('form-submit-btn').disabled = false;
   document.getElementById('form-submit-text').style.display = 'inline';
   document.getElementById('form-submit-spinner').style.display = 'none';
@@ -2468,8 +3409,8 @@ function openEditModal(key) {
   const ev = findEventByKey(key); if (!ev) return;
   editingEventId = ev.__backendId || null;
   editingEventRowNumber = ev.__rowNumber || null;
-  document.getElementById('form-modal-title').textContent = 'Edit Event';
-  document.getElementById('form-submit-text').textContent = 'Update Event';
+  document.getElementById('form-modal-title').textContent = t('admin_edit_event');
+  document.getElementById('form-submit-text').textContent = t('admin_update_event');
   document.getElementById('form-submit-btn').disabled = false;
   document.getElementById('form-submit-text').style.display = 'inline';
   document.getElementById('form-submit-spinner').style.display = 'none';
@@ -2484,12 +3425,20 @@ function closeEventFormModal() {
   editingEventId = null; editingEventRowNumber = null;
 }
 function closeEventFormModalBackdrop(e) { /* intentionally disabled */ }
-function clearForm() { const f=document.getElementById('event-form'); if(f)f.reset(); document.querySelectorAll('.artist-check').forEach(c=>{c.checked=false;}); }
+function clearForm() {
+  const f=document.getElementById('event-form');
+  if(f) f.reset();
+  document.querySelectorAll('.artist-check').forEach(c=>{c.checked=false;});
+  ['prev-image','prev-heroImage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
 function fillForm(ev) {
   const set = (key, val) => { const el=document.getElementById('ev-'+key); if(el) el.value=val||''; };
   set('dateStart',ev.dateStart); set('dateEnd',ev.dateEnd);
   set('startTime',ev.startTime||''); set('endTime',ev.endTime||'');
-  set('title',ev.title); set('image',ev.image);
+  set('title',ev.title); set('image',ev.image); set('heroImage',ev.heroImage);
   set('country',ev.country); set('city',ev.city); set('location',ev.location);
   set('description',ev.description); set('type',ev.type); set('note',ev.note);
   set('tv',ev.tv); set('map',ev.map);
@@ -2539,7 +3488,7 @@ function closePreviewPopup() { const p=document.getElementById('preview-popup');
 async function handleEventFormSubmit() {
   const schema = readFormSchema();
   if (!schema.title || !schema.title.trim()) {
-    showToast('❌ กรุณาใส่ชื่อ Event ก่อน');
+    showToast(t('toast_need_title'));
     document.getElementById('ev-title').focus(); return;
   }
   const payload = {
@@ -2571,7 +3520,7 @@ async function handleEventFormSubmit() {
   btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
   if (success) {
     closeEventFormModal();
-    showToast(editingEventId ? 'Event updated! ✓' : 'Event added! ✓');
+    showToast(editingEventId ? t('toast_updated') : t('toast_added'));
     clearForm();
     Cache.clearAll(); _fetchingEvents = false;
     await loadEventsFromSheets(true);
@@ -2580,6 +3529,83 @@ async function handleEventFormSubmit() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// ── View mode (grid / list) ───────────────────────────────────────
+let _viewMode = 'grid';
+function setViewMode(mode) {
+  _viewMode = mode;
+  const gridBtn     = document.getElementById('view-grid-btn');
+  const listBtn     = document.getElementById('view-list-btn');
+  const timelineBtn = document.getElementById('view-timeline-btn');
+  const active = '#111', inactive = 'transparent';
+  const activeStroke = '#fff', inactiveStroke = '#6b7280';
+  if (gridBtn)     { gridBtn.style.background     = mode==='grid'     ? active : inactive; gridBtn.querySelector('svg').style.stroke     = mode==='grid'     ? activeStroke : inactiveStroke; }
+  if (listBtn)     { listBtn.style.background     = mode==='list'     ? active : inactive; listBtn.querySelector('svg').style.stroke     = mode==='list'     ? activeStroke : inactiveStroke; }
+  if (timelineBtn) { timelineBtn.style.background = mode==='timeline' ? active : inactive; timelineBtn.querySelector('svg').style.stroke = mode==='timeline' ? activeStroke : inactiveStroke; }
+  renderHome();
+}
+
+// ── Share event ───────────────────────────────────────────────────
+function buildTimelineView(events) {
+  const dowNames = t('day_abbr');
+  const artistTextColors = { Pond:'#ea580c', Phuwin:'#4b5563', Permpoon:'#16a34a' };
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column;gap:0;';
+  const dateMap = new Map();
+  events.forEach(ev => {
+    const key = ev.dateStart ? ev.dateStart.slice(0,7) : 'zzz';
+    const label = ev.dateStart ? new Date(ev.dateStart+'T00:00:00').toLocaleDateString(t('date_locale'),{month:'long',year:'numeric'}) : 'Date TBA';
+    if (!dateMap.has(key)) dateMap.set(key, { label, events:[] });
+    dateMap.get(key).events.push(ev);
+  });
+  dateMap.forEach(({ label, events: group }) => {
+    const mhdr = document.createElement('div');
+    mhdr.className = 'month-group-header';
+    mhdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${label}</span><span class="month-group-header-count">${group.length} event${group.length!==1?'s':''}</span></div><span class="month-group-header-line"></span>`;
+    wrap.appendChild(mhdr);
+    const tl = document.createElement('div');
+    tl.className = 'timeline-wrap';
+    const line = document.createElement('div'); line.className = 'timeline-line'; tl.appendChild(line);
+    group.forEach(ev => {
+      const color = getArtistColor(ev.artists);
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      item.onclick = () => openDetailModal(ev.__backendId);
+      let dotHtml = `<div class="timeline-dot-wrap"><div class="timeline-dow"></div><div class="timeline-circle" style="background:${color};"><span>?</span></div></div>`;
+      if (ev.dateStart) {
+        const d = new Date(ev.dateStart+'T00:00:00');
+        dotHtml = `<div class="timeline-dot-wrap"><div class="timeline-dow">${dowNames[d.getDay()]}</div><div class="timeline-circle" style="background:${color};"><span>${d.getDate()}</span></div></div>`;
+      }
+      const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()) : [];
+      const artistBadges = artistArr.map(a => `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.62rem;font-weight:700;color:${artistTextColors[a]||color};"><span style="width:5px;height:5px;border-radius:50%;background:${getArtistColor(a)};display:inline-block;"></span>${a}</span>`).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
+      const days2 = daysUntilEvent(ev.dateStart);
+      const badge = (days2 !== null && days2 >= 0 && days2 <= 7) ? `<span style="margin-left:auto;flex-shrink:0;background:${color};color:#fff;font-size:0.55rem;font-weight:800;padding:2px 7px;border-radius:99px;">${days2===0?'TODAY':days2+' DAY'+(days2>1?'S':'')}</span>` : '';
+      const meta = [ev.startTime ? escHtml(ev.startTime) : '', ev.location ? escHtml(ev.location) : ''].filter(Boolean).join(' · ');
+      item.innerHTML = `${dotHtml}<div class="timeline-card" style="border-left-color:${color};"><div class="timeline-card-top">${artistBadges}${badge}</div><div class="timeline-card-title">${escHtml(ev.title)}</div>${meta?`<div class="timeline-card-meta"><span>${meta}</span></div>`:''}</div>`;
+      tl.appendChild(item);
+    });
+    wrap.appendChild(tl);
+  });
+  return wrap;
+}
+
+function shareEvent(title, id) {
+  const url = window.location.href.split('?')[0] + '?event=' + id;
+  if (navigator.share) {
+    navigator.share({ title, url }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(url).then(() => showToast(t('toast_copied'))).catch(() => showToast('Copy: ' + url));
+  }
+}
+
+function bentoNextClick() {
+  const el = document.getElementById('bento-next');
+  if (el && el.dataset.id) openDetailModal(el.dataset.id);
+}
+function bentoNextClick2() {
+  const el = document.getElementById('bento-ev2');
+  if (el && el.dataset.id) openDetailModal(el.dataset.id);
+}
+
 function debounceLucide() {
   if (typeof lucide === 'undefined') return;
   clearTimeout(_lucideTimer);
@@ -2636,7 +3662,9 @@ document.addEventListener('visibilitychange', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ── Security init ──
+  // ── Language init ──
+  // ── Language init ──
+  setLang(_lang);
   checkPanelKey();
 
   if (panelUnlocked && !isLoggedIn()) {
@@ -2655,12 +3683,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Keyboard handlers ──
   const pwField = document.getElementById('login-pw-field');
-  if (pwField) pwField.addEventListener('keydown', e => { if(e.key==='Enter') doAdminLogin(); });
+  if (pwField) pwField.addEventListener('keydown', e => { if(e.key==='Enter') doAdminLogin().catch(()=>{}); });
 
   document.addEventListener('keydown', function(e) {
     const modal = document.getElementById('event-form-modal');
     if (!modal || modal.style.display === 'none') return;
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); }
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeEventFormModal(); }
+  });
+  document.addEventListener('keydown', function(e) {
+    // Escape to close detail modal
+    if (e.key === 'Escape') {
+      const detail = document.getElementById('detail-modal');
+      if (detail && detail.style.display !== 'none') closeDetailModal();
+    }
   });
   document.addEventListener('keydown', function(e) {
     if (e.key !== 'Enter') return;
