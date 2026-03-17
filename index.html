@@ -2236,26 +2236,31 @@ function renderHome() {
     gw.appendChild(hdr);
 
     if (_viewMode === 'list') {
-      // COMPACT GRID VIEW — 3 columns
+      // LIST VIEW — full-width rows with thumbnail on left
       const listWrap = document.createElement('div');
-      listWrap.style.cssText = 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;';
+      listWrap.style.cssText = 'display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;';
       group.forEach(ev => {
         const color = getArtistColor(ev.artists);
         const gradients = {'#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)','#6b7280':'linear-gradient(135deg,#f9fafb,#f3f4f6)','#22c55e':'linear-gradient(135deg,#f0fdf4,#dcfce7)','#a855f7':'linear-gradient(135deg,#faf5ff,#f3e8ff)','#3b82f6':'linear-gradient(135deg,#eff6ff,#dbeafe)','#ef4444':'linear-gradient(135deg,#fef2f2,#fee2e2)','#ec4899':'linear-gradient(135deg,#fdf2f8,#fce7f3)'};
         const grad = gradients[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
         const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
-        const dots = artistArr.map(a => { const ac = getArtistColor(a); return `<span style="display:inline-flex;align-items:center;gap:2px;font-size:0.58rem;font-weight:700;color:${ac};"><span style="width:4px;height:4px;border-radius:50%;background:${ac};display:inline-block;"></span>${a}</span>`; }).join('<span style="color:#e5e7eb;margin:0 1px;">·</span>');
+        const dots = artistArr.map(a => { const ac = getArtistColor(a); return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.72rem;font-weight:600;color:${ac};"><span style="width:5px;height:5px;border-radius:50%;background:${ac};display:inline-block;"></span>${a}</span>`; }).join(' ');
         const dateStr = ev.dateStart ? fmtDate(ev.dateStart) : '';
         const timeStr = ev.startTime ? fmtTime(ev.startTime) : '';
+        const locStr  = ev.location  ? escHtml(ev.location)  : '';
+        const meta = [dateStr, timeStr, locStr].filter(Boolean).join(' · ');
+        const days = daysUntilEvent(ev.dateStart);
+        const countdownBadge = (days !== null && days >= 0 && days <= 7)
+          ? `<span style="background:${color};color:#fff;font-size:0.62rem;font-weight:800;padding:2px 8px;border-radius:99px;letter-spacing:0.04em;margin-left:auto;flex-shrink:0;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
+        const imgHtml = ev.image
+          ? `<img src="${escHtml(ev.image)}" style="width:68px;height:68px;border-radius:10px;object-fit:cover;object-position:top;display:block;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">`
+          : `<div style="width:68px;height:68px;border-radius:10px;background:${grad};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
         const item = document.createElement('div');
-        item.style.cssText = `background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);overflow:hidden;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;border-top:3px solid ${color};`;
-        item.onmouseover = () => { item.style.transform='translateY(-2px)'; item.style.boxShadow='0 6px 18px rgba(0,0,0,0.10)'; };
-        item.onmouseout  = () => { item.style.transform=''; item.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)'; };
+        item.style.cssText = `background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:box-shadow 0.15s,transform 0.15s;border-left:3px solid ${color};`;
+        item.onmouseover = () => { item.style.boxShadow='0 4px 16px rgba(0,0,0,0.10)'; item.style.transform='translateY(-1px)'; };
+        item.onmouseout  = () => { item.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)'; item.style.transform=''; };
         item.onclick = () => openDetailModal(ev.__backendId);
-        item.innerHTML = ev.image
-          ? `<img src="${escHtml(ev.image)}" style="width:100%;height:100px;object-fit:cover;object-position:top;display:block;" loading="lazy" onerror="this.style.display='none'">`
-          : `<div style="width:100%;height:100px;background:${grad};display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
-        item.innerHTML += `<div style="padding:8px 10px;"><div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">${dots}</div><div style="font-size:0.78rem;font-weight:700;color:#111;line-height:1.3;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(ev.title)}</div><div style="font-size:0.65rem;color:#9ca3af;">${[dateStr,timeStr].filter(Boolean).join(' · ')}</div></div>`;
+        item.innerHTML = `${imgHtml}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">${dots}${countdownBadge}</div><div style="font-size:0.88rem;font-weight:700;color:#111;line-height:1.35;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div><div style="font-size:0.72rem;color:#9ca3af;">${meta}</div></div>`;
         listWrap.appendChild(item);
       });
       gw.appendChild(listWrap);
