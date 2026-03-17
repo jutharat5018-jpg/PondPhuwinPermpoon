@@ -187,7 +187,7 @@ self.addEventListener('fetch', e => {
   .cal-month-pill:hover { background:#e5e7eb;color:#111; }
   .cal-month-pill.active { background:#111;color:#fff;font-weight:700; }
   /* date strip */
-  .cal-date-strip { display:flex;gap:4px;overflow-x:auto;overflow-y:visible;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch; }
+  .cal-date-strip { display:flex;gap:4px;overflow-x:scroll;overflow-y:visible;padding-bottom:6px;padding-right:16px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth; }
   .cal-date-strip::-webkit-scrollbar { display:none; }
   .cal-date-chip { width:42px;min-width:42px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:none;background:transparent;font-family:inherit;position:relative;box-sizing:border-box; }
   .cal-date-chip:hover { background:#f3f4f6; }
@@ -883,7 +883,7 @@ self.addEventListener('fetch', e => {
        <div style="font-size:0.72rem;color:#9ca3af;"><span id="cal-month-event-count">—</span> events</div>
       </div>
       <!-- Date strip เต็มแถว scroll ได้ -->
-      <div id="cal-date-strip" class="cal-date-strip"></div>
+      <div id="cal-date-strip" class="cal-date-strip" style="padding-right:16px;"></div>
      </div>
 
      <!-- ── Event card grid ── -->
@@ -2951,9 +2951,18 @@ function renderCalendar() {
       const dowColor = (isSelected || isToday) ? 'color:rgba(255,255,255,0.55);' : 'color:#9ca3af;';
       const numColor = (isSelected || isToday) ? 'color:#fff;' : 'color:#111;';
       const dot = hasEv && !isSelected ? `<div class="cal-date-chip-dot" style="background:${accentColor};"></div>` : '';
-      return `<button class="cal-date-chip" style="${chipStyle}" onclick="calSelectedDate='${ds}';renderCalendarCardGrid(buildMonthEvents());"><span class="cal-date-chip-dow" style="${dowColor}">${dow}</span><span class="cal-date-chip-num" style="${numColor}">${d}</span>${dot}</button>`;
+      return `<button class="cal-date-chip" style="${chipStyle}" onclick="calSelectedDate='${ds}';renderCalendar();"><span class="cal-date-chip-dow" style="${dowColor}">${dow}</span><span class="cal-date-chip-num" style="${numColor}">${d}</span>${dot}</button>`;
     }).join('');
   }
+
+  // ── Scroll date strip to selected/today ──
+  requestAnimationFrame(() => {
+    const strip = document.getElementById('cal-date-strip');
+    if (strip) {
+      const active = strip.querySelector('[style*="background:#111"],[style*="background:#"]');
+      if (active) active.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+    }
+  });
 
   // ── Card grid ──
   renderCalendarCardGrid(monthEvents);
