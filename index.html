@@ -736,10 +736,10 @@ self.addEventListener('fetch', e => {
       <div style="flex:1;"></div>
       <span id="events-count" style="font-size:0.68rem;font-weight:600;color:#fff;background:#111;border-radius:6px;padding:2px 10px;"></span>
       <div style="display:flex;align-items:center;gap:2px;background:#f3f4f6;border-radius:8px;padding:3px;flex-shrink:0;">
-       <button id="view-grid-btn" onclick="setViewMode('grid')" style="width:30px;height:28px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Grid view">
+       <button id="view-grid-btn" onclick="setViewMode('grid')" style="width:30px;height:28px;border-radius:6px;background:#111;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Grid view">
         <svg width="13" height="13" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
        </button>
-       <button id="view-list-btn" onclick="setViewMode('list')" style="width:30px;height:28px;border-radius:6px;background:#111;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="List view">
+       <button id="view-list-btn" onclick="setViewMode('list')" style="width:30px;height:28px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="List view">
         <svg width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
        </button>
       </div>
@@ -3750,7 +3750,7 @@ async function handleEventFormSubmit() {
 
 // ═══════════════════════════════════════════════════════════════════
 // ── View mode (grid / list) ───────────────────────────────────────
-let _viewMode = 'list';
+let _viewMode = 'grid';
 function setViewMode(mode) {
   _viewMode = mode;
   const gridBtn     = document.getElementById('view-grid-btn');
