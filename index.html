@@ -3351,15 +3351,19 @@ let _adminYearFilter = String(new Date().getFullYear());
 function renderAdminYearTabs() {
   const wrap = document.getElementById('admin-year-tabs');
   if (!wrap) return;
-  // Collect unique years from all events
   const years = [...new Set(
     allEvents
       .filter(ev => ev.dateStart && ev.dateStart.length >= 4)
       .map(ev => ev.dateStart.slice(0, 4))
   )].sort();
   if (years.length === 0) { wrap.innerHTML = ''; return; }
-  // Ensure current filter is valid
-  if (!years.includes(_adminYearFilter)) _adminYearFilter = years[years.length - 1];
+  // If current filter year doesn't exist in data, pick nearest year
+  if (!years.includes(_adminYearFilter)) {
+    const currentYear = String(new Date().getFullYear());
+    _adminYearFilter = years.includes(currentYear)
+      ? currentYear
+      : years[years.length - 1];
+  }
   wrap.innerHTML = years.map(y => {
     const active = y === _adminYearFilter;
     return `<button onclick="setAdminYear('${y}')" style="padding:4px 14px;border-radius:99px;border:1.5px solid ${active?'#111':'#e5e7eb'};background:${active?'#111':'#fff'};color:${active?'#fff':'#374151'};font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;">${y}</button>`;
@@ -3379,6 +3383,10 @@ function renderAdminList() {
   const limitWarn = document.getElementById('admin-limit-warn');
   if (!list) return;
   if (limitWarn) limitWarn.style.display = allEvents.length >= 999 ? 'block' : 'none';
+
+  // Always render year tabs first (even if no events)
+  renderAdminYearTabs();
+
   if (allEvents.length === 0) {
     list.innerHTML = '';
     if (noEv) noEv.style.display = 'block';
@@ -3386,13 +3394,16 @@ function renderAdminList() {
   }
   if (noEv) noEv.style.display = 'none';
 
-  // Render year tabs first
-  renderAdminYearTabs();
-
   // Filter events by selected year
   const filteredEvents = allEvents.filter(ev =>
     ev.dateStart && ev.dateStart.startsWith(_adminYearFilter)
   );
+
+  // If no events for selected year, show empty state
+  if (filteredEvents.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:2rem;color:#9ca3af;"><p style="font-weight:600;">No events in ${_adminYearFilter}</p></div>`;
+    debounceLucide(); return;
+  }
 
   // Group events by year-month (filtered)
   const groups = new Map();
