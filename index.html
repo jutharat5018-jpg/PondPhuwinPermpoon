@@ -171,7 +171,28 @@ self.addEventListener('fetch', e => {
   }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
-  /* ── Month strip layout ── */
+  /* ── Filter bar — always horizontal scroll, never wrap ── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-bar button,
+  .filter-bar .artist-filter-btn,
+  .filter-bar .cal-filter-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .filter-bar .flex-spacer { display: none !important; }
+  .filter-bar > div:last-child { flex-shrink: 0; }
   .cal-month-strip { display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none; }
   .cal-month-strip::-webkit-scrollbar { display:none; }
   .cal-month-pill { padding:6px 16px;border-radius:99px;font-size:0.82rem;font-weight:600;color:#9ca3af;background:#f3f4f6;cursor:pointer;transition:all 0.15s;white-space:nowrap;border:none;font-family:inherit; }
@@ -400,21 +421,6 @@ self.addEventListener('fetch', e => {
     /* If bento-ev2 is hidden, bento-next takes full width */
     #bento-ev2[style*="display: none"] ~ #bento-next,
     #bento-ev2[style*="display:none"] ~ #bento-next { grid-column: span 2 !important; }
-
-    /* ── Filter bar — horizontal scroll on mobile ── */
-    #home-filter-bar {
-      flex-wrap: nowrap !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      -webkit-overflow-scrolling: touch !important;
-      scrollbar-width: none !important;
-      gap: 6px !important;
-      padding-bottom: 4px !important;
-    }
-    #home-filter-bar::-webkit-scrollbar { display: none !important; }
-    #home-filter-bar > .flex-spacer { display: none !important; }
-    #events-count { flex-shrink: 0 !important; }
-    #home-filter-bar > div:last-child { flex-shrink: 0 !important; }
 
     /* ── Filter buttons — wrap, never overflow ── */
     .artist-filter-btn, .cal-filter-btn {
@@ -755,7 +761,7 @@ self.addEventListener('fetch', e => {
      </div>
 
      <!-- FILTER BAR -->
-     <div id="home-filter-bar" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:0.75rem;">
+     <div id="home-filter-bar" class="filter-bar" style="margin-bottom:0.75rem;">
       <button class="artist-filter-btn" data-artist="all" onclick="filterHome('all')"
         style="padding:5px 14px;border-radius:6px;border:1px solid #111;background:#111;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.15s;" >All</button>
       <button class="artist-filter-btn" data-artist="Pond" onclick="filterHome('Pond')"
@@ -876,7 +882,7 @@ self.addEventListener('fetch', e => {
       <!-- ซ้าย: mini calendar -->
       <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:16px;flex-shrink:0;">
        <!-- filter pills แนวนอน -->
-       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+       <div class="filter-bar" style="margin-bottom:12px;">
         <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
           style="padding:4px 12px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
         <button class="cal-filter-btn" data-artist="Pond" onclick="filterCalendar('Pond')"
@@ -4014,11 +4020,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Init calendar date ──
   const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
 
-  // ── STEP 1: Immediately hydrate from localStorage (zero-latency) ──
+  // ── STEP 1: Clear stale localStorage cache — always fetch fresh on load ──
+  try {
+    [LC.TS_EV, LC.TS_BD, LC.TS_AN].forEach(k => localStorage.removeItem(k));
+  } catch(e) {}
+
+  // ── STEP 2: Immediately hydrate from localStorage (zero-latency skeleton) ──
   hydrateFromCache();
   debounceLucide();
 
-  // ── STEP 2: Fetch fresh data in background (non-blocking) ──
+  // ── STEP 3: Fetch fresh data in background (non-blocking) ──
   homeFilter = 'all';
   Promise.all([
     loadEventsFromSheets(),
@@ -4026,7 +4037,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAnniversariesFromSheets()
   ]).catch(() => {});
 
-  // ── STEP 3: Schedule recurring 60-second background refresh ──
+  // ── STEP 4: Schedule recurring 60-second background refresh ──
   scheduleAutoRefresh();
 });
   </script>
