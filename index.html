@@ -99,6 +99,18 @@ self.addEventListener('fetch', e => {
     --shadow-card: 0 2px 8px rgba(0,0,0,0.07);
     --border-card: none;
     --color-accent: #111;
+    /* Fluid spacing */
+    --page-pad-x: clamp(10px, 3vw, 2rem);
+    --page-pad-y: clamp(1rem, 2.5vw, 2rem);
+    --gap-cards:  clamp(8px, 1.5vw, 20px);
+    /* Fluid type scale */
+    --text-xs:   clamp(10px, 0.8vw, 12px);
+    --text-sm:   clamp(12px, 0.9vw, 14px);
+    --text-base: clamp(13px, 1vw,   16px);
+    --text-lg:   clamp(15px, 1.2vw, 18px);
+    --text-xl:   clamp(16px, 1.5vw, 22px);
+    --text-2xl:  clamp(18px, 2vw,   28px);
+    --text-3xl:  clamp(22px, 2.5vw, 36px);
   }
   * { font-family: 'Inter', sans-serif; }
   html { height: 100%; overflow: hidden; font-size: 105%; }
@@ -279,20 +291,19 @@ self.addEventListener('fetch', e => {
     .cal-event-dot { font-size: 0.68rem; padding: 2px 4px; }
     .cal-day { height: 80px; padding: 4px; }
     .detail-hero { height: 200px; }
-    .cards-grid { grid-template-columns: 1fr !important; }
   }
-  @media (min-width: 641px) and (max-width: 900px) {
-    .cards-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  /* ── Fluid card grid — auto-fills columns based on screen width ── */
+  .cards-grid {
+    display: grid !important;
+    gap: clamp(8px, 1.5vw, 20px) !important;
+    align-items: stretch !important;
   }
-  @media (min-width: 901px) and (max-width: 1100px) {
-    .cards-grid { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
-  }
-  @media (min-width: 1101px) and (max-width: 1300px) {
-    .cards-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
-  }
-  @media (min-width: 1301px) {
-    .cards-grid { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
-  }
+  @media (max-width: 480px)                          { .cards-grid { grid-template-columns: 1fr !important; } }
+  @media (min-width: 481px)  and (max-width: 767px)  { .cards-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; } }
+  @media (min-width: 768px)  and (max-width: 1023px) { .cards-grid { grid-template-columns: repeat(3,minmax(0,1fr)) !important; } }
+  @media (min-width: 1024px) and (max-width: 1399px) { .cards-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; } }
+  @media (min-width: 1400px) and (max-width: 1799px) { .cards-grid { grid-template-columns: repeat(5,minmax(0,1fr)) !important; } }
+  @media (min-width: 1800px)                         { .cards-grid { grid-template-columns: repeat(6,minmax(0,1fr)) !important; } }
   @media (max-width: 780px) {
     #form-preview-layout { grid-template-columns: 1fr !important; }
     #form-preview-col { border-left: none !important; border-top: 1px solid #f0f0f0; }
@@ -658,9 +669,65 @@ self.addEventListener('fetch', e => {
     .nav-link { font-size: 0.75rem !important; padding: 6px 8px !important; }
     .nav-label { display: none; }
   }
-  @media (max-width: 360px) {
-    #nav-site-title { font-size: 0.7rem; max-width: 100px; }
-    .nav-link { padding: 6px 7px !important; }
+  /* ══════════════════════════════════════════════
+     LARGE SCREENS  1440px – 1920px+
+  ══════════════════════════════════════════════ */
+  @media (min-width: 1440px) {
+    .nav-inner { max-width: 1600px; }
+    #page-home > div,
+    #page-calendar > div { max-width: 1600px !important; }
+  }
+  @media (min-width: 1920px) {
+    .nav-inner { max-width: 1800px; }
+    #page-home > div,
+    #page-calendar > div { max-width: 1800px !important; }
+    /* Hero bento: taller on big screens */
+    #bento-next, #bento-ev2 { aspect-ratio: 21/7 !important; }
+  }
+
+  /* ── Fluid page container ── */
+  #page-home > div,
+  #page-calendar > div {
+    padding: var(--page-pad-y) var(--page-pad-x) !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* ── Images always fluid ── */
+  .card-img, .cal-ev-card-img, .detail-hero {
+    width: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .card-img        { height: clamp(120px, 14vw, 180px); }
+  .cal-ev-card-img { height: clamp(90px,  10vw, 140px); }
+
+  /* ── Fluid typography ── */
+  #home-title        { font-size: var(--text-3xl) !important; }
+  #cal-section-title { font-size: var(--text-2xl) !important; }
+  .section-header    { font-size: var(--text-xl)  !important; }
+  .month-group-header-label { font-size: var(--text-xl) !important; }
+  .timeline-card-title, .list-card-title { font-size: var(--text-base) !important; }
+  .timeline-card-meta, .list-card-meta   { font-size: var(--text-sm)   !important; }
+
+  /* ── Hero bento fluid ── */
+  #bento-next-title, #bento-next2-title {
+    font-size: clamp(0.85rem, 1.2vw, 1.25rem) !important;
+  }
+
+  /* ── Calendar: fluid 3-col on large enough right panel ── */
+  @media (min-width: 1400px) {
+    #cal-card-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
+  }
+  @media (min-width: 1800px) {
+    #cal-card-grid { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+  }
+
+  /* ── List view 2-col: stack to 1 on small screens ── */
+  @media (max-width: 600px) {
+    #events-grid .cards-grid[style*="repeat(2"] {
+      grid-template-columns: 1fr !important;
+    }
   }
   </style>
  </head>
@@ -2306,7 +2373,7 @@ function renderHome() {
       // GRID VIEW
       const cg = document.createElement('div');
       cg.className = 'cards-grid';
-      cg.style.cssText = 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:stretch;';
+      cg.style.cssText = 'display:grid;gap:clamp(8px,1.5vw,20px);align-items:stretch;';
       group.forEach(ev => {
         const card = createCard(ev);
         if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) cg.appendChild(card);
