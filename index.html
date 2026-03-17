@@ -187,9 +187,9 @@ self.addEventListener('fetch', e => {
   .cal-month-pill:hover { background:#e5e7eb;color:#111; }
   .cal-month-pill.active { background:#111;color:#fff;font-weight:700; }
   /* date strip */
-  .cal-date-strip { display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none; }
+  .cal-date-strip { display:flex;gap:4px;overflow-x:auto;overflow-y:visible;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch; }
   .cal-date-strip::-webkit-scrollbar { display:none; }
-  .cal-date-chip { min-width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border-radius:12px;cursor:pointer;transition:all 0.15s;border:none;background:transparent;font-family:inherit;position:relative;flex-shrink:0; }
+  .cal-date-chip { width:42px;min-width:42px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:none;background:transparent;font-family:inherit;position:relative;box-sizing:border-box; }
   .cal-date-chip:hover { background:#f3f4f6; }
   .cal-date-chip.today { background:#111; }
   .cal-date-chip.today .cal-date-chip-dow { color:rgba(255,255,255,0.5); }
@@ -789,10 +789,13 @@ self.addEventListener('fetch', e => {
       </div>
      </div>
 
-     <!-- Yearly stats — white minimal -->
-     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;">
-      <!-- White summary row -->
-      <div style="background:#fff;border:1px solid #f0f0f0;border-radius:12px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+     <!-- ── แถวเดียว: กรอบซ้าย + กรอบขวา ── -->
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;align-items:start;">
+
+     <!-- กรอบ 1: Stats + Artist -->
+     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 20px;">
+      <!-- แถว 1: Total + Past/Remaining/% -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-bottom:12px;border-bottom:1px solid #f3f4f6;margin-bottom:12px;">
        <div style="display:flex;align-items:baseline;gap:8px;">
         <div id="cal-stat-total" style="font-size:2rem;font-weight:700;color:#111;line-height:1;letter-spacing:-0.03em;">-</div>
         <div id="cal-stat-year-label" style="font-size:0.65rem;font-weight:600;color:#9ca3af;letter-spacing:0.07em;">2026 · Total</div>
@@ -814,7 +817,7 @@ self.addEventListener('fetch', e => {
         </div>
        </div>
       </div>
-      <!-- Artist row -->
+      <!-- แถว 2: Pond / Phuwin / Permpoon -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
        <div style="background:#fff7ed;border:0.5px solid #fed7aa;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
@@ -843,8 +846,15 @@ self.addEventListener('fetch', e => {
       </div>
      </div>
 
+     <!-- กรอบ 2: Month grid 4×3 -->
+     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;">
+      <div id="cal-month-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+     </div>
+
+     </div><!-- end grid row -->
+
      <!-- NEXT EVENT BANNER -->
-     <div id="cal-next-event-banner" style="display:none;background:#fff;border:none;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:14px 16px;margin-bottom:1.25rem;align-items:center;gap:14px;cursor:pointer;" onclick="openDetailModal(this.dataset.eventId)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openDetailModal(this.dataset.eventId)">
+     <div id="cal-next-event-banner" style="display:none;background:#fff;border:none;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:14px 16px;margin-bottom:1rem;align-items:center;gap:14px;cursor:pointer;" onclick="openDetailModal(this.dataset.eventId)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openDetailModal(this.dataset.eventId)">
       <div id="cal-next-event-icon" style="width:44px;height:44px;border-radius:12px;background:#fff7ed;border:1.5px solid #fed7aa;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
        <svg width="20" height="20" fill="none" stroke="#f97316" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
@@ -856,13 +866,9 @@ self.addEventListener('fetch', e => {
       <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
      </div>
 
-     <!-- ── Month strip ── -->
-     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;margin-bottom:1.25rem;">
-      <div id="cal-month-strip" class="cal-month-strip"></div>
-     </div>
 
      <!-- ── Filter + Date strip ── -->
-     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;margin-bottom:1.25rem;">
+     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;margin-bottom:1.25rem;overflow:hidden;">
       <!-- Filter pills -->
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
        <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
@@ -873,9 +879,13 @@ self.addEventListener('fetch', e => {
          style="padding:4px 14px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
        <button class="cal-filter-btn" data-artist="Permpoon" onclick="filterCalendar('Permpoon')"
          style="padding:4px 14px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
-       <span id="cal-month-label" style="margin-left:auto;font-weight:700;font-size:0.9rem;color:#111;"></span>
       </div>
-      <!-- Date strip -->
+      <!-- Month label + count แถวบน -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+       <div id="cal-month-label" style="font-weight:700;font-size:0.95rem;color:#111;"></div>
+       <div style="font-size:0.72rem;color:#9ca3af;"><span id="cal-month-event-count">—</span> events</div>
+      </div>
+      <!-- Date strip เต็มแถว scroll ได้ -->
       <div id="cal-date-strip" class="cal-date-strip"></div>
      </div>
 
@@ -2888,13 +2898,36 @@ function renderCalendar() {
     else { const first = Object.keys(monthEvents).sort()[0]; calSelectedDate = first || `${monthStr}-01`; }
   }
 
-  // ── Month strip ──
+  // ── Month event count ──
+  const totalMonthEvents = new Set();
+  filteredEvs.forEach(ev => {
+    if (!ev.dateStart) return;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
+      if (ds >= ev.dateStart && ds <= (ev.dateEnd || ev.dateStart)) {
+        totalMonthEvents.add(ev.__backendId || ev.title);
+        break;
+      }
+    }
+  });
+  const countEl = document.getElementById('cal-month-event-count');
+  if (countEl) countEl.textContent = totalMonthEvents.size;
+
+  // ── Month strip (4×3 grid) ──
   const stripEl = document.getElementById('cal-month-strip');
   if (stripEl) {
     const allMonthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const evCountByMonth = Array(12).fill(0);
+    filteredEvs.forEach(ev => {
+      if (!ev.dateStart || !ev.dateStart.startsWith(String(calYear))) return;
+      const m = parseInt(ev.dateStart.split('-')[1]) - 1;
+      if (m >= 0 && m < 12) evCountByMonth[m]++;
+    });
     stripEl.innerHTML = allMonthNames.map((mn, mi) => {
-      const active = mi === month ? ' active' : '';
-      return `<button class="cal-month-pill${active}" onclick="calMonth=${mi};calSelectedDate=null;renderCalendar();">${mn}</button>`;
+      const isActive = mi === month;
+      const count = evCountByMonth[mi];
+      const dotHtml = count > 0 ? `<span style="width:5px;height:5px;border-radius:50%;background:${isActive?'rgba(255,255,255,0.55)':'#f97316'};display:inline-block;flex-shrink:0;"></span>` : '';
+      return `<button onclick="calMonth=${mi};calSelectedDate=null;renderCalendar();" style="padding:9px 6px;border-radius:10px;border:none;font-size:0.82rem;font-weight:${isActive?'700':'600'};background:${isActive?'#111':'#f3f4f6'};color:${isActive?'#fff':'#374151'};cursor:pointer;transition:all 0.15s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">${mn}${dotHtml}</button>`;
     }).join('');
   }
 
@@ -2902,17 +2935,8 @@ function renderCalendar() {
   const dateStripEl = document.getElementById('cal-date-strip');
   if (dateStripEl) {
     const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    // Show days that have events, plus today if in this month
-    const daysToShow = new Set();
-    Object.keys(monthEvents).forEach(ds => { const d = parseInt(ds.split('-')[2]); daysToShow.add(d); });
-    if (today.getFullYear() === year && today.getMonth() === month) daysToShow.add(today.getDate());
-    // Sort and render
-    const sortedDays = Array.from(daysToShow).sort((a,b)=>a-b);
-    if (sortedDays.length === 0) {
-      // No events — show full month strip compactly
-      for (let d = 1; d <= daysInMonth; d++) daysToShow.add(d);
-    }
-    const days = sortedDays.length > 0 ? sortedDays : Array.from(daysToShow).sort((a,b)=>a-b);
+    // แสดงทุกวันในเดือนเสมอ
+    const days = Array.from({length: daysInMonth}, (_, i) => i + 1);
     dateStripEl.innerHTML = days.map(d => {
       const ds = `${monthStr}-${String(d).padStart(2,'0')}`;
       const isToday = ds === todayStr;
