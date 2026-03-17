@@ -3294,9 +3294,11 @@ function startCountdown(dateStr, timeStr) {
   if (_countdownTimer) clearInterval(_countdownTimer);
   const cdEl = document.getElementById('bento-countdown');
   if (!cdEl || !dateStr) return;
-  let t = (timeStr || '').replace(/[^\d:]/g,'').trim();
+  // Use only the first time if multiple (e.g. "13:00/15:00/17:00")
+  let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
   if (!t) t = '00:00';
   if (!t.includes(':')) t = t.slice(0,2)+':'+t.slice(2);
+  if (t.length === 4) t = '0' + t; // e.g. "8:00" → "08:00"
   const target = new Date(dateStr + 'T' + t + ':00');
   if (isNaN(target)) { cdEl.style.display = 'none'; return; }
   _countdownTarget = target;
