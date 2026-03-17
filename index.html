@@ -861,7 +861,7 @@ self.addEventListener('fetch', e => {
 
      <!-- ── Filter + Date strip ── -->
      <div style="background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:14px 16px;margin-bottom:1.25rem;">
-      <!-- Filter pills -->
+      <!-- Filter pills + Year selector -->
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
        <button class="cal-filter-btn" data-artist="all" onclick="filterCalendar('all')"
          style="padding:4px 14px;border-radius:99px;border:2px solid #111;background:#111;color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">All</button>
@@ -871,6 +871,11 @@ self.addEventListener('fetch', e => {
          style="padding:4px 14px;border-radius:99px;border:2px solid #6b7280;background:#fff;color:#6b7280;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Phuwin</button>
        <button class="cal-filter-btn" data-artist="Permpoon" onclick="filterCalendar('Permpoon')"
          style="padding:4px 14px;border-radius:99px;border:2px solid #22c55e;background:#fff;color:#22c55e;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.15s;">Permpoon</button>
+       <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+        <button onclick="calYear--;calSelectedDate=null;renderCalendar();" style="width:28px;height:28px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;">‹</button>
+        <span id="cal-year-label" style="font-size:0.88rem;font-weight:700;color:#111;min-width:36px;text-align:center;"></span>
+        <button onclick="calYear++;calSelectedDate=null;renderCalendar();" style="width:28px;height:28px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;">›</button>
+       </div>
       </div>
       <!-- Month label + count แถวบน -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -2865,6 +2870,8 @@ function renderCalendar() {
   const monthNames = t('month_names');
   const labelEl = document.getElementById('cal-month-label');
   if (labelEl) labelEl.textContent = monthNames[month] + ' ' + year;
+  const yearLabelEl = document.getElementById('cal-year-label');
+  if (yearLabelEl) yearLabelEl.textContent = year;
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
