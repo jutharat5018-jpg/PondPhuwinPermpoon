@@ -1104,11 +1104,30 @@ self.addEventListener('fetch', e => {
 
        <div>
         <label class="form-label" for="ev-startTime" style="font-weight:700;">Start Time <span style="color:#ec4899;">*</span></label>
-        <input class="form-input" id="ev-startTime" name="startTime" type="text" placeholder="e.g. 18:00 GMT+7" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input class="form-input" id="ev-startTime" name="startTime" type="time" style="border:1.5px solid #111;background:#f9f9f9;font-weight:600;flex:1;">
+          <select id="ev-startTimezone" style="padding:0.65rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;color:#374151;background:#f9fafb;cursor:pointer;outline:none;font-family:inherit;">
+            <option value="GMT+7">GMT+7</option>
+            <option value="GMT+8">GMT+8</option>
+            <option value="GMT+9">GMT+9</option>
+            <option value="GMT+0">GMT+0</option>
+            <option value="GMT+1">GMT+1</option>
+          </select>
+        </div>
+        <div style="font-size:0.72rem;color:#9ca3af;margin-top:4px;">ไม่เลือกก็ได้ — กรอกหรือปล่อยว่างไว้</div>
        </div>
        <div>
         <label class="form-label" for="ev-endTime">End Time <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
-        <input class="form-input" id="ev-endTime" name="endTime" type="text" placeholder="e.g. 21:00 GMT+7">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input class="form-input" id="ev-endTime" name="endTime" type="time" style="flex:1;">
+          <select id="ev-endTimezone" style="padding:0.65rem 0.75rem;border:1px solid #e5e7eb;border-radius:10px;font-size:0.88rem;color:#374151;background:#f9fafb;cursor:pointer;outline:none;font-family:inherit;">
+            <option value="GMT+7">GMT+7</option>
+            <option value="GMT+8">GMT+8</option>
+            <option value="GMT+9">GMT+9</option>
+            <option value="GMT+0">GMT+0</option>
+            <option value="GMT+1">GMT+1</option>
+          </select>
+        </div>
        </div>
 
       </div>
@@ -3536,7 +3555,20 @@ function clearForm() {
 function fillForm(ev) {
   const set = (key, val) => { const el=document.getElementById('ev-'+key); if(el) el.value=val||''; };
   set('dateStart',ev.dateStart); set('dateEnd',ev.dateEnd);
-  set('startTime',ev.startTime||''); set('endTime',ev.endTime||'');
+
+  // Parse startTime: extract HH:MM for time input, timezone for select
+  const parsetime = (val, timeId, tzId) => {
+    if (!val) return;
+    const match = val.match(/(\d{1,2}:\d{2})/);
+    const tzMatch = val.match(/(GMT[+-]\d+)/i);
+    const tel = document.getElementById(timeId);
+    const tzel = document.getElementById(tzId);
+    if (tel && match) tel.value = match[1].padStart(5,'0');
+    if (tzel && tzMatch) tzel.value = tzMatch[1].toUpperCase();
+  };
+  parsetime(ev.startTime, 'ev-startTime', 'ev-startTimezone');
+  parsetime(ev.endTime,   'ev-endTime',   'ev-endTimezone');
+
   set('title',ev.title); set('image',ev.image); set('heroImage',ev.heroImage);
   set('country',ev.country); set('city',ev.city); set('location',ev.location);
   set('description',ev.description); set('type',ev.type); set('note',ev.note);
@@ -3551,11 +3583,19 @@ function fillForm(ev) {
   document.querySelectorAll('.artist-check').forEach(c => { c.checked = arr.includes(c.value); });
 }
 function fv(key) { const el=document.getElementById('ev-'+key); return el ? el.value.trim() : ''; }
+// Read time field — combine HH:MM with timezone select
+function fvTime(key) {
+  const el = document.getElementById('ev-'+key);
+  const tzEl = document.getElementById('ev-'+key+'Timezone');
+  if (!el || !el.value) return '';
+  const tz = tzEl ? tzEl.value : 'GMT+7';
+  return el.value + ' ' + tz; // e.g. "18:00 GMT+7"
+}
 function readFormSchema() {
   const artists = [...document.querySelectorAll('.artist-check:checked')].map(c=>c.value);
   return {
     dateStart:fv('dateStart'), dateEnd:fv('dateEnd'),
-    startTime:fv('startTime'), endTime:fv('endTime'),
+    startTime:fvTime('startTime'), endTime:fvTime('endTime'),
     title:fv('title'), image:fv('image'),
     artists:artists.join(','), country:fv('country'), city:fv('city'),
     location:fv('location'), description:fv('description'),
