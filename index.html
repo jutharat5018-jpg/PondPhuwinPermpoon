@@ -195,11 +195,37 @@ self.addEventListener('fetch', e => {
   }
   .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-left: 1px solid #f0f0f0; border-top: 1px solid #f0f0f0; width: 100%; }
   .cal-grid > div { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
-  /* ── Hero bento: stack vertically on mobile ── */
-  #bento-next, #bento-ev2 { aspect-ratio: 16/6; min-height: 160px; }
+  /* ── Hero bento: flex-wrap responsive layout ── */
+  #bento-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  #bento-next, #bento-ev2 {
+    flex: 1 1 420px;
+    min-width: 280px;
+    max-width: 100%;
+    min-height: 160px;
+    aspect-ratio: 16/6;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  @media (max-width: 900px) {
+    #bento-next, #bento-ev2 {
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
+      aspect-ratio: 16/7 !important;
+    }
+  }
   @media (max-width: 600px) {
-    #bento-grid { grid-template-columns: 1fr !important; }
-    #bento-next, #bento-ev2 { aspect-ratio: 16/9 !important; min-height: 160px !important; }
+    #bento-next, #bento-ev2 {
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
+      aspect-ratio: 16/9 !important;
+      min-height: 160px !important;
+    }
   }
   /* ── Filter bar — always horizontal scroll, never wrap ── */
   .filter-bar {
@@ -736,6 +762,14 @@ self.addEventListener('fetch', e => {
   /* ── Hero bento fluid ── */
   #bento-next-title, #bento-next2-title {
     font-size: clamp(0.85rem, 1.2vw, 1.25rem) !important;
+    word-break: break-word;
+  }
+  /* Ensure bg layers never push layout */
+  #bento-next-bg, #bento-next2-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
   }
 
   /* ── Calendar card grid: fluid auto-fill ── */
@@ -773,9 +807,9 @@ self.addEventListener('fetch', e => {
      <div id="bday-banners" style="display:none;flex-direction:column;gap:8px;margin-bottom:1.5rem;"></div>
 
      <!-- HERO -->
-     <div id="bento-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;">
+     <div id="bento-grid">
       <!-- Event 1 -->
-      <div id="bento-next" style="background:#111;border-radius:14px;overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
+      <div id="bento-next" style="background:#111;border-radius:14px;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick()">
        <div id="bento-next-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
        <div style="position:absolute;top:18px;left:20px;">
@@ -799,7 +833,7 @@ self.addEventListener('fetch', e => {
        </div>
       </div>
       <!-- Event 2 -->
-      <div id="bento-ev2" style="background:#111;border-radius:14px;overflow:hidden;position:relative;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
+      <div id="bento-ev2" style="background:#111;border-radius:14px;display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;padding:18px 20px;" onclick="bentoNextClick2()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')bentoNextClick2()">
        <div id="bento-next2-bg" style="position:absolute;inset:0;background-size:cover;background-position:top center;opacity:0.45;"></div>
        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.08) 100%);"></div>
        <div style="position:relative;">
@@ -4468,16 +4502,7 @@ function shareEvent(title, id) {
   }
 }
 
-function syncBentoHeight() {
-  const a = document.getElementById('bento-next');
-  const b = document.getElementById('bento-ev2');
-  if (!a || !b) return;
-  // reset ก่อน
-  a.style.height = ''; b.style.height = '';
-  const h = Math.max(a.offsetHeight, b.offsetHeight);
-  a.style.height = h + 'px';
-  b.style.height = h + 'px';
-}
+function syncBentoHeight() { /* no-op: flex + aspect-ratio handles height */ }
 
 function bentoNextClick() {
   const el = document.getElementById('bento-next');
