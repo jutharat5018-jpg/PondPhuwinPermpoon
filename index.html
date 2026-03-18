@@ -2668,7 +2668,19 @@ function _getTodayStr() {
 }
 function isEventPast(ev) {
   if (!ev.dateStart) return false;
-  return ev.dateStart < _getTodayStr();
+  const todayStr = _getTodayStr();
+  if (ev.dateStart < todayStr) return true;
+  if (ev.dateStart === todayStr && ev.startTime) {
+    const nowBKK = new Date(Date.now() + (7 * 3600000) + new Date().getTimezoneOffset() * 60000);
+    const rawT = ev.startTime.split('/')[0].replace(/[^\d:]/g,'').trim();
+    let hhmm = rawT.includes(':') ? rawT : (rawT.slice(0,2)+':'+rawT.slice(2));
+    if (hhmm.split(':')[0].length === 1) hhmm = '0' + hhmm;
+    const parts = hhmm.split(':');
+    const evStart = new Date(nowBKK);
+    evStart.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+    return nowBKK >= evStart;
+  }
+  return false;
 }
 function isEventUpcoming(ev) { return !isEventPast(ev); }
 
@@ -4254,26 +4266,21 @@ function startCountdown(dateStr, timeStr) {
 
   let target = _parseEventTarget(dateStr, timeStr);
 
-  // If target already passed and it's today, count to end of day
-  if (target <= new Date()) {
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0,10);
-    if (dateStr === todayStr) {
-      target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    }
+  // ถ้า target ผ่านไปแล้ว → ซ่อน countdown และ re-render ให้งานย้ายไป past
+  if (target <= new Date() || isNaN(target.getTime())) {
+    cdEl.style.display = 'none';
+    clearInterval(_countdownTimer);
+    scheduleRender();
+    return;
   }
-  if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
   _countdownTarget = target;
   function tick() {
     const now  = new Date();
     const diff = target - now;
     if (diff <= 0) {
-      document.getElementById('cd-days').textContent  = '0';
-      document.getElementById('cd-hours').textContent = '00';
-      document.getElementById('cd-mins').textContent  = '00';
-      document.getElementById('cd-secs').textContent  = '00';
-      cdEl.style.display = 'flex';
+      cdEl.style.display = 'none';
       clearInterval(_countdownTimer);
+      scheduleRender();
       return;
     }
     const d = Math.floor(diff / 86400000);
@@ -4297,24 +4304,20 @@ function startCountdown2(dateStr, timeStr) {
 
   let target = _parseEventTarget(dateStr, timeStr);
 
-  if (target <= new Date()) {
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0,10);
-    if (dateStr === todayStr) {
-      target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    }
+  // ถ้า target ผ่านไปแล้ว → ซ่อน countdown และ re-render ให้งานย้ายไป past
+  if (target <= new Date() || isNaN(target.getTime())) {
+    cdEl.style.display = 'none';
+    clearInterval(window._countdownTimer2);
+    scheduleRender();
+    return;
   }
-  if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
   function tick2() {
     const now  = new Date();
     const diff = target - now;
     if (diff <= 0) {
-      document.getElementById('cd2-days').textContent  = '0';
-      document.getElementById('cd2-hours').textContent = '00';
-      document.getElementById('cd2-mins').textContent  = '00';
-      document.getElementById('cd2-secs').textContent  = '00';
-      cdEl.style.display = 'flex';
+      cdEl.style.display = 'none';
       clearInterval(window._countdownTimer2);
+      scheduleRender();
       return;
     }
     const d = Math.floor(diff / 86400000);
