@@ -3339,28 +3339,8 @@ function renderCalendarCardGrid(monthEvents) {
     const calDays = daysUntilEvent(ev.dateStart);
     const calIsToday = calDays === 0;
     const calIsNext = _nextEventId && ev.__backendId === _nextEventId;
-    // Build inline countdown for calendar card
+    // Countdown removed from calendar cards
     let calCountdownHtml = '';
-    if (!past && calDays !== null && calDays >= 0 && calDays <= 365) {
-      const ms = msUntilEvent(ev);
-      if (ms !== null && ms > 0) {
-        const cd = Math.floor(ms / 86400000);
-        const ch = Math.floor((ms % 86400000) / 3600000);
-        const cm = Math.floor((ms % 3600000)  / 60000);
-        const cs = Math.floor((ms % 60000)    / 1000);
-        const cid = ev.__backendId;
-        const nextLbl = calIsNext ? `<span style="font-size:0.52rem;font-weight:800;letter-spacing:0.08em;color:#f97316;text-transform:uppercase;margin-right:4px;">⚡ Next</span>` : '';
-        calCountdownHtml = `<div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;margin-top:5px;" data-countdown-ev="${cid}">
-          ${nextLbl}
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-d">${cd}</span><span>D</span></span>
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-h">${String(ch).padStart(2,'0')}</span><span>H</span></span>
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-m">${String(cm).padStart(2,'0')}</span><span>M</span></span>
-          <span class="count-box" style="min-width:28px;"><span id="cd-${cid}-s">${String(cs).padStart(2,'0')}</span><span>S</span></span>
-        </div>`;
-      } else if (calIsToday) {
-        calCountdownHtml = `<div style="margin-top:5px;"><span class="today-badge" style="position:static;display:inline-block;">TODAY</span></div>`;
-      }
-    }
     // Image or gradient placeholder
     const gradients = {
       '#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)',
