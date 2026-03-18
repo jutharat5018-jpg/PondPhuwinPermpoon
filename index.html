@@ -977,13 +977,13 @@ self.addEventListener('fetch', e => {
        </div>
        <!-- DOW headers -->
        <div id="cal-dow-headers" style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;margin-bottom:3px;width:fit-content;">
-        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">S</div>
-        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">M</div>
-        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">T</div>
-        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">W</div>
-        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">T</div>
-        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">F</div>
-        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;">S</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;" data-i18n-dow="0">S</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;" data-i18n-dow="1">M</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;" data-i18n-dow="2">T</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;" data-i18n-dow="3">W</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;" data-i18n-dow="4">T</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;" data-i18n-dow="5">F</div>
+        <div style="text-align:center;font-size:0.6rem;font-weight:700;color:#9ca3af;padding:4px 0;" data-i18n-dow="6">S</div>
        </div>
        <!-- Calendar grid cells -->
        <div id="cal-date-strip" style="display:grid;grid-template-columns:repeat(7,36px);gap:2px;width:fit-content;"></div>
@@ -992,7 +992,7 @@ self.addEventListener('fetch', e => {
       <!-- ขวา: event cards -->
       <div style="min-width:0;">
        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-size:0.72rem;color:#9ca3af;"><span id="cal-month-event-count">—</span> events</div>
+        <div style="font-size:0.72rem;color:#9ca3af;"><span id="cal-month-event-count">—</span> <span data-i18n="stat_events">events</span></div>
        </div>
        <div id="cal-card-grid" style="display:flex;flex-direction:column;gap:10px;">
         <div style="text-align:center;padding:3rem;color:#9ca3af;font-size:0.85rem;">Loading...</div>
@@ -1934,6 +1934,12 @@ function applyI18n() {
     const val = t(key);
     if (val && val !== key) el.placeholder = val;
   });
+  // Update DOW headers
+  const abbr = t('day_abbr');
+  document.querySelectorAll('[data-i18n-dow]').forEach(el => {
+    const idx = parseInt(el.getAttribute('data-i18n-dow'));
+    if (abbr && abbr[idx]) el.textContent = abbr[idx].charAt(0);
+  });
   // Update form submit button text
   const submitText = document.getElementById('form-submit-text');
   if (submitText) submitText.textContent = t('admin_save_event');
@@ -1967,11 +1973,11 @@ function setLang(lang) {
   if (noEvMonth) noEvMonth.textContent = t('no_events_month');
   const noEvAdmin = document.getElementById('admin-no-events-txt');
   if (noEvAdmin) noEvAdmin.textContent = t('no_events_admin');
-  // Re-render current page
+  // Re-render current page immediately
   const page = document.querySelector('.page.active');
   if (page) {
     const id = page.id;
-    if (id === 'page-home') scheduleRender();
+    if (id === 'page-home') renderHome();
     else if (id === 'page-calendar') renderCalendar();
   }
 }
@@ -2989,10 +2995,10 @@ function buildTypePill(type, size) {
 function buildDateBadge(ev, color) {
   if (!ev.dateStart) return '';
   const d = new Date(ev.dateStart + 'T00:00:00');
-  const dow = d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
+  const dow = d.toLocaleDateString(t('date_locale'), { weekday: 'short' }).toUpperCase();
   if (ev.dateEnd && ev.dateEnd !== ev.dateStart) {
     const d2 = new Date(ev.dateEnd + 'T00:00:00');
-    const dow2 = d2.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase();
+    const dow2 = d2.toLocaleDateString(t('date_locale'), { weekday: 'short' }).toUpperCase();
     return `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.4rem 0.6rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.62rem;font-weight:700;letter-spacing:0.04em;">${dow} ${d.getDate()} – ${dow2} ${d2.getDate()}</div></div>`;
   }
   return `<div style="position:absolute;top:12px;right:12px;background:${color};color:#fff;border-radius:8px;padding:0.5rem 0.75rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);"><div style="font-size:0.7rem;font-weight:700;letter-spacing:0.05em;">${dow}</div><div style="font-size:1.3rem;font-weight:700;line-height:1;">${d.getDate()}</div></div>`;
@@ -4015,7 +4021,7 @@ function renderAdminList() {
     let monthLabel = 'No Date';
     if (monthKey !== 'no-date') {
       const d = new Date(monthKey + '-01T00:00:00');
-      monthLabel = d.toLocaleDateString('en-US', {month:'long', year:'numeric'});
+      monthLabel = d.toLocaleDateString(t('date_locale'), {month:'long', year:'numeric'});
     }
     const pastCount = evs.filter(e => isEventPast(e)).length;
     const upCount = evs.length - pastCount;
