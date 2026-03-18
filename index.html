@@ -2442,8 +2442,9 @@ function renderHome() {
         const locStr  = ev.location  ? escHtml(ev.location)  : '';
         const meta = [dateStr, timeStr, locStr].filter(Boolean).join(' · ');
         const days = daysUntilEvent(ev.dateStart);
+        const _badgeGrads = ['linear-gradient(135deg,#ef4444,#f97316)','linear-gradient(135deg,#f97316,#fbbf24)','linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#059669,#3b82f6)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#0891b2,#7c3aed)','linear-gradient(135deg,#d97706,#ef4444)','linear-gradient(135deg,#059669,#0891b2)'];
         const countdownBadge = (days !== null && days >= 0 && days <= 7)
-          ? `<span style="background:${color};color:#fff;font-size:0.62rem;font-weight:800;padding:2px 8px;border-radius:99px;letter-spacing:0.04em;margin-left:auto;flex-shrink:0;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
+          ? `<span style="background:${_badgeGrads[days]||_badgeGrads[7]};color:#fff;font-size:0.62rem;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:0.07em;margin-left:auto;flex-shrink:0;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
         const imgHtml = ev.image
           ? `<img src="${escHtml(ev.image)}" style="width:68px;height:68px;border-radius:10px;object-fit:cover;object-position:top;display:block;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">`
           : `<div style="width:68px;height:68px;border-radius:10px;background:${grad};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
@@ -2469,8 +2470,9 @@ function renderHome() {
         const color = getArtistColor(ev.artists);
         const artistLabel = ev.artists ? ev.artists.split(',').map(a=>a.trim()).join(' · ') : '';
         const days = daysUntilEvent(ev.dateStart);
+        const _badgeGrads2 = ['linear-gradient(135deg,#ef4444,#f97316)','linear-gradient(135deg,#f97316,#fbbf24)','linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#059669,#3b82f6)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#0891b2,#7c3aed)','linear-gradient(135deg,#d97706,#ef4444)','linear-gradient(135deg,#059669,#0891b2)'];
         const countdownBadge = (days !== null && days >= 0 && days <= 7)
-          ? `<span style="background:${color};color:#fff;font-size:0.58rem;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:0.04em;margin-left:auto;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
+          ? `<span style="background:${_badgeGrads2[days]||_badgeGrads2[7]};color:#fff;font-size:0.58rem;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:0.07em;margin-left:auto;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
         const row = document.createElement('div');
         row.style.cssText = `display:flex;gap:14px;align-items:flex-start;padding-bottom:${idx === group.length-1 ? '0' : '14px'};`;
         // dot / date circle
