@@ -2444,16 +2444,16 @@ function processEvents(raw) {
       // วันก่อนหน้า → past แน่นอน
       ev._isPast = true;
     } else if (ev.dateStart === todayStr) {
-      // วันนี้ → ดูเวลา endTime (ถ้ามี) หรือ startTime
-      const timeRef = ev.endTime || ev.startTime;
+      // วันนี้ → ดูแค่ startTime
+      const timeRef = ev.startTime;
       if (timeRef) {
         const rawT = timeRef.split('/')[0].replace(/[^\d:]/g,'').trim();
         let hhmm = rawT.includes(':') ? rawT : (rawT.slice(0,2)+':'+rawT.slice(2));
         if (hhmm.split(':')[0].length === 1) hhmm = '0' + hhmm;
         const parts = hhmm.split(':');
-        const evEnd = new Date(nowBKK);
-        evEnd.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
-        ev._isPast = nowBKK >= evEnd;
+        const evStart = new Date(nowBKK);
+        evStart.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+        ev._isPast = nowBKK >= evStart;
       } else {
         // ไม่มีเวลา → ถือว่ายังไม่ past ตลอดทั้งวัน
         ev._isPast = false;
@@ -5179,15 +5179,15 @@ function _fastHydrateFromCache() {
       if (ev.dateStart < todayStr) {
         ev._isPast = true;
       } else if (ev.dateStart === todayStr) {
-        const timeRef = ev.endTime || ev.startTime;
+        const timeRef = ev.startTime;
         if (timeRef) {
           const rawT = timeRef.split('/')[0].replace(/[^\d:]/g,'').trim();
           let hhmm = rawT.includes(':') ? rawT : (rawT.slice(0,2)+':'+rawT.slice(2));
           if (hhmm.split(':')[0].length === 1) hhmm = '0' + hhmm;
           const parts = hhmm.split(':');
-          const evEnd = new Date(nowBKK);
-          evEnd.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
-          ev._isPast = nowBKK >= evEnd;
+          const evStart = new Date(nowBKK);
+          evStart.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+          ev._isPast = nowBKK >= evStart;
         } else {
           ev._isPast = false;
         }
