@@ -2759,7 +2759,9 @@ function buildCountdownImgBadge(ev, inline = false) {
   const st = styles[days] || styles[7];
   const pos = inline
     ? `display:inline-block;margin-bottom:6px;`
-    : `position:absolute;top:8px;left:8px;z-index:4;`;
+    : days <= 1
+      ? `position:absolute;top:8px;left:8px;z-index:4;`
+      : `position:absolute;bottom:8px;left:8px;z-index:4;`;
   return `<div style="${pos}${st}color:#fff;font-weight:800;padding:4px 11px;border-radius:8px;font-size:0.62rem;letter-spacing:0.07em;">${label}</div>`;
 }
 
