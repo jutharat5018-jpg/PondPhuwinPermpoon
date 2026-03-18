@@ -145,7 +145,24 @@ self.addEventListener('fetch', e => {
 
   // Force reload on back/forward cache restore (iPhone bfcache fix)
   window.addEventListener('pageshow', function(event) {
-    if (event.persisted) window.location.reload();
+    if (event.persisted) {
+      // bfcache restore — clear stale cache and re-fetch
+      try {
+        if (typeof Cache !== 'undefined' && typeof LC !== 'undefined') {
+          Cache.del(LC.TS_EV); Cache.del(LC.TS_BD); Cache.del(LC.TS_AN);
+        }
+        if (typeof _memCache !== 'undefined') _memCache.clear();
+      } catch(e) {}
+      if (typeof loadEventsFromSheets === 'function') {
+        Promise.all([
+          loadEventsFromSheets(true),
+          loadBirthdaysFromSheets(true),
+          loadAnniversariesFromSheets(true)
+        ]).catch(() => {});
+      } else {
+        window.location.reload();
+      }
+    }
   });
   </script>
   <style>
@@ -4964,9 +4981,13 @@ document.addEventListener('touchmove',  () => {}, { passive: true });
 // Pause/resume background refresh when tab visibility changes
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    // Tab became visible — only refetch if rate limiter allows AND cache is stale
-    if (!Cache.isFresh(LC.TS_EV) && _rateLimit.allow('visibility_refresh', 30000)) {
-      loadEventsFromSheets().catch(()=>{});
+    // Tab became visible — always refetch if rate limiter allows (30s cooldown)
+    if (_rateLimit.allow('visibility_refresh', 30000)) {
+      Cache.del(LC.TS_EV);
+      if (typeof _memCache !== 'undefined') _memCache.clear();
+      loadEventsFromSheets(true).catch(()=>{});
+      loadBirthdaysFromSheets(true).catch(()=>{});
+      loadAnniversariesFromSheets(true).catch(()=>{});
     }
   }
 });
