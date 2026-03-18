@@ -3433,6 +3433,7 @@ function msUntilEvent(ev) {
 // Renders TODAY / N DAYS badge (overlaid on image, or inline)
 function buildCountdownImgBadge(ev, inline = false) {
   if (!ev.dateStart) return '';
+  if (isEventPast(ev)) return '';
   const days = daysUntilEvent(ev.dateStart);
   if (days === null || days < 0 || days > 7 || days <= 1) return '';
   const styles = [
@@ -3498,8 +3499,9 @@ function startCardCountdowns() {
       const ms = msUntilEvent(ev);
       if (ms === null) return;
       if (ms <= 0) {
-        // Event passed — hide the ticker
+        // Event passed — hide the ticker and re-render so card moves to past
         widget.style.display = 'none';
+        scheduleRender();
         return;
       }
       const d = Math.floor(ms / 86400000);
@@ -3999,6 +4001,11 @@ function renderCalendarCardGrid(monthEvents) {
     });
   });
   eventsToShow.sort((a, b) => {
+    // upcoming ก่อน past เสมอ
+    const aPast = isEventPast(a) ? 1 : 0;
+    const bPast = isEventPast(b) ? 1 : 0;
+    if (aPast !== bPast) return aPast - bPast;
+    // ภายในกลุ่มเดียวกัน เรียงตามวันที่ + เวลา
     if (!a.dateStart && !b.dateStart) return 0;
     if (!a.dateStart) return 1;
     if (!b.dateStart) return -1;
@@ -4046,7 +4053,7 @@ function renderCalendarCardGrid(monthEvents) {
     const loc = [ev.location, ev.city].filter(Boolean).join(', ');
     // Countdown for this event
     const calDays = daysUntilEvent(ev.dateStart);
-    const calIsToday = calDays === 0;
+    const calIsToday = calDays === 0 && !isEventPast(ev);
     const calIsNext = _nextEventId && ev.__backendId === _nextEventId;
     // Countdown removed from calendar cards
     let calCountdownHtml = '';
@@ -4090,7 +4097,7 @@ function renderCalendarCardGrid(monthEvents) {
         const color = getArtistColor(ev.artists);
         const past = isEventPast(ev);
         const calDays = daysUntilEvent(ev.dateStart);
-        const calIsToday = calDays === 0;
+        const calIsToday = calDays === 0 && !isEventPast(ev);
         const grad = ({'#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)','#6b7280':'linear-gradient(135deg,#f9fafb,#f3f4f6)','#22c55e':'linear-gradient(135deg,#f0fdf4,#dcfce7)','#a855f7':'linear-gradient(135deg,#faf5ff,#f3e8ff)','#3b82f6':'linear-gradient(135deg,#eff6ff,#dbeafe)','#ef4444':'linear-gradient(135deg,#fef2f2,#fee2e2)','#ec4899':'linear-gradient(135deg,#fdf2f8,#fce7f3)'})[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
         const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
         const artistDots = artistArr.map(a => { const ac = getArtistColor(a); return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;font-weight:700;color:${past?'#9ca3af':ac};"><span style="width:5px;height:5px;border-radius:50%;background:${past?'#d1d5db':ac};display:inline-block;"></span>${a}</span>`; }).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
