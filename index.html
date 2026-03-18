@@ -183,7 +183,7 @@ self.addEventListener('fetch', e => {
   .nav-link { cursor: pointer; transition: all 0.15s; font-size: 0.88rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: 99px; color: #9ca3af; letter-spacing: 0.01em; }
   .nav-link:hover { color: #111; background: rgba(0,0,0,0.06); }
   .nav-link.active { color: #111; background: #e5e7eb; border-radius: 99px; font-weight: 600; }
-  .event-card { background: #fff; border-radius: var(--radius-card); overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease; cursor: pointer; display: flex; flex-direction: column; border: none; box-shadow: var(--shadow-card); height: 100%; position: relative; content-visibility: auto; contain-intrinsic-size: 0 280px; }
+  .event-card { background: #fff; border-radius: var(--radius-card); overflow: hidden; transition: transform 0.18s ease, box-shadow 0.18s ease; cursor: pointer; display: flex; flex-direction: column; border: none; box-shadow: var(--shadow-card); height: 320px; position: relative; content-visibility: auto; contain-intrinsic-size: 0 320px; }
   .month-group { content-visibility: auto; contain-intrinsic-size: 0 400px; }
   .event-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
   .card-hover-overlay { position:absolute;inset:0;background:rgba(0,0,0,0.75);border-radius:11px;display:flex;flex-direction:column;justify-content:center;padding:16px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:5; }
@@ -437,7 +437,7 @@ self.addEventListener('fetch', e => {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(clamp(160px, 15vw, 240px), 1fr)) !important;
     gap: clamp(8px, 1.2vw, 14px) !important;
-    align-items: start !important;
+    align-items: stretch !important;
     width: 100% !important;
     min-width: 0 !important;
   }
@@ -893,7 +893,7 @@ self.addEventListener('fetch', e => {
   }
   /* ── Reduce heavy shadows on mobile (perf) ── */
   @media (max-width: 767px) {
-    .event-card { box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important; }
+    .event-card { box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important; height: 280px !important; }
     .event-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.10) !important; }
     .modal-box { box-shadow: 0 4px 24px rgba(0,0,0,0.15) !important; }
   }
@@ -4107,27 +4107,43 @@ function clearHomeSearch() {
 
 let _countdownTarget = null;
 let _countdownTimer  = null;
+function _parseEventTarget(dateStr, timeStr) {
+  // Extract time "HH:MM" and timezone "GMT+7" from timeStr like "18:00 GMT+7"
+  const raw = (timeStr || '').split('/')[0].trim();
+  let t = raw.replace(/GMT[+-][\d:]+/i,'').replace(/[^\d:]/g,'').trim();
+  if (!t.includes(':') && t.length >= 3) t = t.slice(0,2)+':'+t.slice(2);
+  if (t.split(':')[0]?.length === 1) t = '0' + t;
+  const validTime = /^\d{2}:\d{2}$/.test(t);
+
+  // Extract timezone offset from timeStr e.g. "GMT+7" → +7 hours
+  let tzOffsetMs = 7 * 3600000; // default GMT+7 (Thailand)
+  const tzMatch = raw.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/i);
+  if (tzMatch) {
+    const sign = tzMatch[1] === '+' ? 1 : -1;
+    const h = parseInt(tzMatch[2]);
+    const m = parseInt(tzMatch[3] || '0');
+    tzOffsetMs = sign * (h * 60 + m) * 60000;
+  }
+
+  if (validTime) {
+    const [hh, mm] = t.split(':').map(Number);
+    // Build target as UTC: date at midnight UTC + event time - tz offset
+    const dateParts = dateStr.split('-').map(Number);
+    const utcMidnight = Date.UTC(dateParts[0], dateParts[1]-1, dateParts[2]);
+    const eventTimeMs = (hh * 60 + mm) * 60000;
+    return new Date(utcMidnight + eventTimeMs - tzOffsetMs);
+  }
+  // No valid time — use local midnight
+  return new Date(dateStr + 'T00:00:00');
+}
+
 function startCountdown(dateStr, timeStr) {
   if (_countdownTimer) clearInterval(_countdownTimer);
   const cdEl = document.getElementById('bento-countdown');
   if (!cdEl || !dateStr) return;
-  // Use only the first time if multiple (e.g. "13:00/15:00/17:00")
-  let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
-  if (!t.includes(':') && t.length >= 3) t = t.slice(0,2)+':'+t.slice(2);
-  if (t.split(':')[0]?.length === 1) t = '0' + t;
-  // Validate HH:MM format
-  const validTime = /^\d{2}:\d{2}$/.test(t);
-  let target;
-  if (validTime) {
-    target = new Date(dateStr + 'T' + t + ':00');
-  } else {
-    // No valid time — if today, count to end of day; else midnight
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0,10);
-    target = dateStr === todayStr
-      ? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
-      : new Date(dateStr + 'T00:00:00');
-  }
+
+  let target = _parseEventTarget(dateStr, timeStr);
+
   // If target already passed and it's today, count to end of day
   if (target <= new Date()) {
     const now = new Date();
@@ -4168,20 +4184,9 @@ function startCountdown2(dateStr, timeStr) {
   if (window._countdownTimer2) clearInterval(window._countdownTimer2);
   const cdEl = document.getElementById('bento-countdown2');
   if (!cdEl || !dateStr) return;
-  let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
-  if (!t.includes(':') && t.length >= 3) t = t.slice(0,2)+':'+t.slice(2);
-  if (t.split(':')[0]?.length === 1) t = '0' + t;
-  const validTime = /^\d{2}:\d{2}$/.test(t);
-  let target;
-  if (validTime) {
-    target = new Date(dateStr + 'T' + t + ':00');
-  } else {
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0,10);
-    target = dateStr === todayStr
-      ? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
-      : new Date(dateStr + 'T00:00:00');
-  }
+
+  let target = _parseEventTarget(dateStr, timeStr);
+
   if (target <= new Date()) {
     const now = new Date();
     const todayStr = now.toISOString().slice(0,10);
