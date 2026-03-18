@@ -805,7 +805,15 @@ self.addEventListener('fetch', e => {
        <div style="position:relative;">
         <div id="bento-next2-label" style="font-size:0.6rem;font-weight:800;letter-spacing:0.08em;margin-bottom:6px;display:none;"></div>
         <div id="bento-next2-title" style="font-size:0.95rem;font-weight:800;color:#fff;line-height:1.3;margin-bottom:5px;display:none;"></div>
-        <div id="bento-next2-meta" style="font-size:0.62rem;color:rgba(255,255,255,0.4);display:none;"></div>
+        <div id="bento-next2-meta" style="font-size:0.62rem;color:rgba(255,255,255,0.4);display:none;margin-bottom:4px;"></div>
+        <div id="bento-countdown2" style="display:none;gap:4px;align-items:center;margin-top:8px;">
+         <div style="display:flex;gap:4px;">
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd2-days" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">DAYS</div></div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd2-hours" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">HRS</div></div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd2-mins" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">MIN</div></div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:6px;padding:4px 7px;text-align:center;min-width:32px;"><div id="cd2-secs" style="font-size:0.9rem;font-weight:900;color:#fff;line-height:1;">0</div><div style="font-size:0.42rem;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.06em;margin-top:1px;">SEC</div></div>
+         </div>
+        </div>
        </div>
       </div>
      </div>
@@ -2360,6 +2368,7 @@ function renderHome() {
       el('bento-next2-bg').style.backgroundImage = `url('${hero2Src}')`;
     }
     if (el('bento-ev2')) el('bento-ev2').dataset.id = next2.__backendId;
+    startCountdown2(next2.dateStart, next2.startTime);
   } else if (el('bento-ev2')) {
     el('bento-ev2').style.display = 'none';
   }
@@ -3521,6 +3530,41 @@ function startCountdown(dateStr, timeStr) {
   cdEl.style.display = 'flex';
   tick();
   _countdownTimer = setInterval(tick, 1000);
+}
+
+function startCountdown2(dateStr, timeStr) {
+  if (window._countdownTimer2) clearInterval(window._countdownTimer2);
+  const cdEl = document.getElementById('bento-countdown2');
+  if (!cdEl || !dateStr) return;
+  let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
+  if (!t) t = '00:00';
+  if (!t.includes(':')) t = t.slice(0,2)+':'+t.slice(2);
+  if (t.split(':')[0].length === 1) t = '0' + t;
+  const target = new Date(dateStr + 'T' + t + ':00');
+  if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
+  function tick2() {
+    const now  = new Date();
+    const diff = target - now;
+    if (diff <= 0) {
+      document.getElementById('cd2-days').textContent  = '0';
+      document.getElementById('cd2-hours').textContent = '00';
+      document.getElementById('cd2-mins').textContent  = '00';
+      document.getElementById('cd2-secs').textContent  = '00';
+      clearInterval(window._countdownTimer2);
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000)  / 60000);
+    const s = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('cd2-days').textContent  = d;
+    document.getElementById('cd2-hours').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd2-mins').textContent  = String(m).padStart(2,'0');
+    document.getElementById('cd2-secs').textContent  = String(s).padStart(2,'0');
+  }
+  cdEl.style.display = 'flex';
+  tick2();
+  window._countdownTimer2 = setInterval(tick2, 1000);
 }
 
 function previewAdminImg(inputId, previewId) {
