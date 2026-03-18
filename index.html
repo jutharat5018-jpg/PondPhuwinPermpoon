@@ -3231,7 +3231,13 @@ function renderCalendar() {
       else if (hasEv) bg = `background:${accentColor}18;border-radius:8px;`;
       const numColor = (isSelected||isToday) ? 'color:#fff;font-weight:800;' : hasEv ? `color:${accentColor};font-weight:700;` : 'color:#374151;font-weight:500;';
       const dot = hasEv && !isSelected && !isToday ? `<div style="width:4px;height:4px;border-radius:50%;background:${accentColor};margin-top:1px;"></div>` : '';
-      cells += `<button onclick="calSelectedDate='${ds}';renderCalendar();" style="width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:none;cursor:pointer;font-family:inherit;${bg}transition:all 0.12s;"><span style="font-size:0.78rem;${numColor}">${d}</span>${dot}</button>`;
+      if (hasEv) {
+        cells += `<button onclick="calSelectedDate='${ds}';renderCalendar();" style="width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:none;cursor:pointer;font-family:inherit;${bg}transition:all 0.12s;"><span style="font-size:0.78rem;${numColor}">${d}</span>${dot}</button>`;
+      } else if (isToday) {
+        cells += `<button onclick="calSelectedDate='${ds}';renderCalendar();" style="width:36px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:none;cursor:pointer;font-family:inherit;${bg}transition:all 0.12s;"><span style="font-size:0.78rem;${numColor}">${d}</span></button>`;
+      } else {
+        cells += `<div style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:default;"><span style="font-size:0.78rem;color:#d1d5db;font-weight:400;">${d}</span></div>`;
+      }
     }
     dateStripEl.innerHTML = cells;
   }
