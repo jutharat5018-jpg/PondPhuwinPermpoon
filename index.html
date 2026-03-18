@@ -3705,7 +3705,7 @@ function renderCalendarEventList(monthEvents, daysInMonth) {
 
 
 
-let _calStatYear = 2026;
+let _calStatYear = new Date().getFullYear();
 
 function onCalYearChange(val) {
   _calStatYear = parseInt(val);
