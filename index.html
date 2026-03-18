@@ -36,9 +36,9 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = `
-const SW_VERSION = 'ppp-sw-v7-swr';
-const STATIC_CACHE = 'ppp-static-v7';
-const API_CACHE    = 'ppp-api-v7';
+const SW_VERSION = 'ppp-sw-v8-pwa';
+const STATIC_CACHE = 'ppp-static-v8';
+const API_CACHE    = 'ppp-api-v8';
 const API_TTL_MS   = 3 * 60 * 1000; // 3 min — show cache, revalidate in bg
 
 self.addEventListener('install', e => { self.skipWaiting(); });
@@ -46,7 +46,12 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== STATIC_CACHE && k !== API_CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    ).then(() => self.clients.claim()).then(() => {
+      // Tell all open PWA windows to reload so they pick up fresh SW + data
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(c => c.postMessage({ type: 'SW_ACTIVATED' }));
+      });
+    })
   );
 });
 self.addEventListener('fetch', e => {
@@ -120,9 +125,16 @@ self.addEventListener('fetch', e => {
       navigator.serviceWorker.register(swUrl, { scope: '/' })
         .catch(() => {});
 
-      // Listen for SW_DATA_UPDATED — re-fetch silently, update UI without full reload
+      // Listen for SW messages
       navigator.serviceWorker.addEventListener('message', e => {
-        if (e.data && e.data.type === 'SW_DATA_UPDATED') {
+        if (!e.data) return;
+        // New SW activated — reload to get fresh HTML + data
+        if (e.data.type === 'SW_ACTIVATED') {
+          window.location.reload();
+          return;
+        }
+        // SW fetched fresh data in background — silently update UI
+        if (e.data.type === 'SW_DATA_UPDATED') {
           // Clear app-level cache so loadEventsFromSheets fetches fresh
           if (typeof Cache !== 'undefined') {
             Cache.del(window.LC && LC.TS_EV);
@@ -1756,7 +1768,7 @@ async function hashPassword(pw) {
 }
 
 // ── PERFORMANCE CONFIG ────────────────────────────────────────────
-const CACHE_VERSION    = 'ppp_v8';
+const CACHE_VERSION    = 'ppp_v9';
 const CACHE_TTL_MS     = 5 * 60 * 1000;       // 5 min — per requirements
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h stale fallback
 const FETCH_TIMEOUT_MS = 10000;
