@@ -3151,24 +3151,32 @@ const SOCIAL_ICONS = {
 };
 
 function isValidUrl(v) { return v && typeof v === 'string' && /^https?:\/\/.+/.test(v.trim()); }
-function makeSocialBtn(href, iconSvg, label) {
+function makeSocialBtn(href, iconSvg, label, large, raw) {
   if (!isValidUrl(href)) return '';
   const url = href.trim().replace(/'/g, "\\'");
+  if (large) {
+    const scaledIcon = iconSvg ? iconSvg.replace(/width="(\d+)"/g, 'width="22"').replace(/height="(\d+)"/g, 'height="22"') : '';
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="link-btn" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1.5px solid #e5e7eb;font-size:0.88rem;font-weight:600;color:#374151;text-decoration:none;background:#fff;transition:all 0.15s;cursor:pointer;">${scaledIcon}<span>${escHtml(label)}</span></a>`;
+  }
+  if (raw) {
+    // No circle — show icon directly (used for LIVE badge etc.)
+    return `<button type="button" onclick="event.stopPropagation();window.open('${url}','_blank','noopener,noreferrer')" style="display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;flex-shrink:0;padding:0;" title="${escHtml(label)}">${iconSvg}</button>`;
+  }
   return `<button type="button" onclick="event.stopPropagation();window.open('${url}','_blank','noopener,noreferrer')" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:none;cursor:pointer;flex-shrink:0;overflow:hidden;" title="${escHtml(label)}">${iconSvg}</button>`;
 }
-function buildSocialIcons(ev) {
+function buildSocialIcons(ev, large) {
   let h = '';
-  if (isValidUrl(ev.youtube))   h += makeSocialBtn(ev.youtube,   SOCIAL_ICONS.youtube,   'YouTube');
-  if (isValidUrl(ev.instagram)) h += makeSocialBtn(ev.instagram, SOCIAL_ICONS.instagram, 'Instagram');
-  if (isValidUrl(ev.facebook))  h += makeSocialBtn(ev.facebook,  SOCIAL_ICONS.facebook,  'Facebook');
-  if (isValidUrl(ev.x))         h += makeSocialBtn(ev.x,         SOCIAL_ICONS.x,         'X (Twitter)');
-  if (isValidUrl(ev.tiktok))    h += makeSocialBtn(ev.tiktok,    SOCIAL_ICONS.tiktok,    'TikTok');
-  if (isValidUrl(ev.website))   h += makeSocialBtn(ev.website,   SOCIAL_ICONS.website,   'Website');
-  if (isValidUrl(ev.whatsapp))  h += makeSocialBtn(ev.whatsapp,  SOCIAL_ICONS.whatsapp,  'WhatsApp');
-  if (isValidUrl(ev.shopee))    h += makeSocialBtn(ev.shopee,    SOCIAL_ICONS.shopee,    'Shopee');
-  if (isValidUrl(ev.live))      h += makeSocialBtn(ev.live,      getLiveIcon(ev.live),   getLiveLabelFromUrl(ev.live));
-  if (isValidUrl(ev.download))  h += makeSocialBtn(ev.download,  SOCIAL_ICONS.download,  'Download');
-  if (isValidUrl(ev.iq))        h += makeSocialBtn(ev.iq,         SOCIAL_ICONS.iq,         'iQIYI');
+  if (isValidUrl(ev.youtube))   h += makeSocialBtn(ev.youtube,   SOCIAL_ICONS.youtube,   'YouTube',    large);
+  if (isValidUrl(ev.instagram)) h += makeSocialBtn(ev.instagram, SOCIAL_ICONS.instagram, 'Instagram',  large);
+  if (isValidUrl(ev.facebook))  h += makeSocialBtn(ev.facebook,  SOCIAL_ICONS.facebook,  'Facebook',   large);
+  if (isValidUrl(ev.x))         h += makeSocialBtn(ev.x,         SOCIAL_ICONS.x,         'X (Twitter)',large);
+  if (isValidUrl(ev.tiktok))    h += makeSocialBtn(ev.tiktok,    SOCIAL_ICONS.tiktok,    'TikTok',     large);
+  if (isValidUrl(ev.website))   h += makeSocialBtn(ev.website,   SOCIAL_ICONS.website,   'Website',    large);
+  if (isValidUrl(ev.whatsapp))  h += makeSocialBtn(ev.whatsapp,  SOCIAL_ICONS.whatsapp,  'WhatsApp',   large);
+  if (isValidUrl(ev.shopee))    h += makeSocialBtn(ev.shopee,    SOCIAL_ICONS.shopee,    'Shopee',     large);
+  if (isValidUrl(ev.live))      h += makeSocialBtn(ev.live,      getLiveIcon(ev.live),   getLiveLabelFromUrl(ev.live), large, !large);
+  if (isValidUrl(ev.download))  h += makeSocialBtn(ev.download,  SOCIAL_ICONS.download,  'Download',   large);
+  if (isValidUrl(ev.iq))        h += makeSocialBtn(ev.iq,        SOCIAL_ICONS.iq,        'iQIYI',      large);
   return h;
 }
 
@@ -3487,7 +3495,7 @@ function openDetailModal(id) {
   else descWrap.style.display = 'none';
 
   const linksWrap = document.getElementById('detail-links-wrap');
-  const linksHtml = buildSocialIcons(ev);
+  const linksHtml = buildSocialIcons(ev, true);
   if (linksHtml) { linksWrap.style.display = 'block'; document.getElementById('detail-links').innerHTML = linksHtml; }
   else linksWrap.style.display = 'none';
 
