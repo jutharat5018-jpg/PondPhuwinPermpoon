@@ -396,6 +396,13 @@ self.addEventListener('fetch', e => {
     /* Done/Left already stacked as separate divs */
     /* Permpoon: span full row when alone on bottom */
     .artist-stat-permpoon { grid-column: 1 / -1 !important; }
+  /* ── Stat card high-contrast overrides ── */
+  .artist-stat-donerow { font-weight: 600; }
+  .artist-stat-donerow strong { font-weight: 800; }
+  /* ── View details button ── */
+  .view-details { font-weight: 700; opacity: 0.9; cursor: pointer; }
+  .view-details:hover { opacity: 1; }
+  .view-details a { font-weight: 700; }
   }
   /* Desktop/tablet: restore fixed 36px cells */
   @media (min-width: 768px) {
@@ -892,12 +899,12 @@ self.addEventListener('fetch', e => {
        <div style="background:#fff7ed;border:0.5px solid #fed7aa;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
          <div style="width:7px;height:7px;border-radius:50%;background:#f97316;"></div>
-         <span style="font-size:0.6rem;font-weight:700;color:#9a3412;letter-spacing:0.08em;">POND</span>
+         <span style="font-size:0.6rem;font-weight:700;color:#7c2d12;letter-spacing:0.08em;">POND</span>
         </div>
-        <div id="cs-pond-total" style="font-size:1.4rem;font-weight:700;color:#f97316;line-height:1;">-</div>
+        <div id="cs-pond-total" style="font-size:1.4rem;font-weight:800;color:#c2410c;line-height:1;">-</div>
         <div class="artist-stat-donerow" style="margin-left:auto;text-align:right;">
-         <div style="font-size:0.62rem;color:#fdba74;">Done <strong id="cs-pond-past" style="color:#c2410c;">-</strong></div>
-         <div style="font-size:0.62rem;color:#fdba74;">Left <strong id="cs-pond-up" style="color:#f97316;">-</strong></div>
+         <div style="font-size:0.62rem;color:#9a3412;font-weight:600;">Done <strong id="cs-pond-past" style="color:#7c2d12;">-</strong></div>
+         <div style="font-size:0.62rem;color:#9a3412;font-weight:600;">Left <strong id="cs-pond-up" style="color:#c2410c;">-</strong></div>
         </div>
        </div>
        <div style="background:#f9fafb;border:0.5px solid #e5e7eb;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
@@ -905,10 +912,10 @@ self.addEventListener('fetch', e => {
          <div style="width:7px;height:7px;border-radius:50%;background:#6b7280;"></div>
          <span style="font-size:0.6rem;font-weight:700;color:#374151;letter-spacing:0.08em;">PHUWIN</span>
         </div>
-        <div id="cs-phuwin-total" style="font-size:1.4rem;font-weight:700;color:#4b5563;line-height:1;">-</div>
+        <div id="cs-phuwin-total" style="font-size:1.4rem;font-weight:800;color:#1f2937;line-height:1;">-</div>
         <div class="artist-stat-donerow" style="margin-left:auto;text-align:right;">
-         <div style="font-size:0.62rem;color:#d1d5db;">Done <strong id="cs-phuwin-past" style="color:#374151;">-</strong></div>
-         <div style="font-size:0.62rem;color:#d1d5db;">Left <strong id="cs-phuwin-up" style="color:#6b7280;">-</strong></div>
+         <div style="font-size:0.62rem;color:#374151;font-weight:600;">Done <strong id="cs-phuwin-past" style="color:#111827;">-</strong></div>
+         <div style="font-size:0.62rem;color:#374151;font-weight:600;">Left <strong id="cs-phuwin-up" style="color:#1f2937;">-</strong></div>
         </div>
        </div>
        <div class="artist-stat-permpoon" style="background:#f0fdf4;border:0.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
@@ -916,10 +923,10 @@ self.addEventListener('fetch', e => {
          <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;"></div>
          <span style="font-size:0.6rem;font-weight:700;color:#14532d;letter-spacing:0.08em;">PERMPOON</span>
         </div>
-        <div id="cs-permpoon-total" style="font-size:1.4rem;font-weight:700;color:#16a34a;line-height:1;">-</div>
+        <div id="cs-permpoon-total" style="font-size:1.4rem;font-weight:800;color:#15803d;line-height:1;">-</div>
         <div class="artist-stat-donerow" style="margin-left:auto;text-align:right;">
-         <div style="font-size:0.62rem;color:#bbf7d0;">Done <strong id="cs-permpoon-past" style="color:#15803d;">-</strong></div>
-         <div style="font-size:0.62rem;color:#bbf7d0;">Left <strong id="cs-permpoon-up" style="color:#22c55e;">-</strong></div>
+         <div style="font-size:0.62rem;color:#166534;font-weight:600;">Done <strong id="cs-permpoon-past" style="color:#14532d;">-</strong></div>
+         <div style="font-size:0.62rem;color:#166534;font-weight:600;">Left <strong id="cs-permpoon-up" style="color:#15803d;">-</strong></div>
         </div>
        </div>
       </div>
@@ -2875,7 +2882,7 @@ function createCard(ev) {
 
   const socialHtml = buildSocialIcons(ev);
   const shareBtn = ``;
-  const hoverOverlay = `<div class="card-hover-overlay"><div class="oh-title">${escHtml(ev.title)}</div>${ev.description && !hasHtml(ev.description) ? `<div class="oh-desc">${escHtml(ev.description)}</div>` : ''}<div style="margin-top:10px;display:flex;gap:6px;align-items:center;">${ev.dateStart ? `<button onclick="event.stopPropagation();quickAddCalendar('${ev.__backendId}')" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:6px;color:#fff;font-size:0.62rem;font-weight:700;padding:4px 9px;cursor:pointer;letter-spacing:0.03em;"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Add to Calendar</button>` : ''}<div class="oh-cta" style="margin-top:0;">View details →</div></div></div>`;
+  const hoverOverlay = `<div class="card-hover-overlay"><div class="oh-title">${escHtml(ev.title)}</div>${ev.description && !hasHtml(ev.description) ? `<div class="oh-desc">${escHtml(ev.description)}</div>` : ''}<div style="margin-top:10px;display:flex;gap:6px;align-items:center;"><div class="oh-cta view-details" style="margin-top:0;font-weight:700;opacity:0.9;cursor:pointer;font-size:0.72rem;letter-spacing:0.03em;">View details →</div></div></div>`;
   const imgSection = ev.image
     ? `<div class="card-img-wrap">${shareBtn}<img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
@@ -2942,21 +2949,9 @@ function openDetailModal(id) {
   if (linksHtml) { linksWrap.style.display = 'block'; document.getElementById('detail-links').innerHTML = linksHtml; }
   else linksWrap.style.display = 'none';
 
-  // Add to Calendar
+  // Add to Calendar — removed per UI update
   const calWrap = document.getElementById('detail-cal-wrap');
-  if (calWrap && ev.dateStart) {
-    const title = encodeURIComponent(ev.title || '');
-    const loc   = encodeURIComponent([ev.location, ev.city, ev.country].filter(Boolean).join(', '));
-    const dateStr = ev.dateStart.replace(/-/g,'');
-    const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dateStr}/${dateStr}&location=${loc}`;
-    const ical = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:${title}%0ADTSTART:${dateStr}%0ADTEND:${dateStr}%0ALOCATION:${loc}%0AEND:VEVENT%0AEND:VCALENDAR`;
-    calWrap.style.display = 'block';
-    calWrap.innerHTML = `<div style="margin-bottom:0.75rem;font-size:0.78rem;font-weight:700;color:#374151;">${t('add_calendar')}</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="${gcal}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:0.78rem;font-weight:600;color:#374151;text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''"  onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_add_cal')}</a>
-        <a href="${ical}" download="${(ev.title||'event').replace(/\s+/g,'_')}.ics" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:0.78rem;font-weight:600;color:#374151;text-decoration:none;transition:background 0.15s;" onmouseenter="this.style.background='#f9fafb'" onmouseleave="this.style.background=''" onclick="event.stopPropagation()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${t('detail_ical')}</a>
-      </div>`;
-  } else if (calWrap) { calWrap.style.display = 'none'; }
+  if (calWrap) { calWrap.style.display = 'none'; }
 
   // Ticket buttons
   const ticketWrap = document.getElementById('detail-ticket-wrap');
