@@ -4427,6 +4427,10 @@ async function handleEventFormSubmit() {
   if (success) {
     closeEventFormModal();
     showToast(editingEventId ? t('toast_updated') : t('toast_added'));
+    // Jump to the year of the event just saved/edited
+    if (schema.dateStart && schema.dateStart.length >= 4) {
+      _adminYearFilter = schema.dateStart.slice(0, 4);
+    }
     clearForm();
     Cache.clearAll(); _fetchingEvents = false;
     await loadEventsFromSheets(true);
