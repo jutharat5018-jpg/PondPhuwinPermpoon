@@ -3937,6 +3937,7 @@ function quickAddCalendar(id) {
 // Track which months are expanded (default: current month open)
 const _adminOpenMonths = new Set();
 let _adminYearFilter = String(new Date().getFullYear());
+let _adminFirstLoad = true;
 
 function renderAdminYearTabs() {
   const sel = document.getElementById('admin-year-select');
@@ -3997,11 +3998,11 @@ function renderAdminList() {
     groups.get(key).push(ev);
   });
 
-  // Auto-open current month if nothing is open yet
-  if (_adminOpenMonths.size === 0) {
+  // Auto-open current month on first visit only
+  if (_adminFirstLoad && _adminOpenMonths.size === 0) {
+    _adminFirstLoad = false;
     const now = new Date();
     const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    // Open current or nearest upcoming month
     const keys = [...groups.keys()].sort();
     const cur = keys.find(k => k >= thisMonth) || keys[keys.length-1];
     if (cur) _adminOpenMonths.add(cur);
