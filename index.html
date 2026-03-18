@@ -3427,6 +3427,7 @@ function filterCalendar(artist) {
 }
 
 function renderCalendar() {
+  _calStatYear = calYear;
   renderCalYearStats();
   const year = calYear, month = calMonth;
   const monthNames = t('month_names');
