@@ -22,8 +22,9 @@
   <!-- DNS prefetch + preconnect for external assets -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-  <link rel="dns-prefetch" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
   <!-- Preload critical font subset -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
@@ -268,8 +269,8 @@ self.addEventListener('fetch', e => {
     display: block;
     background: #f3f4f6;
   }
-  .card-img.img-loading { opacity: 0.6; transition: opacity 0.3s ease; }
-  .card-img.img-loaded  { opacity: 1; }
+  .card-img.img-loading { opacity: 0; }
+  .card-img.img-loaded  { opacity: 1; transition: opacity 0.25s ease; }
   .artist-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
   /* ── CALENDAR ── */
   .cal-day { width:66px;height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;transition:background 0.15s;box-sizing:border-box;position:relative;border:none;padding:0; }
@@ -1771,7 +1772,7 @@ async function hashPassword(pw) {
 const CACHE_VERSION    = 'ppp_v9';
 const CACHE_TTL_MS     = 5 * 60 * 1000;       // 5 min — per requirements
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h stale fallback
-const FETCH_TIMEOUT_MS = 10000;
+const FETCH_TIMEOUT_MS = 6000;
 const RETRY_DELAYS     = [1500, 4000, 10000];
 const DEBOUNCE_RENDER  = 16;
 const DEBOUNCE_RESIZE  = 200;
@@ -2964,8 +2965,8 @@ function _vsInit(groups) {
   _vsGrid.style.display = 'flex';
   _vsGrid.style.flexDirection = 'column';
 
-  const FIRST_BATCH = 16;  // render immediately on load
-  const NEXT_BATCH  = 20;  // render per scroll trigger
+  const FIRST_BATCH = 8;   // render immediately on load — less = faster first paint
+  const NEXT_BATCH  = 12;  // render per scroll trigger
   let idx = 0;
 
   let currentMonth = null;
@@ -2985,7 +2986,7 @@ function _vsInit(groups) {
     _vsGrid.appendChild(sentinel);
     sentinelObs = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) renderBatch(NEXT_BATCH);
-    }, { rootMargin: '400px 0px', threshold: 0 });
+    }, { rootMargin: '200px 0px', threshold: 0 });
     sentinelObs.observe(sentinel);
   }
 
@@ -4939,7 +4940,11 @@ function bentoNextClick2() {
 function debounceLucide() {
   if (typeof lucide === 'undefined') return;
   clearTimeout(_lucideTimer);
-  _lucideTimer = setTimeout(() => lucide.createIcons(), 50);
+  if (typeof requestIdleCallback !== 'undefined') {
+    _lucideTimer = requestIdleCallback(() => lucide.createIcons(), { timeout: 300 });
+  } else {
+    _lucideTimer = setTimeout(() => lucide.createIcons(), 80);
+  }
 }
 function showToast(msg) {
   const t = document.getElementById('toast'); if (!t) return;
