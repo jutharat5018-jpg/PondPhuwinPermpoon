@@ -3513,26 +3513,34 @@ function startCountdown(dateStr, timeStr) {
   if (!cdEl || !dateStr) return;
   // Use only the first time if multiple (e.g. "13:00/15:00/17:00")
   let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
-  if (!t) t = '00:00';
-  // Ensure HH:MM format
-  if (!t.includes(':')) t = t.slice(0,2)+':'+t.slice(2);
-  if (t.split(':')[0].length === 1) t = '0' + t;
-  const target = new Date(dateStr + 'T' + t + ':00');
+  if (!t.includes(':') && t.length >= 3) t = t.slice(0,2)+':'+t.slice(2);
+  if (t.split(':')[0]?.length === 1) t = '0' + t;
+  // Validate HH:MM format
+  const validTime = /^\d{2}:\d{2}$/.test(t);
+  let target;
+  if (validTime) {
+    target = new Date(dateStr + 'T' + t + ':00');
+  } else {
+    // No valid time — if today, count to end of day; else midnight
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0,10);
+    target = dateStr === todayStr
+      ? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+      : new Date(dateStr + 'T00:00:00');
+  }
+  // If target already passed and it's today, count to end of day
+  if (target <= new Date()) {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0,10);
+    if (dateStr === todayStr) {
+      target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    }
+  }
   if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
   _countdownTarget = target;
   function tick() {
     const now  = new Date();
-    let diff = target - now;
-    // If time already passed but it's still today, count to end of day instead
-    if (diff <= 0) {
-      const eventDate = new Date(dateStr + 'T00:00:00');
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const isToday = eventDate.getTime() === todayStart.getTime();
-      if (isToday) {
-        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-        diff = endOfDay - now;
-      }
-    }
+    const diff = target - now;
     if (diff <= 0) {
       document.getElementById('cd-days').textContent  = '0';
       document.getElementById('cd-hours').textContent = '00';
@@ -3561,23 +3569,30 @@ function startCountdown2(dateStr, timeStr) {
   const cdEl = document.getElementById('bento-countdown2');
   if (!cdEl || !dateStr) return;
   let t = ((timeStr || '').split('/')[0]).replace(/[^\d:]/g,'').trim();
-  if (!t) t = '00:00';
-  if (!t.includes(':')) t = t.slice(0,2)+':'+t.slice(2);
-  if (t.split(':')[0].length === 1) t = '0' + t;
-  const target = new Date(dateStr + 'T' + t + ':00');
+  if (!t.includes(':') && t.length >= 3) t = t.slice(0,2)+':'+t.slice(2);
+  if (t.split(':')[0]?.length === 1) t = '0' + t;
+  const validTime = /^\d{2}:\d{2}$/.test(t);
+  let target;
+  if (validTime) {
+    target = new Date(dateStr + 'T' + t + ':00');
+  } else {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0,10);
+    target = dateStr === todayStr
+      ? new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+      : new Date(dateStr + 'T00:00:00');
+  }
+  if (target <= new Date()) {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0,10);
+    if (dateStr === todayStr) {
+      target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    }
+  }
   if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
   function tick2() {
     const now  = new Date();
-    let diff = target - now;
-    if (diff <= 0) {
-      const eventDate = new Date(dateStr + 'T00:00:00');
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const isToday = eventDate.getTime() === todayStart.getTime();
-      if (isToday) {
-        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-        diff = endOfDay - now;
-      }
-    }
+    const diff = target - now;
     if (diff <= 0) {
       document.getElementById('cd2-days').textContent  = '0';
       document.getElementById('cd2-hours').textContent = '00';
