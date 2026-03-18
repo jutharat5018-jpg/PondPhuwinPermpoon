@@ -871,8 +871,6 @@ self.addEventListener('fetch', e => {
     .event-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.10) !important; }
     .modal-box { box-shadow: 0 4px 24px rgba(0,0,0,0.15) !important; }
   }
-  /* ── Virtual scroll sentinel ── */
-  #vs-sentinel { pointer-events: none; }
   /* ── Smooth infinite-scroll transition ── */
   .month-group { animation: fadeInUp 0.18s ease both; }
   @keyframes fadeInUp {
@@ -1711,7 +1709,7 @@ async function hashPassword(pw) {
 }
 
 // ── PERFORMANCE CONFIG ────────────────────────────────────────────
-const CACHE_VERSION    = 'ppp_v5';
+const CACHE_VERSION    = 'ppp_v6';
 const CACHE_TTL_MS     = 5 * 60 * 1000;       // 5 min — per requirements
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h stale fallback
 const FETCH_TIMEOUT_MS = 10000;
@@ -2322,7 +2320,10 @@ function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 function processEvents(raw) {
   const cleanDate = v => { if (!v) return ''; const s = String(v).trim(); return s.startsWith('1899-12-30') ? '' : s; };
   const rawStr    = v => (v != null && v !== '') ? String(v).trim() : '';
-  const safeText  = v => { if (!v) return ''; const s = String(v).trim(); return /<[a-z][\s\S]*>/i.test(s) ? '' : s; };
+  // stripTags: remove HTML tags but keep text content — never blank the whole value
+  const stripTags = v => { if (!v) return ''; return String(v).replace(/<[^>]*>/g, '').trim(); };
+  // safeText: use stripTags so events are never silently dropped
+  const safeText  = stripTags;
   const mapped = raw.map((r, i) => ({
     __backendId: r.id || r.__backendId || '',
     __rowNumber: i + 2,
@@ -2381,16 +2382,21 @@ function processEvents(raw) {
 function hydrateFromCache() { _fastHydrateFromCache(); }
 
 async function loadEventsFromSheets(force = false) {
-  // L1: memory cache hit — instant, no storage read
+  // L1: memory cache hit — only skip network if cache is also fresh
   if (!force) {
     const mem = _memCache.get('events');
-    if (mem) { allEvents = mem; return; }
+    if (mem && mem.length && Cache.isFresh(LC.TS_EV)) {
+      allEvents = mem; return; // truly fresh — no need to fetch
+    }
+    if (mem && mem.length) {
+      allEvents = mem; // serve stale from memory while we fetch below
+    }
   }
   // Rate limiter — hard block duplicate calls within TTL window
   if (!force && !_rateLimit.allow('events')) return;
   // Dedup guard — never run two fetches in parallel
   if (_fetchingEvents) return;
-  // Skip if localStorage cache is fresh
+  // Skip if localStorage cache is fresh AND we have data
   if (!force && Cache.isFresh(LC.TS_EV) && allEvents.length > 0) return;
 
   _fetchingEvents = true;
@@ -2404,6 +2410,9 @@ async function loadEventsFromSheets(force = false) {
       Cache.set(LC.EVENTS, processed);      // L2 write
       Cache.setTS(LC.TS_EV);
       apiLoaded = true;
+      // Clear memoize caches so new data renders fresh
+      _fmtDateCache.clear();
+      _escCache.clear();
       hideConnectionError();
       scheduleRender();
     }
@@ -2527,11 +2536,10 @@ async function deleteAnniversaryInSheets(id) {
 function scheduleAutoRefresh() {
   clearInterval(_refreshTimer);
   // Add random jitter (0–15s) so 1M users don't all hit the API simultaneously
-  const jitter = Math.random() * 15000;
+  const jitter = Math.random() * 2000; // short jitter — 2s max
   _refreshTimer = setInterval(() => {
-    if (document.hidden) return;           // save API calls when tab not visible
+    if (document.hidden) return;
     if (_fetchingEvents || _fetchingBdays || _fetchingAnnivs) return;
-    // Only refresh if cache is actually stale
     if (!Cache.isFresh(LC.TS_EV)) {
       loadEventsFromSheets().catch(() => {});
       loadBirthdaysFromSheets().catch(() => {});
@@ -2558,12 +2566,20 @@ function renderCurrentPage() {
 }
 
 // ── Status helpers ────────────────────────────────────────────────
+// Cache today's date string for performance (refreshes each render cycle)
+let _todayStrCache = '';
+let _todayStrDate  = 0;
+function _getTodayStr() {
+  const now = Date.now();
+  if (now - _todayStrDate > 60000) { // refresh every 60s max
+    _todayStrCache = new Date().toISOString().slice(0, 10);
+    _todayStrDate  = now;
+  }
+  return _todayStrCache;
+}
 function isEventPast(ev) {
   if (!ev.dateStart) return false;
-  // Use precomputed flag when available (set in processEvents)
-  if (ev._isPast !== undefined) return ev._isPast;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  return new Date(ev.dateStart + 'T00:00:00') < today;
+  return ev.dateStart < _getTodayStr();
 }
 function isEventUpcoming(ev) { return !isEventPast(ev); }
 
@@ -2689,7 +2705,7 @@ function renderHome() {
   const q = homeSearch.trim().toLowerCase();
   const events = allEvents.filter(ev => {
     if (!ev.title) return false;
-    if (ev._isPast !== undefined ? ev._isPast : isEventPast(ev)) return false;
+    if (isEventPast(ev)) return false;
     if (homeFilter !== 'all') {
       if (!ev.artists) return false;
       if (!ev.artists.split(',').map(a => a.trim()).includes(homeFilter)) return false;
@@ -2721,7 +2737,7 @@ function renderHome() {
   if (count) count.textContent = t('events_count', events.length);
 
   // ── Bento grid update ──
-  const upAll = allEvents.filter(ev => ev.title && !(ev._isPast !== undefined ? ev._isPast : isEventPast(ev)));
+  const upAll = allEvents.filter(ev => ev.title && !isEventPast(ev));
   const cPond     = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Pond')).length;
   const cPhuwin   = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Phuwin')).length;
   const cPermpoon = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Permpoon')).length;
@@ -2876,104 +2892,84 @@ function _renderHomeEnd() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// VIRTUAL INFINITE SCROLL ENGINE
-// Renders PAGE_SIZE cards at a time, loads more as user scrolls
+// RENDER ENGINE — render all items via DocumentFragment (reliable)
+// Uses chunked RAF rendering to avoid blocking main thread on 500+ events
 // ═══════════════════════════════════════════════════════════════════
-let _vsAllGroups = [];       // flat array of {type:'header'|'card', data}
-let _vsRendered  = 0;        // how many items rendered so far
-let _vsSentinel  = null;     // IntersectionObserver sentinel element
-let _vsObserver  = null;     // IntersectionObserver instance
-let _vsGrid      = null;     // reference to #events-grid
+let _vsGrid = null; // kept for compatibility
 
 function _vsInit(groups) {
-  _vsAllGroups = groups;
-  _vsRendered  = 0;
-  _vsGrid      = document.getElementById('events-grid');
+  _vsGrid = document.getElementById('events-grid');
   if (!_vsGrid) return;
   _vsGrid.innerHTML = '';
   _vsGrid.style.display = 'flex';
   _vsGrid.style.flexDirection = 'column';
-  // Destroy old observer
-  if (_vsObserver) { _vsObserver.disconnect(); _vsObserver = null; }
-  if (_vsSentinel && _vsSentinel.parentNode) _vsSentinel.parentNode.removeChild(_vsSentinel);
-  // Create sentinel
-  _vsSentinel = document.createElement('div');
-  _vsSentinel.id = 'vs-sentinel';
-  _vsSentinel.style.height = '1px';
-  _vsSentinel.style.width = '100%';
-  _vsSentinel.setAttribute('aria-hidden', 'true');
-  // First batch — render immediately
-  _vsRenderBatch();
-  // Setup IntersectionObserver for infinite scroll
-  _vsObserver = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) _vsRenderBatch();
-  }, { rootMargin: '400px 0px', threshold: 0 });
-}
 
-function _vsRenderBatch() {
-  if (_vsRendered >= _vsAllGroups.length) {
-    if (_vsSentinel && _vsSentinel.parentNode) _vsSentinel.parentNode.removeChild(_vsSentinel);
-    if (_vsObserver) { _vsObserver.disconnect(); _vsObserver = null; }
-    return;
-  }
-  const frag = document.createDocumentFragment();
-  let cardCount = 0;
-  let currentGroupEl = null;
-  // Resume into last open month group if continuing mid-group
-  let currentGridEl = _vsGrid ? _vsGrid.querySelector('.month-group:last-child .cards-grid, .month-group:last-child [style*="grid-template-columns"], .month-group:last-child [style*="padding-left:56px"]') : null;
-  // Remove sentinel temporarily
-  if (_vsSentinel && _vsSentinel.parentNode) _vsSentinel.parentNode.removeChild(_vsSentinel);
-  while (_vsRendered < _vsAllGroups.length && cardCount < PAGE_SIZE) {
-    const item = _vsAllGroups[_vsRendered];
-    _vsRendered++;
-    if (item.type === 'month-header') {
-      const gw = document.createElement('div');
-      gw.className = 'month-group';
-      gw.dataset.monthKey = item.key;
-      const hdr = document.createElement('div');
-      hdr.className = 'month-group-header';
-      hdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${item.label}</span><span class="month-group-header-count">${item.total} event${item.total !== 1 ? 's' : ''}</span></div><span class="month-group-header-line"></span>`;
-      gw.appendChild(hdr);
-      if (item.mode === 'grid') {
-        const cg = document.createElement('div');
-        cg.className = 'cards-grid';
-        cg.style.cssText = 'display:grid;gap:clamp(8px,1.5vw,20px);align-items:stretch;';
-        gw.appendChild(cg);
-        currentGridEl = cg;
-      } else if (item.mode === 'list') {
-        const lw = document.createElement('div');
-        lw.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(260px,35vw,480px),1fr));gap:8px;';
-        gw.appendChild(lw);
-        currentGridEl = lw;
-      } else {
-        const tw = document.createElement('div');
-        tw.style.cssText = 'display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px;';
-        const line = document.createElement('div');
-        line.style.cssText = 'position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px;';
-        tw.appendChild(line);
-        gw.appendChild(tw);
-        currentGridEl = tw;
+  const CHUNK = 60; // cards per RAF frame — fast enough, doesn't block
+  let idx = 0;
+
+  // State for building month groups across chunks
+  let currentMonth = null;   // { gw, gridEl } currently open
+  const monthMap = new Map(); // key → { gw, gridEl } already in DOM
+
+  function renderChunk() {
+    const frag = document.createDocumentFragment();
+    let rendered = 0;
+
+    while (idx < groups.length && rendered < CHUNK) {
+      const item = groups[idx++];
+
+      if (item.type === 'month-header') {
+        // Always create a new month group
+        const gw = document.createElement('div');
+        gw.className = 'month-group';
+        const hdr = document.createElement('div');
+        hdr.className = 'month-group-header';
+        hdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${item.label}</span><span class="month-group-header-count">${item.total} event${item.total !== 1 ? 's' : ''}</span></div><span class="month-group-header-line"></span>`;
+        gw.appendChild(hdr);
+
+        let gridEl;
+        if (item.mode === 'list') {
+          gridEl = document.createElement('div');
+          gridEl.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(260px,35vw,480px),1fr));gap:8px;';
+        } else if (item.mode === 'timeline') {
+          gridEl = document.createElement('div');
+          gridEl.style.cssText = 'display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px;';
+          const line = document.createElement('div');
+          line.style.cssText = 'position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px;';
+          gridEl.appendChild(line);
+        } else {
+          gridEl = document.createElement('div');
+          gridEl.className = 'cards-grid';
+          gridEl.style.cssText = 'display:grid;gap:clamp(8px,1.5vw,20px);align-items:stretch;';
+        }
+        gw.appendChild(gridEl);
+        frag.appendChild(gw);
+        currentMonth = { gw, gridEl };
+        monthMap.set(item.key, currentMonth);
+
+      } else if (item.type === 'card') {
+        const card = item.buildFn(item.ev);
+        if (currentMonth && card && card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
+          currentMonth.gridEl.appendChild(card);
+        }
+        rendered++;
       }
-      currentGroupEl = gw;
-      frag.appendChild(gw);
-    } else if (item.type === 'card') {
-      const card = item.buildFn(item.ev);
-      if (currentGridEl && card && card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
-        currentGridEl.appendChild(card);
-      }
-      cardCount++;
+    }
+
+    _vsGrid.appendChild(frag);
+
+    if (idx < groups.length) {
+      // More items to render — schedule next chunk
+      requestAnimationFrame(renderChunk);
+    } else {
+      // All done
+      debounceLucide();
+      startCardCountdowns();
     }
   }
-  _vsGrid.appendChild(frag);
-  // Re-attach sentinel and start observing
-  _vsGrid.appendChild(_vsSentinel);
-  if (_vsObserver && _vsRendered < _vsAllGroups.length) {
-    _vsObserver.observe(_vsSentinel);
-  }
-  // Lazy-load images in newly rendered content
-  _observeLazyImages(_vsGrid);
-  debounceLucide();
-  startCardCountdowns();
+
+  // Kick off first chunk immediately
+  renderChunk();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -4972,6 +4968,20 @@ function _fastHydrateFromCache() {
       allEvents = ev; apiLoaded = true; hit = true;
       _memCache.set('events', ev);
     }
+  }
+  // Re-stamp _isPast on cached events (may be missing from old cache)
+  if (hit && allEvents.length) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    allEvents.forEach(ev => {
+      if (ev._isPast === undefined) {
+        ev._isPast = !!ev.dateStart && ev.dateStart < todayStr;
+      }
+      if (ev._daysUntil === undefined) {
+        ev._daysUntil = ev.dateStart
+          ? Math.round((new Date(ev.dateStart + 'T00:00:00') - new Date(todayStr + 'T00:00:00')) / 86400000)
+          : null;
+      }
+    });
   }
   const memBd = _memCache.get('bdays');
   const bd = memBd || Cache.get(LC.BDAYS);
