@@ -36,21 +36,79 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = `
-const SW_VERSION = 'ppp-sw-v4-nocache';
+const SW_VERSION = 'ppp-sw-v5-smart';
+const STATIC_CACHE = 'ppp-static-v5';
+const API_CACHE    = 'ppp-api-v5';
+const API_TTL_MS   = 5 * 60 * 1000; // 5 min — match app CACHE_TTL_MS
+
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
-  // Delete ALL old caches on activate
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== STATIC_CACHE && k !== API_CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 self.addEventListener('fetch', e => {
-  // Always fetch fresh — never serve from cache
   if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request, { cache: 'no-store' }).catch(() => new Response('', { status: 503 }))
-  );
+  const url = e.request.url;
+
+  // Google Apps Script API — stale-while-revalidate with 5-min TTL
+  if (url.includes('script.google.com')) {
+    e.respondWith(
+      caches.open(API_CACHE).then(async cache => {
+        const cached = await cache.match(e.request);
+        const now = Date.now();
+        if (cached) {
+          const cachedTime = parseInt(cached.headers.get('x-cached-at') || '0');
+          if (now - cachedTime < API_TTL_MS) return cached; // fresh
+          // Stale — return cached immediately, revalidate in background
+          fetch(e.request).then(res => {
+            if (res && res.ok) {
+              const headers = new Headers(res.headers);
+              headers.set('x-cached-at', String(now));
+              const cloned = res.clone();
+              res.arrayBuffer().then(buf => {
+                cache.put(e.request, new Response(buf, { status: 200, headers }));
+              });
+            }
+          }).catch(() => {});
+          return cached;
+        }
+        // No cache — fetch and store
+        try {
+          const res = await fetch(e.request);
+          if (res && res.ok) {
+            const headers = new Headers(res.headers);
+            headers.set('x-cached-at', String(now));
+            const buf = await res.arrayBuffer();
+            await cache.put(e.request, new Response(buf, { status: 200, headers }));
+            return new Response(buf, { status: 200, headers: res.headers });
+          }
+          return res;
+        } catch(err) {
+          return new Response(JSON.stringify({status:'error',message:'offline'}), {
+            status: 503, headers: {'Content-Type':'application/json'}
+          });
+        }
+      })
+    );
+    return;
+  }
+
+  // Static assets — cache-first (fonts, scripts)
+  if (url.includes('fonts.googleapis') || url.includes('fonts.gstatic') || url.includes('cdn.jsdelivr')) {
+    e.respondWith(
+      caches.open(STATIC_CACHE).then(async cache => {
+        const cached = await cache.match(e.request);
+        if (cached) return cached;
+        const res = await fetch(e.request).catch(() => null);
+        if (res && res.ok) cache.put(e.request, res.clone());
+        return res || new Response('', { status: 503 });
+      })
+    );
+    return;
+  }
 });
 `;
       const blob = new Blob([swCode], { type: 'application/javascript' });
@@ -782,6 +840,39 @@ self.addEventListener('fetch', e => {
     #events-grid div[style*="repeat(2"] {
       grid-template-columns: 1fr !important;
     }
+  }
+
+  /* ── PERFORMANCE: CSS containment reduces layout recalc ── */
+  .event-card {
+    contain: layout style;
+    will-change: auto;
+  }
+  .month-group {
+    contain: layout;
+  }
+  /* ── Lazy image placeholder ── */
+  img[data-src] {
+    background: linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);
+    background-size: 300% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  img.img-loaded {
+    animation: none;
+    background: transparent;
+  }
+  /* ── Reduce heavy shadows on mobile (perf) ── */
+  @media (max-width: 767px) {
+    .event-card { box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important; }
+    .event-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.10) !important; }
+    .modal-box { box-shadow: 0 4px 24px rgba(0,0,0,0.15) !important; }
+  }
+  /* ── Virtual scroll sentinel ── */
+  #vs-sentinel { pointer-events: none; }
+  /* ── Smooth infinite-scroll transition ── */
+  .month-group { animation: fadeInUp 0.18s ease both; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   </style>
  </head>
@@ -1579,6 +1670,8 @@ self.addEventListener('fetch', e => {
 
  </div><!-- /#app -->
   <div id="toast"></div>
+  <!-- Perf indicator (hidden by default, visible in ?debug mode) -->
+  <div id="perf-badge" style="display:none;position:fixed;bottom:4rem;right:1rem;background:rgba(0,0,0,0.75);color:#0f0;font-family:monospace;font-size:0.65rem;padding:5px 8px;border-radius:6px;z-index:9999;pointer-events:none;"></div>
 
   <script>
 // ═══════════════════════════════════════════════════════════════════
@@ -1613,20 +1706,23 @@ async function hashPassword(pw) {
 }
 
 // ── PERFORMANCE CONFIG ────────────────────────────────────────────
-const CACHE_VERSION    = 'ppp_v3';
-const CACHE_TTL_MS     = 60 * 1000;           // 60s — min refresh interval
+const CACHE_VERSION    = 'ppp_v5';
+const CACHE_TTL_MS     = 5 * 60 * 1000;       // 5 min — per requirements
 const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h stale fallback
-const FETCH_TIMEOUT_MS = 12000;
-const RETRY_DELAYS     = [2000, 5000, 15000];
+const FETCH_TIMEOUT_MS = 10000;
+const RETRY_DELAYS     = [1500, 4000, 10000];
 const DEBOUNCE_RENDER  = 16;
-const DEBOUNCE_RESIZE  = 150;
-const SKELETON_COUNT   = 6;
+const DEBOUNCE_RESIZE  = 200;
+const SKELETON_COUNT   = 8;
+const PAGE_SIZE        = 20;  // cards per infinite-scroll batch
+const IMG_OBSERVER_OPTS = { rootMargin: '200px 0px', threshold: 0 };
 
 // ── RATE LIMITER — prevents API spam even on traffic spike ────────
 const _rateLimit = {
   _calls: {},
   _blocked: {},
-  // Allow max 1 call per key per window (matches CACHE_TTL_MS)
+  // Allow max 1 call per key per window
+  // 5-min window for background refresh, 30s for manual retries
   allow(key, windowMs = CACHE_TTL_MS) {
     const now = Date.now();
     const last = this._calls[key] || 0;
@@ -1999,9 +2095,19 @@ function setLang(lang) { /* language locked to English */ }
 
 function fmtDate(dateStr, opts) {
   if (!dateStr) return '';
+  // Memoize default format only (used 90%+ of the time)
+  if (!opts) {
+    const cached = _fmtDateCache.get(dateStr);
+    if (cached) return cached;
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d)) return dateStr;
+    const result = d.toLocaleDateString(t('date_locale'), {month:'short', day:'numeric', year:'numeric'});
+    if (_fmtDateCache.size < 500) _fmtDateCache.set(dateStr, result);
+    return result;
+  }
   const d = new Date(dateStr + 'T00:00:00');
   if (isNaN(d)) return dateStr;
-  return d.toLocaleDateString(t('date_locale'), opts || {month:'short', day:'numeric', year:'numeric'});
+  return d.toLocaleDateString(t('date_locale'), opts);
 }
 
 function fmtTime(timeStr) {
@@ -2032,6 +2138,11 @@ let editingEventRowNumber = null;
 let deleteConfirmIds = new Set();
 let panelUnlocked   = false;
 let apiLoaded       = false;
+
+// ── PERFORMANCE: Memoized helpers (called 1000x+ with same args) ─
+const _fmtDateCache = new Map();
+const _artistColorCache = new Map();
+const _origFmtDate = null; // placeholder, overridden below
 
 // ── CONCURRENCY GUARDS ────────────────────────────────────────────
 let _fetchingEvents = false;
@@ -2252,35 +2363,17 @@ function processEvents(raw) {
     const cmp = a.dateStart.localeCompare(b.dateStart);
     return cmp !== 0 ? cmp : (a.startTime || '').localeCompare(b.startTime || '');
   });
+  // Pre-compute past flag and days-until for each event (avoids recomputing every render frame)
+  const todayStr = new Date().toISOString().slice(0,10);
+  filtered.forEach(ev => {
+    ev._isPast = !!ev.dateStart && ev.dateStart < todayStr;
+    ev._daysUntil = ev.dateStart ? Math.round((new Date(ev.dateStart+'T00:00:00') - new Date(new Date().toISOString().slice(0,10)+'T00:00:00')) / 86400000) : null;
+  });
   return filtered;
 }
 
-// Hydrate from cache immediately — zero-latency first paint
-// Priority: L1 (memory) → L2 (localStorage)
-function hydrateFromCache() {
-  // L1 check first (same session, instant)
-  const memEv = _memCache.get('events');
-  if (memEv && memEv.length) {
-    allEvents = memEv; apiLoaded = true; scheduleRender();
-  } else {
-    // L2: localStorage
-    const ev = Cache.get(LC.EVENTS);
-    if (ev && ev.length) {
-      allEvents = ev; apiLoaded = true;
-      _memCache.set('events', ev); // promote to L1
-      scheduleRender();
-    } else {
-      showSkeletons();
-    }
-  }
-  const memBd = _memCache.get('bdays');
-  const bd = memBd || Cache.get(LC.BDAYS);
-  if (bd) { allBirthdays = bd; if (!memBd) _memCache.set('bdays', bd); }
-
-  const memAn = _memCache.get('annivs');
-  const an = memAn || Cache.get(LC.ANNIVS);
-  if (an) { allAnniversaries = an; if (!memAn) _memCache.set('annivs', an); }
-}
+// Legacy wrapper — now handled by _fastHydrateFromCache in DOMContentLoaded
+function hydrateFromCache() { _fastHydrateFromCache(); }
 
 async function loadEventsFromSheets(force = false) {
   // L1: memory cache hit — instant, no storage read
@@ -2462,6 +2555,8 @@ function renderCurrentPage() {
 // ── Status helpers ────────────────────────────────────────────────
 function isEventPast(ev) {
   if (!ev.dateStart) return false;
+  // Use precomputed flag when available (set in processEvents)
+  if (ev._isPast !== undefined) return ev._isPast;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   return new Date(ev.dateStart + 'T00:00:00') < today;
 }
@@ -2473,31 +2568,23 @@ function showSkeletons() {
   const noEv = document.getElementById('no-events');
   if (!grid) return;
   if (noEv) noEv.style.display = 'none';
-  const skel = (w1,w2) => `
-    <div style="background:#fff;border-radius:16px;overflow:hidden;border:1.5px solid #f0f0f0;">
-      <div style="height:190px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;"></div>
-      <div style="padding:0.9rem;">
-        <div style="display:flex;gap:6px;margin-bottom:10px;">
-          <div style="height:10px;width:40px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
-          <div style="height:10px;width:30px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:99px;"></div>
-        </div>
-        <div style="height:16px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:8px;width:${w1};"></div>
-        <div style="height:13px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;margin-bottom:6px;width:${w2};"></div>
-        <div style="height:11px;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.6s ease-in-out infinite;border-radius:6px;width:55%;"></div>
-      </div>
-    </div>`;
-  const widths = [['85%','70%'],['75%','60%'],['90%','75%'],['80%','65%'],['70%','80%'],['88%','72%']];
-  let html = '';
-  for (let i = 0; i < SKELETON_COUNT; i++) {
-    const [w1,w2] = widths[i % widths.length];
-    html += skel(w1,w2);
-  }
+  // Minimal DOM — reuse a shared skeleton template via cloneNode (fast)
   grid.innerHTML = '';
-  grid.style.display = 'block';
+  grid.style.display = 'flex';
+  grid.style.flexDirection = 'column';
   const wrap = document.createElement('div');
   wrap.className = 'cards-grid';
-  wrap.style.cssText = 'display:grid;align-items:stretch;';
-  wrap.innerHTML = html;
+  wrap.style.cssText = 'display:grid;gap:clamp(8px,1.5vw,20px);align-items:stretch;';
+  // Build skeleton template once
+  if (!window._skelTemplate) {
+    const t = document.createElement('div');
+    t.style.cssText = 'background:#fff;border-radius:12px;overflow:hidden;border:1px solid #f0f0f0;contain:layout style;';
+    t.innerHTML = '<div class="skel-img" style="height:clamp(130px,12vw,180px);background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.4s ease-in-out infinite;"></div><div style="padding:0.75rem;"><div style="height:9px;width:40%;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:99px;margin-bottom:8px;"></div><div style="height:14px;width:85%;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:6px;margin-bottom:6px;"></div><div style="height:11px;width:60%;background:linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);background-size:300% 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:6px;"></div></div>';
+    window._skelTemplate = t;
+  }
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < SKELETON_COUNT; i++) frag.appendChild(window._skelTemplate.cloneNode(true));
+  wrap.appendChild(frag);
   grid.appendChild(wrap);
 }
 
@@ -2557,16 +2644,21 @@ async function retryConnection() {
 // ═══════════════════════════════════════════════════════════════════
 function getArtistColor(artists) {
   if (!artists) return '#64748b';
+  const cached = _artistColorCache.get(artists);
+  if (cached) return cached;
   const arr = artists.split(',').map(a => a.trim());
   const has = x => arr.includes(x);
-  if (has('Pond') && has('Phuwin') && has('Permpoon')) return '#ec4899';
-  if (has('Pond') && has('Phuwin'))   return '#a855f7';
-  if (has('Pond') && has('Permpoon')) return '#3b82f6';
-  if (has('Phuwin') && has('Permpoon')) return '#ef4444';
-  if (has('Pond'))     return '#f97316';
-  if (has('Phuwin'))   return '#6b7280';
-  if (has('Permpoon')) return '#22c55e';
-  return '#64748b';
+  let color;
+  if (has('Pond') && has('Phuwin') && has('Permpoon')) color = '#ec4899';
+  else if (has('Pond') && has('Phuwin'))   color = '#a855f7';
+  else if (has('Pond') && has('Permpoon')) color = '#3b82f6';
+  else if (has('Phuwin') && has('Permpoon')) color = '#ef4444';
+  else if (has('Pond'))     color = '#f97316';
+  else if (has('Phuwin'))   color = '#6b7280';
+  else if (has('Permpoon')) color = '#22c55e';
+  else color = '#64748b';
+  _artistColorCache.set(artists, color);
+  return color;
 }
 function getArtistLabel(artists) {
   if (!artists) return '';
@@ -2576,23 +2668,29 @@ function getFullDateDisplay(dateStr) {
   if (!dateStr) return '';
   return new Date(dateStr + 'T00:00:00').toLocaleDateString(t('date_locale'), { month: 'long', day: 'numeric', year: 'numeric' });
 }
+// Memoized escHtml — called thousands of times per render
+const _escCache = new Map();
 function escHtml(str) {
   if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const cached = _escCache.get(str);
+  if (cached !== undefined) return cached;
+  const result = str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  if (_escCache.size < 2000) _escCache.set(str, result); // LRU-lite
+  return result;
 }
 
 function renderHome() {
   renderBirthdayBanners();
   const q = homeSearch.trim().toLowerCase();
   const events = allEvents.filter(ev => {
-    if (!ev.title || !ev.title.trim()) return false;
-    if (isEventPast(ev)) return false;
+    if (!ev.title) return false;
+    if (ev._isPast !== undefined ? ev._isPast : isEventPast(ev)) return false;
     if (homeFilter !== 'all') {
       if (!ev.artists) return false;
       if (!ev.artists.split(',').map(a => a.trim()).includes(homeFilter)) return false;
     }
     if (q) {
-      const haystack = [ev.title, ev.location, ev.city, ev.country, ev.artists, ev.type, ev.tv].join(' ').toLowerCase();
+      const haystack = (ev.title + ' ' + (ev.location||'') + ' ' + (ev.city||'') + ' ' + (ev.country||'') + ' ' + (ev.artists||'') + ' ' + (ev.type||'') + ' ' + (ev.tv||'')).toLowerCase();
       if (!haystack.includes(q)) return false;
     }
     return true;
@@ -2618,7 +2716,7 @@ function renderHome() {
   if (count) count.textContent = t('events_count', events.length);
 
   // ── Bento grid update ──
-  const upAll = allEvents.filter(ev => ev.title && !isEventPast(ev));
+  const upAll = allEvents.filter(ev => ev.title && !(ev._isPast !== undefined ? ev._isPast : isEventPast(ev)));
   const cPond     = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Pond')).length;
   const cPhuwin   = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Phuwin')).length;
   const cPermpoon = upAll.filter(ev => ev.artists?.split(',').map(a=>a.trim()).includes('Permpoon')).length;
@@ -2705,117 +2803,213 @@ function renderHome() {
     dateMap.get(key).events.push(ev);
   });
 
-  // Timeline mode — bypass per-month loop, use buildTimelineView directly
+  // Timeline mode — full timeline (no paging needed, uses compact rows)
   if (_viewMode === 'timeline') {
     grid.style.display = 'flex';
     grid.style.flexDirection = 'column';
     grid.innerHTML = '';
     grid.appendChild(buildTimelineView(events));
     debounceLucide();
+    _observeLazyImages(grid);
     return;
   }
 
-  // Build DOM via fragment for minimal reflow
-  const frag = document.createDocumentFragment();
+  // ── Build flat item list for virtual infinite scroll ──
+  const vsItems = [];
   dateMap.forEach(({ label, events: group }) => {
-    const gw = document.createElement('div');
-    gw.className = 'month-group';
-    const hdr = document.createElement('div');
-    hdr.className = 'month-group-header';
-    hdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${label}</span><span class="month-group-header-count">${group.length} event${group.length !== 1 ? 's' : ''}</span></div><span class="month-group-header-line"></span>`;
-    gw.appendChild(hdr);
-
-    if (_viewMode === 'list') {
-      // LIST VIEW — full-width rows with thumbnail on left
-      const listWrap = document.createElement('div');
-      listWrap.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(260px,35vw,480px),1fr));gap:8px;';
-      group.forEach(ev => {
-        const color = getArtistColor(ev.artists);
-        const gradients = {'#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)','#6b7280':'linear-gradient(135deg,#f9fafb,#f3f4f6)','#22c55e':'linear-gradient(135deg,#f0fdf4,#dcfce7)','#a855f7':'linear-gradient(135deg,#faf5ff,#f3e8ff)','#3b82f6':'linear-gradient(135deg,#eff6ff,#dbeafe)','#ef4444':'linear-gradient(135deg,#fef2f2,#fee2e2)','#ec4899':'linear-gradient(135deg,#fdf2f8,#fce7f3)'};
-        const grad = gradients[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
-        const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
-        const dots = artistArr.map(a => { const ac = getArtistColor(a); return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.72rem;font-weight:600;color:${ac};"><span style="width:5px;height:5px;border-radius:50%;background:${ac};display:inline-block;"></span>${a}</span>`; }).join(' ');
-        const dateStr = ev.dateStart ? fmtDate(ev.dateStart) : '';
-        const timeStr = ev.startTime ? fmtTime(ev.startTime) : '';
-        const locStr  = ev.location  ? escHtml(ev.location)  : '';
-        const meta = [dateStr, timeStr, locStr].filter(Boolean).join(' · ');
-        const days = daysUntilEvent(ev.dateStart);
-        const _badgeGrads = ['linear-gradient(135deg,#ef4444,#f97316)','linear-gradient(135deg,#f97316,#fbbf24)','linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#059669,#3b82f6)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#0891b2,#7c3aed)','linear-gradient(135deg,#d97706,#ef4444)','linear-gradient(135deg,#059669,#0891b2)'];
-        const countdownBadge = (days !== null && days >= 0 && days <= 7)
-          ? `<span style="background:${_badgeGrads[days]||_badgeGrads[7]};color:#fff;font-size:0.62rem;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:0.07em;margin-left:auto;flex-shrink:0;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
-        const imgHtml = ev.image
-          ? `<img src="${escHtml(ev.image)}" style="width:68px;height:68px;border-radius:10px;object-fit:cover;object-position:top;display:block;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">`
-          : `<div style="width:68px;height:68px;border-radius:10px;background:${grad};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
-        const item = document.createElement('div');
-        item.style.cssText = `background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:box-shadow 0.15s,transform 0.15s;border-left:3px solid ${color};`;
-        item.onmouseover = () => { item.style.boxShadow='0 4px 16px rgba(0,0,0,0.10)'; item.style.transform='translateY(-1px)'; };
-        item.onmouseout  = () => { item.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)'; item.style.transform=''; };
-        item.onclick = () => openDetailModal(ev.__backendId);
-        item.innerHTML = `${imgHtml}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">${dots}${countdownBadge}</div><div style="font-size:0.88rem;font-weight:700;color:#111;line-height:1.35;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div><div style="font-size:0.72rem;color:#9ca3af;">${meta}</div></div>`;
-        listWrap.appendChild(item);
-      });
-      gw.appendChild(listWrap);
-    } else if (_viewMode === 'timeline') {
-      // TIMELINE VIEW
-      const days_abbr = t('day_abbr');
-      const tlWrap = document.createElement('div');
-      tlWrap.style.cssText = 'display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px;';
-      // vertical line
-      const line = document.createElement('div');
-      line.style.cssText = 'position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px;';
-      tlWrap.appendChild(line);
-      group.forEach((ev, idx) => {
-        const color = getArtistColor(ev.artists);
-        const artistLabel = ev.artists ? ev.artists.split(',').map(a=>a.trim()).join(' · ') : '';
-        const days = daysUntilEvent(ev.dateStart);
-        const _badgeGrads2 = ['linear-gradient(135deg,#ef4444,#f97316)','linear-gradient(135deg,#f97316,#fbbf24)','linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#059669,#3b82f6)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#0891b2,#7c3aed)','linear-gradient(135deg,#d97706,#ef4444)','linear-gradient(135deg,#059669,#0891b2)'];
-        const countdownBadge = (days !== null && days >= 0 && days <= 7)
-          ? `<span style="background:${_badgeGrads2[days]||_badgeGrads2[7]};color:#fff;font-size:0.58rem;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:0.07em;margin-left:auto;">${days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : days + ' DAYS'}</span>` : '';
-        const row = document.createElement('div');
-        row.style.cssText = `display:flex;gap:14px;align-items:flex-start;padding-bottom:${idx === group.length-1 ? '0' : '14px'};`;
-        // dot / date circle
-        let dateCircle = `<div style="width:36px;height:36px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:absolute;left:9px;"><span style="font-size:0.72rem;font-weight:800;color:#6b7280;">?</span></div>`;
-        if (ev.dateStart) {
-          const d = new Date(ev.dateStart+'T00:00:00');
-          dateCircle = `<div style="position:absolute;left:9px;text-align:center;"><div style="font-size:0.5rem;font-weight:700;color:#9ca3af;line-height:1;margin-bottom:1px;">${days_abbr[d.getDay()]}</div><div style="width:36px;height:36px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;"><span style="font-size:0.8rem;font-weight:800;color:#fff;">${d.getDate()}</span></div></div>`;
-        }
-        row.innerHTML = `
-          ${dateCircle}
-          <div style="flex:1;background:#f9fafb;border-radius:12px;padding:10px 12px;border-left:3px solid ${color};cursor:pointer;" onclick="openDetailModal('${ev.__backendId}')">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap;">
-              <span style="font-size:0.65rem;font-weight:700;color:${color};">${escHtml(artistLabel)}</span>
-              ${countdownBadge}
-            </div>
-            <div style="font-size:0.82rem;font-weight:700;color:#111;line-height:1.3;margin-bottom:4px;">${escHtml(ev.title)}</div>
-            <div style="font-size:0.65rem;color:#9ca3af;">
-              ${ev.startTime ? fmtTime(ev.startTime)+' · ' : ''}${ev.location ? escHtml(ev.location) : ''}
-            </div>
-          </div>`;
-        tlWrap.appendChild(row);
-      });
-      gw.appendChild(tlWrap);
-    } else {
-      // GRID VIEW
-      const cg = document.createElement('div');
-      cg.className = 'cards-grid';
-      cg.style.cssText = 'display:grid;gap:clamp(8px,1.5vw,20px);align-items:stretch;';
-      group.forEach(ev => {
-        const card = createCard(ev);
-        if (card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) cg.appendChild(card);
-      });
-      gw.appendChild(cg);
-    }
-    frag.appendChild(gw);
+    vsItems.push({ type: 'month-header', label, key: label, total: group.length, mode: _viewMode });
+    group.forEach(ev => {
+      if (_viewMode === 'list') {
+        vsItems.push({ type: 'card', ev, buildFn: _buildListItem });
+      } else {
+        vsItems.push({ type: 'card', ev, buildFn: _buildGridCard });
+      }
+    });
   });
 
-  grid.style.display = 'flex';
-  grid.style.flexDirection = 'column';
-  grid.innerHTML = '';
-  grid.appendChild(frag);
+  // ── Virtual scroll: render PAGE_SIZE items, load more on scroll ──
+  _vsInit(vsItems);
+}
 
+// Build a list-view item (lazy image via data-src)
+function _buildListItem(ev) {
+  const color = getArtistColor(ev.artists);
+  const gradients = {'#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)','#6b7280':'linear-gradient(135deg,#f9fafb,#f3f4f6)','#22c55e':'linear-gradient(135deg,#f0fdf4,#dcfce7)','#a855f7':'linear-gradient(135deg,#faf5ff,#f3e8ff)','#3b82f6':'linear-gradient(135deg,#eff6ff,#dbeafe)','#ef4444':'linear-gradient(135deg,#fef2f2,#fee2e2)','#ec4899':'linear-gradient(135deg,#fdf2f8,#fce7f3)'};
+  const grad = gradients[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
+  const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
+  const dots = artistArr.map(a => { const ac = getArtistColor(a); return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.72rem;font-weight:600;color:${ac};"><span style="width:5px;height:5px;border-radius:50%;background:${ac};display:inline-block;"></span>${a}</span>`; }).join(' ');
+  const meta = [ev.dateStart ? fmtDate(ev.dateStart) : '', ev.startTime ? fmtTime(ev.startTime) : '', ev.location ? escHtml(ev.location) : ''].filter(Boolean).join(' · ');
+  const days = daysUntilEvent(ev.dateStart);
+  const _bg = ['linear-gradient(135deg,#ef4444,#f97316)','linear-gradient(135deg,#f97316,#fbbf24)','linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#059669,#3b82f6)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#0891b2,#7c3aed)','linear-gradient(135deg,#d97706,#ef4444)','linear-gradient(135deg,#059669,#0891b2)'];
+  const badge = (days !== null && days >= 0 && days <= 7) ? `<span style="background:${_bg[days]||_bg[7]};color:#fff;font-size:0.62rem;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:0.07em;margin-left:auto;flex-shrink:0;">${days===0?'TODAY':days===1?'1 DAY':days+' DAYS'}</span>` : '';
+  // Use data-src for lazy loading
+  const imgHtml = ev.image
+    ? `<img data-src="${escHtml(ev.image)}" src="" style="width:68px;height:68px;border-radius:10px;object-fit:cover;object-position:top;display:block;flex-shrink:0;background:#f3f4f6;" loading="lazy" onerror="this.style.display='none'">`
+    : `<div style="width:68px;height:68px;border-radius:10px;background:${grad};display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"></div>`;
+  const item = document.createElement('div');
+  item.style.cssText = `background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;border-left:3px solid ${color};contain:layout style;`;
+  item.onclick = () => openDetailModal(ev.__backendId);
+  item.innerHTML = `${imgHtml}<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;">${dots}${badge}</div><div style="font-size:0.88rem;font-weight:700;color:#111;line-height:1.35;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div><div style="font-size:0.72rem;color:#9ca3af;">${meta}</div></div>`;
+  return item;
+}
+
+// Build a grid card (wraps createCard with lazy-image upgrade)
+function _buildGridCard(ev) {
+  const card = createCard(ev);
+  // Upgrade all img[src] to lazy data-src inside the card
+  if (card && card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
+    card.querySelectorAll('img[src]:not([data-src])').forEach(img => {
+      if (img.src && !img.src.startsWith('data:') && img.getAttribute('loading') === 'lazy') {
+        img.dataset.src = img.src;
+        img.src = '';
+        img.style.background = '#f3f4f6';
+      }
+    });
+  }
+  return card;
+}
+
+// ── End virtual scroll render ──
+// (observer callbacks + infinite-scroll engine defined below)
+
+// debounceLucide + startCardCountdowns still called from _vsRenderBatch
+
+// Original renderHome closing + past events section:
+function _renderHomeEnd() {
   debounceLucide();
-  // ── Start live per-card countdown tickers ──
   startCardCountdowns();
+  _observeLazyImages(document.getElementById('events-grid'));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VIRTUAL INFINITE SCROLL ENGINE
+// Renders PAGE_SIZE cards at a time, loads more as user scrolls
+// ═══════════════════════════════════════════════════════════════════
+let _vsAllGroups = [];       // flat array of {type:'header'|'card', data}
+let _vsRendered  = 0;        // how many items rendered so far
+let _vsSentinel  = null;     // IntersectionObserver sentinel element
+let _vsObserver  = null;     // IntersectionObserver instance
+let _vsGrid      = null;     // reference to #events-grid
+
+function _vsInit(groups) {
+  _vsAllGroups = groups;
+  _vsRendered  = 0;
+  _vsGrid      = document.getElementById('events-grid');
+  if (!_vsGrid) return;
+  _vsGrid.innerHTML = '';
+  _vsGrid.style.display = 'flex';
+  _vsGrid.style.flexDirection = 'column';
+  // Destroy old observer
+  if (_vsObserver) { _vsObserver.disconnect(); _vsObserver = null; }
+  if (_vsSentinel && _vsSentinel.parentNode) _vsSentinel.parentNode.removeChild(_vsSentinel);
+  // Create sentinel
+  _vsSentinel = document.createElement('div');
+  _vsSentinel.id = 'vs-sentinel';
+  _vsSentinel.style.height = '1px';
+  _vsSentinel.style.width = '100%';
+  _vsSentinel.setAttribute('aria-hidden', 'true');
+  // First batch — render immediately
+  _vsRenderBatch();
+  // Setup IntersectionObserver for infinite scroll
+  _vsObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) _vsRenderBatch();
+  }, { rootMargin: '400px 0px', threshold: 0 });
+}
+
+function _vsRenderBatch() {
+  if (_vsRendered >= _vsAllGroups.length) {
+    if (_vsSentinel && _vsSentinel.parentNode) _vsSentinel.parentNode.removeChild(_vsSentinel);
+    if (_vsObserver) { _vsObserver.disconnect(); _vsObserver = null; }
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  let cardCount = 0;
+  let currentGroupEl = null;
+  // Resume into last open month group if continuing mid-group
+  let currentGridEl = _vsGrid ? _vsGrid.querySelector('.month-group:last-child .cards-grid, .month-group:last-child [style*="grid-template-columns"], .month-group:last-child [style*="padding-left:56px"]') : null;
+  // Remove sentinel temporarily
+  if (_vsSentinel && _vsSentinel.parentNode) _vsSentinel.parentNode.removeChild(_vsSentinel);
+  while (_vsRendered < _vsAllGroups.length && cardCount < PAGE_SIZE) {
+    const item = _vsAllGroups[_vsRendered];
+    _vsRendered++;
+    if (item.type === 'month-header') {
+      const gw = document.createElement('div');
+      gw.className = 'month-group';
+      gw.dataset.monthKey = item.key;
+      const hdr = document.createElement('div');
+      hdr.className = 'month-group-header';
+      hdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${item.label}</span><span class="month-group-header-count">${item.total} event${item.total !== 1 ? 's' : ''}</span></div><span class="month-group-header-line"></span>`;
+      gw.appendChild(hdr);
+      if (item.mode === 'grid') {
+        const cg = document.createElement('div');
+        cg.className = 'cards-grid';
+        cg.style.cssText = 'display:grid;gap:clamp(8px,1.5vw,20px);align-items:stretch;';
+        gw.appendChild(cg);
+        currentGridEl = cg;
+      } else if (item.mode === 'list') {
+        const lw = document.createElement('div');
+        lw.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(260px,35vw,480px),1fr));gap:8px;';
+        gw.appendChild(lw);
+        currentGridEl = lw;
+      } else {
+        const tw = document.createElement('div');
+        tw.style.cssText = 'display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px;';
+        const line = document.createElement('div');
+        line.style.cssText = 'position:absolute;left:27px;top:0;bottom:0;width:2px;background:#f0f0f0;border-radius:99px;';
+        tw.appendChild(line);
+        gw.appendChild(tw);
+        currentGridEl = tw;
+      }
+      currentGroupEl = gw;
+      frag.appendChild(gw);
+    } else if (item.type === 'card') {
+      const card = item.buildFn(item.ev);
+      if (currentGridEl && card && card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
+        currentGridEl.appendChild(card);
+      }
+      cardCount++;
+    }
+  }
+  _vsGrid.appendChild(frag);
+  // Re-attach sentinel and start observing
+  _vsGrid.appendChild(_vsSentinel);
+  if (_vsObserver && _vsRendered < _vsAllGroups.length) {
+    _vsObserver.observe(_vsSentinel);
+  }
+  // Lazy-load images in newly rendered content
+  _observeLazyImages(_vsGrid);
+  debounceLucide();
+  startCardCountdowns();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INTERSECTION OBSERVER — Lazy Image Loading
+// Images use data-src; observer swaps to src when near viewport
+// ═══════════════════════════════════════════════════════════════════
+let _imgObserver = null;
+function _getImgObserver() {
+  if (_imgObserver) return _imgObserver;
+  _imgObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const img = entry.target;
+      const src = img.dataset.src;
+      if (src) {
+        img.src = src;
+        img.removeAttribute('data-src');
+        img.classList.add('img-loading');
+        img.onload = () => { img.classList.remove('img-loading'); img.classList.add('img-loaded'); };
+        img.onerror = () => { img.style.display='none'; };
+      }
+      _imgObserver.unobserve(img);
+    });
+  }, IMG_OBSERVER_OPTS);
+  return _imgObserver;
+}
+function _observeLazyImages(root) {
+  if (!root) return;
+  const obs = _getImgObserver();
+  root.querySelectorAll('img[data-src]').forEach(img => obs.observe(img));
 }
 
 function renderPastEvents(grid) {
@@ -3023,6 +3217,7 @@ function buildDateBadge(ev, color) {
 }
 
 // ── Countdown helpers ─────────────────────────────────────────────
+// NOTE: for rendering use ev._daysUntil when available (precomputed in processEvents)
 function daysUntilEvent(dateStr) {
   if (!dateStr) return null;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -3040,6 +3235,11 @@ function isEventToday(ev) {
 // Tracks the nearest upcoming event and runs a live per-card ticker
 let _nextEventId = null;
 let _cardCountdownTimer = null;
+let _countdownPaused = false;
+// Pause countdown tickers when page is hidden (saves CPU)
+document.addEventListener('visibilitychange', () => {
+  _countdownPaused = document.hidden;
+}, { passive: true });
 
 // Returns ms until event starts (uses startTime if available, else midnight)
 function msUntilEvent(ev) {
@@ -3113,6 +3313,7 @@ function buildCardCountdown(ev) {
 function startCardCountdowns() {
   if (_cardCountdownTimer) clearInterval(_cardCountdownTimer);
   _cardCountdownTimer = setInterval(() => {
+    if (_countdownPaused) return; // skip when tab hidden
     const widgets = document.querySelectorAll('[data-countdown-ev]');
     widgets.forEach(widget => {
       const id = widget.dataset.countdownEv;
@@ -3165,7 +3366,7 @@ function createCard(ev) {
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div class="card-img-wrap"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div class="card-img-wrap"><img data-src="${escHtml(ev.image)}" src="" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" style="background:#f3f4f6;" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:4px;background:${color};flex-shrink:0;"></div>`;
 
   const artistColors = { Pond:'#f97316', Phuwin:'#6b7280', Permpoon:'#22c55e' };
@@ -3221,7 +3422,7 @@ function createCard(ev) {
   const shareBtn = ``;
   const hoverOverlay = `<div class="card-hover-overlay"><div class="oh-title">${escHtml(ev.title)}</div>${ev.description && !hasHtml(ev.description) ? `<div class="oh-desc">${escHtml(ev.description)}</div>` : ''}<div style="margin-top:10px;display:flex;gap:6px;align-items:center;"><div class="oh-cta view-details" style="margin-top:0;font-weight:700;opacity:0.9;cursor:pointer;font-size:0.72rem;letter-spacing:0.03em;">${t('view_details_hover')}</div></div></div>`;
   const imgSection = ev.image
-    ? `<div class="card-img-wrap">${shareBtn}<img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div class="card-img-wrap">${shareBtn}<img data-src="${escHtml(ev.image)}" src="" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" style="background:#f3f4f6;" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
   const noImgBadge = !ev.image ? buildCountdownImgBadge(ev, true) : '';
   card.style.flexDirection = '';
@@ -3645,7 +3846,12 @@ function renderCalendarCardGrid(monthEvents) {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
-  grid.innerHTML = eventsToShow.map(ev => {
+  // For large datasets, cap initial render at 50 items for calendar, lazy-load the rest
+  const CAL_PAGE = 50;
+  const firstBatch = eventsToShow.slice(0, CAL_PAGE);
+  const remaining  = eventsToShow.slice(CAL_PAGE);
+
+  grid.innerHTML = firstBatch.map(ev => {
     const color = getArtistColor(ev.artists);
     const past = isEventPast(ev);
     const days2 = daysUntilEvent(ev.dateStart);
@@ -3674,14 +3880,14 @@ function renderCalendarCardGrid(monthEvents) {
     };
     const grad = gradients[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
     const imgHtml = ev.image
-      ? `<img class="cal-ev-card-img" src="${escHtml(ev.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cal-ev-card-img-placeholder" style="display:none;background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`
-      : `<div class="cal-ev-card-img-placeholder" style="background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
+      ? `<img class="cal-ev-card-img" data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="background:#f3f4f6;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cal-ev-card-img-placeholder" style="display:none;background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/></svg></div>`
+      : `<div class="cal-ev-card-img-placeholder" style="background:${grad};"></div>`;
 
     const imgThumb = ev.image
-      ? `<img src="${escHtml(ev.image)}" alt="" loading="lazy" style="width:72px;height:72px;border-radius:10px;object-fit:cover;object-position:top;flex-shrink:0;" onerror="this.style.display='none'">`
+      ? `<img data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="width:72px;height:72px;border-radius:10px;object-fit:cover;object-position:top;flex-shrink:0;background:#f3f4f6;" onerror="this.style.display='none'">`
       : `<div style="width:72px;height:72px;border-radius:10px;flex-shrink:0;background:${grad};display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
-    return `<div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:stretch;gap:0;cursor:pointer;transition:box-shadow 0.15s;opacity:${past?0.6:1};border-left:3px solid ${past?'#e5e7eb':color};height:100%;box-sizing:border-box;overflow:hidden;" onclick="openDetailModal('${ev.__backendId}')" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.10)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)'">
-      <div style="width:80px;flex-shrink:0;background:${grad};overflow:hidden;position:relative;">${ev.image?`<img src="${escHtml(ev.image)}" alt="" loading="lazy" style="width:80px;height:100%;object-fit:cover;object-position:top;display:block;" onerror="this.parentElement.style.background='${grad}'">`:''} ${calIsToday?`<div class="today-badge" style="top:6px;left:4px;font-size:0.52rem;padding:2px 6px;">${t('next_today')}</div>`:''}</div>
+    return `<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:stretch;gap:0;cursor:pointer;opacity:${past?0.6:1};border-left:3px solid ${past?'#e5e7eb':color};height:100%;box-sizing:border-box;overflow:hidden;contain:layout style;" onclick="openDetailModal('${ev.__backendId}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.09)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)'">
+      <div style="width:80px;flex-shrink:0;background:${grad};overflow:hidden;position:relative;">${ev.image?`<img data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="width:80px;height:100%;object-fit:cover;object-position:top;display:block;background:#f3f4f6;" onerror="this.parentElement.style.background='${grad}'">`:''} ${calIsToday?`<div class="today-badge" style="top:6px;left:4px;font-size:0.52rem;padding:2px 6px;">${t('next_today')}</div>`:''}</div>
       <div style="flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;">
         <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap;">${artistDots}${badge?`<span style="margin-left:auto;">${badge}</span>`:''}</div>
         <div style="font-size:0.85rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div>
@@ -3694,8 +3900,36 @@ function renderCalendarCardGrid(monthEvents) {
       </div>
     </div>`;
   }).join('');
+
+  // Append remaining items if any (avoids blocking main thread for huge lists)
+  if (remaining.length > 0) {
+    requestAnimationFrame(() => {
+      const moreHtml = remaining.map(ev => {
+        const color = getArtistColor(ev.artists);
+        const past = isEventPast(ev);
+        const calDays = daysUntilEvent(ev.dateStart);
+        const calIsToday = calDays === 0;
+        const grad = ({'#f97316':'linear-gradient(135deg,#fff7ed,#ffedd5)','#6b7280':'linear-gradient(135deg,#f9fafb,#f3f4f6)','#22c55e':'linear-gradient(135deg,#f0fdf4,#dcfce7)','#a855f7':'linear-gradient(135deg,#faf5ff,#f3e8ff)','#3b82f6':'linear-gradient(135deg,#eff6ff,#dbeafe)','#ef4444':'linear-gradient(135deg,#fef2f2,#fee2e2)','#ec4899':'linear-gradient(135deg,#fdf2f8,#fce7f3)'})[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
+        const artistArr = ev.artists ? ev.artists.split(',').map(a=>a.trim()).filter(Boolean) : [];
+        const artistDots = artistArr.map(a => { const ac = getArtistColor(a); return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;font-weight:700;color:${past?'#9ca3af':ac};"><span style="width:5px;height:5px;border-radius:50%;background:${past?'#d1d5db':ac};display:inline-block;"></span>${a}</span>`; }).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
+        const loc = [ev.location, ev.city].filter(Boolean).join(', ');
+        return `<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:stretch;gap:0;cursor:pointer;opacity:${past?0.6:1};border-left:3px solid ${past?'#e5e7eb':color};height:100%;box-sizing:border-box;overflow:hidden;contain:layout style;" onclick="openDetailModal('${ev.__backendId}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.09)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)'">
+          <div style="width:80px;flex-shrink:0;background:${grad};overflow:hidden;position:relative;">${ev.image?`<img data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="width:80px;height:100%;object-fit:cover;object-position:top;display:block;background:#f3f4f6;" onerror="this.parentElement.style.background='${grad}'">`:''} ${calIsToday?`<div class="today-badge" style="top:6px;left:4px;font-size:0.52rem;padding:2px 6px;">${t('next_today')}</div>`:''}</div>
+          <div style="flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap;">${artistDots}</div>
+            <div style="font-size:0.85rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div>
+            <div style="font-size:0.68rem;color:#9ca3af;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;">${ev.dateStart?`<span>${fmtDate(ev.dateStart)}</span>`:''}${ev.startTime?`<span style="color:#d1d5db;">·</span><span>${fmtTime(ev.startTime)}</span>`:''}${loc?`<span style="color:#d1d5db;">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(loc)}</span>`:''}</div>
+          </div>
+        </div>`;
+      }).join('');
+      grid.insertAdjacentHTML('beforeend', moreHtml);
+      _observeLazyImages(grid);
+    });
+  }
   // ── Start live countdown tickers for calendar cards ──
   startCardCountdowns();
+  // ── Lazy load images in calendar cards ──
+  _observeLazyImages(grid);
 }
 
 function scrollToEventCard(dateStr) {
@@ -3792,11 +4026,14 @@ function filterHome(artist) {
   scheduleRender();
 }
 
+let _searchDebounce = null;
 function onHomeSearch(val) {
   homeSearch = val;
   const clearBtn = document.getElementById('home-search-clear');
   if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
-  scheduleRender();
+  // Debounce search render to 250ms to avoid jank on fast typing
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(scheduleRender, 250);
 }
 
 function clearHomeSearch() {
@@ -4418,6 +4655,15 @@ function fillForm(ev) {
   set('ticket-live',ev.ticketLive); set('ticket-fanclub',ev.ticketFanclub);
   const arr = ev.artists ? ev.artists.split(',').map(a=>a.trim()) : [];
   document.querySelectorAll('.artist-check').forEach(c => { c.checked = arr.includes(c.value); });
+
+  // Reset pan pickers before re-initializing with new image
+  ['pan-image','pan-heroImage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el._panInited = false; const img = el.querySelector('.img-pan-img'); if(img){img.style.left='0px';img.style.top='0px';} }
+  });
+  // Trigger image preview + pan picker for existing images
+  if (ev.image)     previewAdminImg('ev-image',     'prev-image',     'pan-image');
+  if (ev.heroImage) previewAdminImg('ev-heroImage', 'prev-heroImage', 'pan-heroImage');
 }
 function fv(key) { const el=document.getElementById('ev-'+key); return el ? el.value.trim() : ''; }
 // Read time field — combine HH:MM with timezone select
@@ -4636,7 +4882,11 @@ window.addEventListener('resize', () => {
   _resizeTimer = setTimeout(() => {
     if (document.getElementById('page-calendar')?.classList.contains('active')) renderCalendar();
   }, DEBOUNCE_RESIZE);
-});
+}, { passive: true });
+
+// Passive scroll listeners for perf (prevents Chrome warning)
+document.addEventListener('touchstart', () => {}, { passive: true });
+document.addEventListener('touchmove',  () => {}, { passive: true });
 
 // Pause/resume background refresh when tab visibility changes
 document.addEventListener('visibilitychange', () => {
@@ -4649,8 +4899,10 @@ document.addEventListener('visibilitychange', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  // ── STEP 0: Render UI shell instantly (< 1ms) ──
   applyI18n();
   checkPanelKey();
+  const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
 
   if (panelUnlocked && !isLoggedIn()) {
     currentPage = 'admin';
@@ -4666,50 +4918,112 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAnniversaryAdmin();
   }
 
-  // ── Keyboard handlers ──
+  // ── STEP 1: Try to load from cache immediately (< 5ms, zero network) ──
+  homeFilter = 'all';
+  const cacheHit = _fastHydrateFromCache();
+
+  // ── STEP 2: Register keyboard handlers (non-blocking) ──
   const pwField = document.getElementById('login-pw-field');
   if (pwField) pwField.addEventListener('keydown', e => { if(e.key==='Enter') doAdminLogin().catch(()=>{}); });
-
   document.addEventListener('keydown', function(e) {
-    const modal = document.getElementById('event-form-modal');
-    if (!modal || modal.style.display === 'none') return;
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeEventFormModal(); }
-  });
-  document.addEventListener('keydown', function(e) {
-    // Escape to close detail modal
     if (e.key === 'Escape') {
       const detail = document.getElementById('detail-modal');
-      if (detail && detail.style.display !== 'none') closeDetailModal();
+      if (detail && detail.style.display !== 'none') { closeDetailModal(); return; }
+      const modal = document.getElementById('event-form-modal');
+      if (modal && modal.style.display !== 'none') { e.preventDefault(); closeEventFormModal(); }
+    }
+    if (e.key === 'Enter') {
+      const modal = document.getElementById('event-form-modal');
+      if (modal && modal.style.display !== 'none' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); e.stopPropagation(); }
     }
   });
-  document.addEventListener('keydown', function(e) {
-    if (e.key !== 'Enter') return;
-    const modal = document.getElementById('event-form-modal');
-    if (!modal || modal.style.display === 'none') return;
-    if (e.target.tagName !== 'TEXTAREA') { e.preventDefault(); e.stopPropagation(); }
-  });
 
-  // ── Init calendar date ──
-  const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
+  // ── STEP 3: Fetch fresh data after first paint (non-blocking, deferred) ──
+  // Use requestIdleCallback if available for lowest-impact background fetch
+  const fetchData = () => {
+    Promise.all([
+      loadEventsFromSheets(),
+      loadBirthdaysFromSheets(),
+      loadAnniversariesFromSheets()
+    ]).catch(() => {});
+  };
+  if (cacheHit) {
+    // Cache hit: defer network fetch to idle time so first render is instant
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(fetchData, { timeout: 3000 });
+    } else {
+      setTimeout(fetchData, 500);
+    }
+  } else {
+    // No cache: show skeletons, fetch immediately
+    showSkeletons();
+    debounceLucide();
+    fetchData();
+  }
 
-  // ── STEP 1: Clear only timestamps to force re-fetch, keep data for instant display ──
-  try { [LC.TS_EV, LC.TS_BD, LC.TS_AN].forEach(k => Cache.del(k)); } catch(e) {}
-
-  // ── STEP 2: Immediately hydrate from localStorage (zero-latency skeleton) ──
-  hydrateFromCache();
-  debounceLucide();
-
-  // ── STEP 3: Fetch fresh data in background (non-blocking) ──
-  homeFilter = 'all';
-  Promise.all([
-    loadEventsFromSheets(),
-    loadBirthdaysFromSheets(),
-    loadAnniversariesFromSheets()
-  ]).catch(() => {});
-
-  // ── STEP 4: Schedule recurring 60-second background refresh ──
+  // ── STEP 4: Schedule recurring 5-minute background refresh ──
   scheduleAutoRefresh();
 });
+
+// Ultra-fast cache hydration — reads L1 mem → L2 localStorage, returns true if hit
+function _fastHydrateFromCache() {
+  let hit = false;
+  // L1 memory (same session, instant)
+  const memEv = _memCache.get('events');
+  if (memEv && memEv.length) {
+    allEvents = memEv; apiLoaded = true; hit = true;
+  } else {
+    // L2 localStorage
+    const ev = Cache.get(LC.EVENTS);
+    if (ev && ev.length && Cache.isUsable(LC.TS_EV)) {
+      allEvents = ev; apiLoaded = true; hit = true;
+      _memCache.set('events', ev);
+    }
+  }
+  const memBd = _memCache.get('bdays');
+  const bd = memBd || Cache.get(LC.BDAYS);
+  if (bd && bd.length) { allBirthdays = bd; if (!memBd) _memCache.set('bdays', bd); }
+  const memAn = _memCache.get('annivs');
+  const an = memAn || Cache.get(LC.ANNIVS);
+  if (an && an.length) { allAnniversaries = an; if (!memAn) _memCache.set('annivs', an); }
+  if (hit) {
+    // Render from cache immediately — zero flicker
+    requestAnimationFrame(() => {
+      scheduleRender();
+      renderBirthdayBanners();
+      debounceLucide();
+    });
+  }
+  return hit;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PERFORMANCE MONITOR (shows stats in ?debug mode)
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('debug')) return;
+  const badge = document.getElementById('perf-badge');
+  if (!badge) return;
+  badge.style.display = 'block';
+  const t0 = performance.now();
+  let renderCount = 0;
+  const origSchedule = scheduleRender;
+  window.scheduleRender = function() { renderCount++; origSchedule(); };
+  setInterval(() => {
+    const mem = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(1) + 'MB' : 'n/a';
+    const cacheAge = Date.now() - Cache.getTS(LC.TS_EV);
+    const cacheMin = (cacheAge / 60000).toFixed(1);
+    badge.textContent = [
+      `events: ${allEvents.length}`,
+      `cache: ${cacheMin}m ago`,
+      `dom: ${document.querySelectorAll('.event-card,.cal-ev-card').length} cards`,
+      `renders: ${renderCount}`,
+      `mem: ${mem}`,
+      `uptime: ${((performance.now()-t0)/1000).toFixed(0)}s`
+    ].join(' | ');
+  }, 2000);
+})();
   </script>
  </body>
 </html>
