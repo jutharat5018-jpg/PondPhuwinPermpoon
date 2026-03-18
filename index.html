@@ -3979,9 +3979,9 @@ function renderAdminList() {
   }
   if (noEv) noEv.style.display = 'none';
 
-  // Filter events by selected year
+  // Filter events by selected year (include no-date / Date TBA events always)
   const filteredEvents = allEvents.filter(ev =>
-    ev.dateStart && ev.dateStart.startsWith(_adminYearFilter)
+    !ev.dateStart || ev.dateStart.startsWith(_adminYearFilter)
   );
 
   // If no events for selected year, show empty state
