@@ -37,18 +37,21 @@
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = `
-const SW_VERSION = 'ppp-sw-v8-pwa';
-const STATIC_CACHE = 'ppp-static-v8';
-const API_CACHE    = 'ppp-api-v8';
-const API_TTL_MS   = 3 * 60 * 1000; // 3 min — show cache, revalidate in bg
+const SW_VERSION = 'ppp-sw-v10-pwa';
+const STATIC_CACHE = 'ppp-static-v10';
+const API_CACHE    = 'ppp-api-v10';
+const API_TTL_MS   = 60 * 1000; // 1 min only — always prefer fresh data
 
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(
+    // Clear ALL old caches (including old API caches that may have stale data)
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== STATIC_CACHE && k !== API_CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim()).then(() => {
-      // Tell all open PWA windows to reload so they pick up fresh SW + data
+    ).then(() => {
+      // Also clear the API cache so fresh data is fetched on next load
+      return caches.delete(API_CACHE);
+    }).then(() => self.clients.claim()).then(() => {
       return self.clients.matchAll({ type: 'window' }).then(clients => {
         clients.forEach(c => c.postMessage({ type: 'SW_ACTIVATED' }));
       });
@@ -59,44 +62,29 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = e.request.url;
 
-  // Google Apps Script API — stale-while-revalidate + notify clients on fresh data
+  // Google Apps Script API — NETWORK FIRST, fallback to cache only if offline
   if (url.includes('script.google.com')) {
     e.respondWith(
       caches.open(API_CACHE).then(async cache => {
-        const cached = await cache.match(e.request);
         const now = Date.now();
-
-        // Background revalidate function — fetches fresh, saves, notifies all tabs
-        const revalidate = () => fetch(e.request).then(async res => {
-          if (!res || !res.ok) return;
-          const headers = new Headers(res.headers);
-          headers.set('x-cached-at', String(now));
-          const buf = await res.arrayBuffer();
-          await cache.put(e.request, new Response(buf, { status: 200, headers }));
-          // Notify all open tabs to re-fetch data
-          const clients = await self.clients.matchAll({ type: 'window' });
-          clients.forEach(c => c.postMessage({ type: 'SW_DATA_UPDATED' }));
-        }).catch(() => {});
-
-        if (cached) {
-          const cachedTime = parseInt(cached.headers.get('x-cached-at') || '0');
-          const isStale = (now - cachedTime) > API_TTL_MS;
-          if (isStale) revalidate(); // bg revalidate, return cached immediately
-          return cached;
-        }
-
-        // No cache yet — must wait for network
         try {
-          const res = await fetch(e.request);
+          // Always try network first
+          const res = await fetch(e.request.clone(), { cache: 'no-store' });
           if (res && res.ok) {
             const headers = new Headers(res.headers);
             headers.set('x-cached-at', String(now));
             const buf = await res.arrayBuffer();
             await cache.put(e.request, new Response(buf, { status: 200, headers }));
+            // Notify tabs of fresh data
+            const clients = await self.clients.matchAll({ type: 'window' });
+            clients.forEach(c => c.postMessage({ type: 'SW_DATA_UPDATED' }));
             return new Response(buf, { status: 200, headers: res.headers });
           }
-          return res;
+          throw new Error('Bad response');
         } catch(err) {
+          // Network failed — try cache as last resort
+          const cached = await cache.match(e.request);
+          if (cached) return cached;
           return new Response(JSON.stringify({status:'error',message:'offline'}), {
             status: 503, headers: {'Content-Type':'application/json'}
           });
@@ -480,6 +468,7 @@ self.addEventListener('fetch', e => {
   .bday-banner { display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:0.82rem;position:relative; }
   .bday-today { animation: bday-pulse 2s ease-in-out infinite; }
   @keyframes bday-pulse { 0%,100%{opacity:1} 50%{opacity:0.85} }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   .bday-icon { font-size:1.3rem;flex-shrink:0; }
   .bday-countdown { font-size:0.7rem;font-weight:800;padding:3px 8px;border-radius:99px;margin-left:auto;flex-shrink:0;letter-spacing:0.05em; }
   .month-group { margin-bottom: 2.5rem; padding-top: 1.5rem; }
@@ -946,7 +935,9 @@ self.addEventListener('fetch', e => {
       <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label" >Home</span></span>
       <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label">Calendar</span></span>
       <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label">Admin</span></span>
-
+      <button id="nav-refresh-btn" onclick="forceRefreshAll()" title="Refresh data" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:99px;border:none;background:transparent;cursor:pointer;color:#9ca3af;transition:all 0.15s;padding:0;flex-shrink:0;" onmouseover="this.style.background='rgba(0,0,0,0.06)';this.style.color='#111'" onmouseout="this.style.background='transparent';this.style.color='#9ca3af'">
+        <svg id="nav-refresh-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
      </div>
     </div>
    </nav>
@@ -1769,9 +1760,9 @@ async function hashPassword(pw) {
 }
 
 // ── PERFORMANCE CONFIG ────────────────────────────────────────────
-const CACHE_VERSION    = 'ppp_v9';
-const CACHE_TTL_MS     = 5 * 60 * 1000;       // 5 min — per requirements
-const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h stale fallback
+const CACHE_VERSION    = 'ppp_v10';
+const CACHE_TTL_MS     = 2 * 60 * 1000;        // 2 min — fetch fresh quickly
+const CACHE_MAX_AGE_MS = 30 * 60 * 1000;        // 30 min stale fallback (was 24h!)
 const FETCH_TIMEOUT_MS = 6000;
 const RETRY_DELAYS     = [1500, 4000, 10000];
 const DEBOUNCE_RENDER  = 16;
@@ -2722,6 +2713,32 @@ function hideConnectionError() {
   }
   const warn = document.getElementById('stale-warn');
   if (warn && warn.parentNode) warn.parentNode.removeChild(warn);
+}
+
+async function forceRefreshAll() {
+  const btn = document.getElementById('nav-refresh-btn');
+  const icon = document.getElementById('nav-refresh-icon');
+  if (icon) icon.style.animation = 'spin 0.8s linear infinite';
+  if (btn) btn.style.pointerEvents = 'none';
+
+  // 1. Clear localStorage cache
+  Cache.clearAll();
+  // 2. Clear Service Worker API cache
+  if ('caches' in window) {
+    const keys = await caches.keys().catch(() => []);
+    await Promise.all(keys.filter(k => k.includes('api')).map(k => caches.delete(k))).catch(() => {});
+  }
+  // 3. Force fresh fetch from API
+  _fetchingEvents = false; _fetchingBdays = false; _fetchingAnnivs = false;
+  showSkeletons();
+  await Promise.all([
+    loadEventsFromSheets(true),
+    loadBirthdaysFromSheets(true),
+    loadAnniversariesFromSheets(true)
+  ]).catch(() => {});
+
+  if (icon) icon.style.animation = '';
+  if (btn) btn.style.pointerEvents = '';
 }
 
 async function retryConnection() {
