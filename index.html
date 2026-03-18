@@ -2758,7 +2758,7 @@ function msUntilEvent(ev) {
 function buildCountdownImgBadge(ev, inline = false) {
   if (!ev.dateStart) return '';
   const days = daysUntilEvent(ev.dateStart);
-  if (days === null || days < 0 || days > 7) return '';
+  if (days === null || days < 0 || days > 7 || days <= 1) return '';
   const styles = [
     'background:#ef4444;box-shadow:0 3px 10px rgba(239,68,68,0.7);',         // TODAY  red
     'background:#f97316;box-shadow:0 3px 10px rgba(249,115,22,0.7);',        // 1 DAY  orange
