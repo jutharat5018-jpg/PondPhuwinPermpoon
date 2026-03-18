@@ -2760,14 +2760,14 @@ function buildCountdownImgBadge(ev, inline = false) {
   const days = daysUntilEvent(ev.dateStart);
   if (days === null || days < 0 || days > 7 || days <= 1) return '';
   const styles = [
-    'background:#ef4444;box-shadow:0 3px 10px rgba(239,68,68,0.7);',         // TODAY  red
-    'background:#f97316;box-shadow:0 3px 10px rgba(249,115,22,0.7);',        // 1 DAY  orange
-    'background:#8b5cf6;box-shadow:0 3px 10px rgba(139,92,246,0.7);',        // 2 DAYS violet
-    'background:#10b981;box-shadow:0 3px 10px rgba(16,185,129,0.7);',        // 3 DAYS emerald
-    'background:#2563eb;box-shadow:0 3px 10px rgba(37,99,235,0.7);',         // 4 DAYS blue
-    'background:#db2777;box-shadow:0 3px 10px rgba(219,39,119,0.7);',        // 5 DAYS pink
-    'background:#d97706;box-shadow:0 3px 10px rgba(217,119,6,0.7);',         // 6 DAYS amber
-    'background:#0891b2;box-shadow:0 3px 10px rgba(8,145,178,0.7);',         // 7 DAYS cyan
+    'background:linear-gradient(135deg,#ef4444,#f97316);',   // TODAY
+    'background:linear-gradient(135deg,#f97316,#fbbf24);',   // 1 DAY
+    'background:linear-gradient(135deg,#7c3aed,#ec4899);',   // 2 DAYS
+    'background:linear-gradient(135deg,#059669,#3b82f6);',   // 3 DAYS
+    'background:linear-gradient(135deg,#f97316,#ef4444);',   // 4 DAYS
+    'background:linear-gradient(135deg,#0891b2,#7c3aed);',   // 5 DAYS
+    'background:linear-gradient(135deg,#d97706,#ef4444);',   // 6 DAYS
+    'background:linear-gradient(135deg,#059669,#0891b2);',   // 7 DAYS
   ];
   const label = days === 0 ? 'TODAY' : days === 1 ? '1 DAY' : `${days} DAYS`;
   const st = styles[days] || styles[7];
