@@ -3515,6 +3515,7 @@ function startCountdown(dateStr, timeStr) {
       document.getElementById('cd-hours').textContent = '00';
       document.getElementById('cd-mins').textContent  = '00';
       document.getElementById('cd-secs').textContent  = '00';
+      cdEl.style.display = 'flex';
       clearInterval(_countdownTimer);
       return;
     }
@@ -3550,6 +3551,7 @@ function startCountdown2(dateStr, timeStr) {
       document.getElementById('cd2-hours').textContent = '00';
       document.getElementById('cd2-mins').textContent  = '00';
       document.getElementById('cd2-secs').textContent  = '00';
+      cdEl.style.display = 'flex';
       clearInterval(window._countdownTimer2);
       return;
     }
