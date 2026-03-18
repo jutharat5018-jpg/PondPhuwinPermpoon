@@ -762,7 +762,7 @@ self.addEventListener('fetch', e => {
       <span class="nav-link active" data-page="home" onclick="navigate('home')"><i data-lucide="home" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label" >Home</span></span>
       <span class="nav-link" data-page="calendar" onclick="navigate('calendar')"><i data-lucide="calendar" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label">Calendar</span></span>
       <span class="nav-link" data-page="admin" id="nav-admin-link" style="display:none;" onclick="navigate('admin')"><i data-lucide="settings" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:3px;"></i><span class="nav-label">Admin</span></span>
-
+      <button id="lang-toggle" onclick="setLang(currentLang === 'th' ? 'en' : 'th')" style="padding:4px 12px;border-radius:99px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;letter-spacing:0.04em;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#fff'">TH</button>
      </div>
     </div>
    </nav>
@@ -1619,7 +1619,9 @@ let homeFilter      = 'all';
 let homeSearch      = '';
 
 // ── i18n (English only) ───────────────────────────────────────────
-const i18n = {
+let currentLang = localStorage.getItem('ppp_lang') || 'en';
+
+const i18n_en = {
   nav_home: 'Home', nav_calendar: 'Calendar', nav_admin: 'Admin',
   filter_all: 'All',
   search_placeholder: 'Search events, venues, artists...',
@@ -1692,11 +1694,109 @@ const i18n = {
   detail_share: 'Share',
   admin_panel: 'Admin Panel',
 };
+
+const i18n_th = {
+  nav_home: 'หน้าแรก', nav_calendar: 'ปฏิทิน', nav_admin: 'แอดมิน',
+  filter_all: 'ทั้งหมด',
+  search_placeholder: 'ค้นหางาน สถานที่ ศิลปิน...',
+  next_today: 'วันนี้', next_1day: 'ถัดไป · 1 วัน', next_days: 'ถัดไป · %d วัน', next_event: 'งานถัดไป',
+  cal_next_today: 'วันนี้', cal_next_1day: 'งานถัดไป · 1 วัน', cal_next_days: 'งานถัดไป · %d วัน',
+  events_count: (n) => `${n} งาน`,
+  no_events_title: 'ไม่มีงานที่กำลังจะมาถึง',
+  no_events_sub: 'ติดตามข่าวสารจาก ป้อง · ภูวินทร์ · เพิ่มพูน',
+  cal_no_events: 'ไม่มีงานในวันนี้',
+  add_calendar: 'เพิ่มในปฏิทิน',
+  view_detail: 'ดูรายละเอียด →',
+  past_events: 'งานที่ผ่านมา',
+  countdown_label: 'นับถอยหลัง',
+  date_locale: 'th-TH',
+  date_opts_short: { month: 'short', day: 'numeric', year: 'numeric' },
+  footer: '© 2026 pondphuwin trend. ทำด้วยความรัก',
+  month_names: ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'],
+  day_abbr: ['อา','จ','อ','พ','พฤ','ศ','ส'],
+  login_error: 'รหัสผ่านไม่ถูกต้อง ลองใหม่อีกครั้ง',
+  back_to_schedule: '← กลับไปตารางงาน',
+  admin_manage: 'จัดการงาน',
+  admin_password: 'รหัสผ่าน',
+  admin_login: 'เข้าสู่ระบบ',
+  admin_logout: 'ออกจากระบบ',
+  admin_add_event: 'เพิ่มงาน',
+  admin_edit_event: 'แก้ไขงาน',
+  admin_save_event: 'บันทึกงาน',
+  admin_update_event: 'อัปเดตงาน',
+  admin_cancel: 'ยกเลิก',
+  admin_delete: 'ลบ',
+  admin_confirm_delete: 'ยืนยันการลบ?',
+  admin_no_events: 'ยังไม่มีงาน',
+  admin_refresh: 'รีเฟรช',
+  admin_birthday_title: 'วันเกิดและวันครบรอบ',
+  admin_add_birthday: 'เพิ่มวันเกิด',
+  admin_add_anniversary: 'เพิ่มวันครบรอบ',
+  bday_suffix: (name) => `วันเกิด ${name}`,
+  bday_today: (name) => `สุขสันต์วันเกิด ${name}! 🎂`,
+  anniv_today: (label) => `🥂 ${label} — สุขสันต์วันครบรอบ!`,
+  toast_saved: 'บันทึกแล้ว ✓',
+  toast_deleted: 'ลบแล้ว ✓',
+  toast_error: 'เกิดข้อผิดพลาด',
+  toast_copied: 'คัดลอกลิงก์แล้ว ✓',
+  toast_refreshed: 'รีเฟรชแล้ว ✓',
+  toast_logged_out: 'ออกจากระบบแล้ว',
+  toast_limit: 'ถึงขีดจำกัดแล้ว',
+  toast_removed: 'ลบออกแล้ว (ถูกลบจาก Sheet แล้ว)',
+  toast_need_title: '❌ กรุณาใส่ชื่องานก่อน',
+  toast_need_name: 'กรุณาใส่ชื่อศิลปิน',
+  toast_need_label: 'กรุณาใส่ชื่อวันครบรอบ',
+  toast_invalid_month: 'เดือนไม่ถูกต้อง',
+  toast_invalid_day: 'วันไม่ถูกต้อง',
+  toast_added: 'เพิ่มงานแล้ว! ✓',
+  toast_updated: 'อัปเดตงานแล้ว! ✓',
+  toast_bday_deleted: 'ลบวันเกิดแล้ว ✓',
+  toast_anniv_saved: 'บันทึกวันครบรอบแล้ว ✓',
+  toast_anniv_deleted: 'ลบวันครบรอบแล้ว ✓',
+  stat_total_year: 'ทั้งหมดปีนี้',
+  stat_past: 'ผ่านไปแล้ว',
+  stat_upcoming: 'กำลังจะมาถึง',
+  stat_progress: 'ความคืบหน้า',
+  stat_events: 'งาน',
+  cal_no_events_day: 'ไม่มีงานในวันที่เลือก',
+  detail_add_cal: 'Google Calendar',
+  detail_ical: 'iCal / Outlook',
+  detail_map: 'แผนที่',
+  detail_links: 'ลิงก์',
+  detail_tickets: 'ตั๋ว',
+  detail_desc: 'รายละเอียด',
+  detail_share: 'แชร์',
+  admin_panel: 'แผงแอดมิน',
+};
+
+const i18n = new Proxy({}, { get: (_, key) => (currentLang === 'th' ? i18n_th : i18n_en)[key] });
+
 function t(key, ...args) {
-  let val = i18n[key] || key;
+  const src = currentLang === 'th' ? i18n_th : i18n_en;
+  let val = src[key] || key;
   if (typeof val === 'function') return val(...args);
   if (args.length && typeof val === 'string') val = val.replace('%d', args[0]);
   return val;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('ppp_lang', lang);
+  // Update toggle button
+  const btn = document.getElementById('lang-toggle');
+  if (btn) btn.textContent = lang === 'th' ? 'EN' : 'TH';
+  // Re-render everything
+  const page = document.querySelector('.page.active');
+  if (page) {
+    const id = page.id;
+    if (id === 'page-home') scheduleRender();
+    else if (id === 'page-calendar') renderCalendar();
+  }
+  // Update nav labels
+  const navHome = document.querySelector('[data-page="home"] .nav-label');
+  const navCal  = document.querySelector('[data-page="calendar"] .nav-label');
+  if (navHome) navHome.textContent = t('nav_home');
+  if (navCal)  navCal.textContent  = t('nav_calendar');
 }
 
 function fmtDate(dateStr, opts) {
@@ -1725,9 +1825,6 @@ function fmtDateRange(dateStart, dateEnd) {
   const s = fmtDate(dateStart);
   if (!dateEnd || dateEnd === dateStart) return s;
   return `${s} – ${fmtDate(dateEnd)}`;
-}
-function setLang(lang) {
-  // Language is locked to English — function kept as no-op for compatibility
 }
 let editingEventId  = null;
 let editingEventRowNumber = null;
@@ -4300,7 +4397,8 @@ document.addEventListener('visibilitychange', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   // ── Language init ──
-  // Language locked to English
+  const btn = document.getElementById('lang-toggle');
+  if (btn) btn.textContent = currentLang === 'th' ? 'EN' : 'TH';
   checkPanelKey();
 
   if (panelUnlocked && !isLoggedIn()) {
