@@ -850,13 +850,18 @@ self.addEventListener('fetch', e => {
   .month-group {
     contain: layout;
   }
-  /* ── Lazy image placeholder ── */
-  img[data-src] {
+  /* ── Lazy image: shimmer while loading ── */
+  .card-img.img-loading {
+    filter: blur(4px);
+    transform: scale(1.02);
+    transition: filter 0.35s ease, transform 0.35s ease;
     background: linear-gradient(90deg,#f5f5f5 0%,#ececec 40%,#f5f5f5 80%);
     background-size: 300% 100%;
     animation: shimmer 1.4s ease-in-out infinite;
   }
-  img.img-loaded {
+  .card-img.img-loaded {
+    filter: none;
+    transform: scale(1);
     animation: none;
     background: transparent;
   }
@@ -2844,7 +2849,7 @@ function _buildListItem(ev) {
   const badge = (days !== null && days >= 0 && days <= 7) ? `<span style="background:${_bg[days]||_bg[7]};color:#fff;font-size:0.62rem;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:0.07em;margin-left:auto;flex-shrink:0;">${days===0?'TODAY':days===1?'1 DAY':days+' DAYS'}</span>` : '';
   // Use data-src for lazy loading
   const imgHtml = ev.image
-    ? `<img data-src="${escHtml(ev.image)}" src="" style="width:68px;height:68px;border-radius:10px;object-fit:cover;object-position:top;display:block;flex-shrink:0;background:#f3f4f6;" loading="lazy" onerror="this.style.display='none'">`
+    ? `<img src="${escHtml(ev.image)}" style="width:68px;height:68px;border-radius:10px;object-fit:cover;object-position:top;display:block;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">`
     : `<div style="width:68px;height:68px;border-radius:10px;background:${grad};display:flex;align-items:center;justify-content:center;flex-shrink:0;" aria-hidden="true"></div>`;
   const item = document.createElement('div');
   item.style.cssText = `background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;border-left:3px solid ${color};contain:layout style;`;
@@ -2853,20 +2858,9 @@ function _buildListItem(ev) {
   return item;
 }
 
-// Build a grid card (wraps createCard with lazy-image upgrade)
+// Build a grid card
 function _buildGridCard(ev) {
-  const card = createCard(ev);
-  // Upgrade all img[src] to lazy data-src inside the card
-  if (card && card.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) {
-    card.querySelectorAll('img[src]:not([data-src])').forEach(img => {
-      if (img.src && !img.src.startsWith('data:') && img.getAttribute('loading') === 'lazy') {
-        img.dataset.src = img.src;
-        img.src = '';
-        img.style.background = '#f3f4f6';
-      }
-    });
-  }
-  return card;
+  return createCard(ev);
 }
 
 // ── End virtual scroll render ──
@@ -3007,9 +3001,8 @@ function _getImgObserver() {
   return _imgObserver;
 }
 function _observeLazyImages(root) {
-  if (!root) return;
-  const obs = _getImgObserver();
-  root.querySelectorAll('img[data-src]').forEach(img => obs.observe(img));
+  // Native loading="lazy" handles lazy loading — no custom observer needed
+  // Keep function to avoid breaking call sites
 }
 
 function renderPastEvents(grid) {
@@ -3366,7 +3359,7 @@ function createCard(ev) {
   const hasHtml = v => !!v && /<[a-z][\s\S]*>/i.test(v);
 
   const imgHtml = ev.image
-    ? `<div class="card-img-wrap"><img data-src="${escHtml(ev.image)}" src="" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" style="background:#f3f4f6;" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div class="card-img-wrap"><img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:4px;background:${color};flex-shrink:0;"></div>`;
 
   const artistColors = { Pond:'#f97316', Phuwin:'#6b7280', Permpoon:'#22c55e' };
@@ -3422,7 +3415,7 @@ function createCard(ev) {
   const shareBtn = ``;
   const hoverOverlay = `<div class="card-hover-overlay"><div class="oh-title">${escHtml(ev.title)}</div>${ev.description && !hasHtml(ev.description) ? `<div class="oh-desc">${escHtml(ev.description)}</div>` : ''}<div style="margin-top:10px;display:flex;gap:6px;align-items:center;"><div class="oh-cta view-details" style="margin-top:0;font-weight:700;opacity:0.9;cursor:pointer;font-size:0.72rem;letter-spacing:0.03em;">${t('view_details_hover')}</div></div></div>`;
   const imgSection = ev.image
-    ? `<div class="card-img-wrap">${shareBtn}<img data-src="${escHtml(ev.image)}" src="" alt="${escHtml(ev.title)}" class="card-img" loading="lazy" decoding="async" style="background:#f3f4f6;" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
+    ? `<div class="card-img-wrap">${shareBtn}<img src="${escHtml(ev.image)}" alt="${escHtml(ev.title)}" class="card-img img-loading" loading="lazy" decoding="async" onload="this.classList.remove('img-loading');this.classList.add('img-loaded')" onerror="this.parentElement.style.display='none';">${buildDateBadge(ev, color)}${buildCountdownImgBadge(ev)}</div>`
     : `<div style="height:6px;background:${color};flex-shrink:0;"></div>`;
   const noImgBadge = !ev.image ? buildCountdownImgBadge(ev, true) : '';
   card.style.flexDirection = '';
@@ -3880,14 +3873,14 @@ function renderCalendarCardGrid(monthEvents) {
     };
     const grad = gradients[color] || 'linear-gradient(135deg,#f3f4f6,#e5e7eb)';
     const imgHtml = ev.image
-      ? `<img class="cal-ev-card-img" data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="background:#f3f4f6;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cal-ev-card-img-placeholder" style="display:none;background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/></svg></div>`
+      ? `<img class="cal-ev-card-img" src="${escHtml(ev.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cal-ev-card-img-placeholder" style="display:none;background:${grad};"><svg width="28" height="28" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.4"><rect x="3" y="4" width="18" height="18" rx="2"/></svg></div>`
       : `<div class="cal-ev-card-img-placeholder" style="background:${grad};"></div>`;
 
     const imgThumb = ev.image
-      ? `<img data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="width:72px;height:72px;border-radius:10px;object-fit:cover;object-position:top;flex-shrink:0;background:#f3f4f6;" onerror="this.style.display='none'">`
+      ? `<img src="${escHtml(ev.image)}" alt="" loading="lazy" style="width:72px;height:72px;border-radius:10px;object-fit:cover;object-position:top;flex-shrink:0;" onerror="this.style.display='none'">`
       : `<div style="width:72px;height:72px;border-radius:10px;flex-shrink:0;background:${grad};display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" fill="none" stroke="${color}" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>`;
     return `<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:stretch;gap:0;cursor:pointer;opacity:${past?0.6:1};border-left:3px solid ${past?'#e5e7eb':color};height:100%;box-sizing:border-box;overflow:hidden;contain:layout style;" onclick="openDetailModal('${ev.__backendId}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.09)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)'">
-      <div style="width:80px;flex-shrink:0;background:${grad};overflow:hidden;position:relative;">${ev.image?`<img data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="width:80px;height:100%;object-fit:cover;object-position:top;display:block;background:#f3f4f6;" onerror="this.parentElement.style.background='${grad}'">`:''} ${calIsToday?`<div class="today-badge" style="top:6px;left:4px;font-size:0.52rem;padding:2px 6px;">${t('next_today')}</div>`:''}</div>
+      <div style="width:80px;flex-shrink:0;background:${grad};overflow:hidden;position:relative;">${ev.image?`<img src="${escHtml(ev.image)}" alt="" loading="lazy" style="width:80px;height:100%;object-fit:cover;object-position:top;display:block;" onerror="this.parentElement.style.background='${grad}'">`:''} ${calIsToday?`<div class="today-badge" style="top:6px;left:4px;font-size:0.52rem;padding:2px 6px;">${t('next_today')}</div>`:''}</div>
       <div style="flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;">
         <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap;">${artistDots}${badge?`<span style="margin-left:auto;">${badge}</span>`:''}</div>
         <div style="font-size:0.85rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div>
@@ -3914,7 +3907,7 @@ function renderCalendarCardGrid(monthEvents) {
         const artistDots = artistArr.map(a => { const ac = getArtistColor(a); return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;font-weight:700;color:${past?'#9ca3af':ac};"><span style="width:5px;height:5px;border-radius:50%;background:${past?'#d1d5db':ac};display:inline-block;"></span>${a}</span>`; }).join('<span style="color:#e5e7eb;margin:0 2px;">·</span>');
         const loc = [ev.location, ev.city].filter(Boolean).join(', ');
         return `<div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);display:flex;align-items:stretch;gap:0;cursor:pointer;opacity:${past?0.6:1};border-left:3px solid ${past?'#e5e7eb':color};height:100%;box-sizing:border-box;overflow:hidden;contain:layout style;" onclick="openDetailModal('${ev.__backendId}')" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.09)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)'">
-          <div style="width:80px;flex-shrink:0;background:${grad};overflow:hidden;position:relative;">${ev.image?`<img data-src="${escHtml(ev.image)}" src="" alt="" loading="lazy" style="width:80px;height:100%;object-fit:cover;object-position:top;display:block;background:#f3f4f6;" onerror="this.parentElement.style.background='${grad}'">`:''} ${calIsToday?`<div class="today-badge" style="top:6px;left:4px;font-size:0.52rem;padding:2px 6px;">${t('next_today')}</div>`:''}</div>
+          <div style="width:80px;flex-shrink:0;background:${grad};overflow:hidden;position:relative;">${ev.image?`<img src="${escHtml(ev.image)}" alt="" loading="lazy" style="width:80px;height:100%;object-fit:cover;object-position:top;display:block;" onerror="this.parentElement.style.background='${grad}'">`:''} ${calIsToday?`<div class="today-badge" style="top:6px;left:4px;font-size:0.52rem;padding:2px 6px;">${t('next_today')}</div>`:''}</div>
           <div style="flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;">
             <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap;">${artistDots}</div>
             <div style="font-size:0.85rem;font-weight:700;color:${past?'#9ca3af':'#111'};line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(ev.title)}</div>
