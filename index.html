@@ -2437,9 +2437,32 @@ function processEvents(raw) {
   });
   // Pre-compute past flag and days-until for each event (avoids recomputing every render frame)
   const todayStr = _todayInBKK();
+  const nowBKK = new Date(Date.now() + (7 * 3600000) + new Date().getTimezoneOffset() * 60000);
   filtered.forEach(ev => {
-    ev._isPast = !!ev.dateStart && ev.dateStart < todayStr;
-    ev._daysUntil = ev.dateStart ? Math.round((new Date(ev.dateStart+'T00:00:00') - new Date(todayStr+'T00:00:00')) / 86400000) : null;
+    if (!ev.dateStart) { ev._isPast = false; ev._daysUntil = null; return; }
+    if (ev.dateStart < todayStr) {
+      // วันก่อนหน้า → past แน่นอน
+      ev._isPast = true;
+    } else if (ev.dateStart === todayStr) {
+      // วันนี้ → ดูเวลา endTime (ถ้ามี) หรือ startTime
+      const timeRef = ev.endTime || ev.startTime;
+      if (timeRef) {
+        const rawT = timeRef.split('/')[0].replace(/[^\d:]/g,'').trim();
+        let hhmm = rawT.includes(':') ? rawT : (rawT.slice(0,2)+':'+rawT.slice(2));
+        if (hhmm.split(':')[0].length === 1) hhmm = '0' + hhmm;
+        const parts = hhmm.split(':');
+        const evEnd = new Date(nowBKK);
+        evEnd.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+        ev._isPast = nowBKK >= evEnd;
+      } else {
+        // ไม่มีเวลา → ถือว่ายังไม่ past ตลอดทั้งวัน
+        ev._isPast = false;
+      }
+    } else {
+      // วันหน้า → ยังไม่ past
+      ev._isPast = false;
+    }
+    ev._daysUntil = Math.round((new Date(ev.dateStart+'T00:00:00') - new Date(todayStr+'T00:00:00')) / 86400000);
   });
   return filtered;
 }
@@ -5150,14 +5173,29 @@ function _fastHydrateFromCache() {
   // Re-stamp _isPast on cached events (may be missing from old cache)
   if (hit && allEvents.length) {
     const todayStr = _todayInBKK();
+    const nowBKK = new Date(Date.now() + (7 * 3600000) + new Date().getTimezoneOffset() * 60000);
     allEvents.forEach(ev => {
-      if (ev._isPast === undefined) {
-        ev._isPast = !!ev.dateStart && ev.dateStart < todayStr;
+      if (!ev.dateStart) { ev._isPast = false; ev._daysUntil = null; return; }
+      if (ev.dateStart < todayStr) {
+        ev._isPast = true;
+      } else if (ev.dateStart === todayStr) {
+        const timeRef = ev.endTime || ev.startTime;
+        if (timeRef) {
+          const rawT = timeRef.split('/')[0].replace(/[^\d:]/g,'').trim();
+          let hhmm = rawT.includes(':') ? rawT : (rawT.slice(0,2)+':'+rawT.slice(2));
+          if (hhmm.split(':')[0].length === 1) hhmm = '0' + hhmm;
+          const parts = hhmm.split(':');
+          const evEnd = new Date(nowBKK);
+          evEnd.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+          ev._isPast = nowBKK >= evEnd;
+        } else {
+          ev._isPast = false;
+        }
+      } else {
+        ev._isPast = false;
       }
       if (ev._daysUntil === undefined) {
-        ev._daysUntil = ev.dateStart
-          ? Math.round((new Date(ev.dateStart + 'T00:00:00') - new Date(todayStr + 'T00:00:00')) / 86400000)
-          : null;
+        ev._daysUntil = Math.round((new Date(ev.dateStart + 'T00:00:00') - new Date(todayStr + 'T00:00:00')) / 86400000);
       }
     });
   }
