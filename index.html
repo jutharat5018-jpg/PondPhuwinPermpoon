@@ -2347,7 +2347,12 @@ function renderHome() {
         el('bento-next-bg').style.backgroundImage = `url('${heroSrc}')`;
       }
     }
-    startCountdown(next.dateStart, next.startTime);
+    if (days !== null && days <= 1) {
+      startCountdown(next.dateStart, next.startTime);
+    } else {
+      const cdEl = document.getElementById('bento-countdown');
+      if (cdEl) cdEl.style.display = 'none';
+    }
     if (el('bento-next')) el('bento-next').dataset.id = next.__backendId;
   }
   // Event 2
@@ -2368,7 +2373,12 @@ function renderHome() {
       el('bento-next2-bg').style.backgroundImage = `url('${hero2Src}')`;
     }
     if (el('bento-ev2')) el('bento-ev2').dataset.id = next2.__backendId;
-    startCountdown2(next2.dateStart, next2.startTime);
+    if (days2 !== null && days2 <= 1) {
+      startCountdown2(next2.dateStart, next2.startTime);
+    } else {
+      const cdEl = document.getElementById('bento-countdown2');
+      if (cdEl) cdEl.style.display = 'none';
+    }
   } else if (el('bento-ev2')) {
     el('bento-ev2').style.display = 'none';
   }
