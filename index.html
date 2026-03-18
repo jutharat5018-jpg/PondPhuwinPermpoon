@@ -3508,7 +3508,17 @@ function startCountdown(dateStr, timeStr) {
   _countdownTarget = target;
   function tick() {
     const now  = new Date();
-    const diff = target - now;
+    let diff = target - now;
+    // If time already passed but it's still today, count to end of day instead
+    if (diff <= 0) {
+      const eventDate = new Date(dateStr + 'T00:00:00');
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const isToday = eventDate.getTime() === todayStart.getTime();
+      if (isToday) {
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        diff = endOfDay - now;
+      }
+    }
     if (diff <= 0) {
       document.getElementById('cd-days').textContent  = '0';
       document.getElementById('cd-hours').textContent = '00';
@@ -3544,7 +3554,16 @@ function startCountdown2(dateStr, timeStr) {
   if (isNaN(target.getTime())) { cdEl.style.display = 'none'; return; }
   function tick2() {
     const now  = new Date();
-    const diff = target - now;
+    let diff = target - now;
+    if (diff <= 0) {
+      const eventDate = new Date(dateStr + 'T00:00:00');
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const isToday = eventDate.getTime() === todayStart.getTime();
+      if (isToday) {
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        diff = endOfDay - now;
+      }
+    }
     if (diff <= 0) {
       document.getElementById('cd2-days').textContent  = '0';
       document.getElementById('cd2-hours').textContent = '00';
