@@ -2336,9 +2336,9 @@ function renderHome() {
     const days = daysUntilEvent(next.dateStart);
     const color = getArtistColor(next.artists);
     const dayLabel = days === 0 ? t('next_today') : days === 1 ? t('next_1day') : days !== null && days <= 30 ? t('next_days', days) : t('next_event');
-    const dayBadgeColor = days === 0 ? '#ef4444' : days === 1 ? '#f97316' : color;
-    const dayBadgeShadow = days === 0 ? 'rgba(239,68,68,0.5)' : days === 1 ? 'rgba(249,115,22,0.5)' : 'rgba(0,0,0,0.3)';
-    el('bento-next-label').innerHTML = `<span style="background:${dayBadgeColor};color:#fff;padding:3px 10px;border-radius:99px;font-size:0.6rem;font-weight:800;letter-spacing:0.07em;box-shadow:0 2px 8px ${dayBadgeShadow};display:inline-block;">${dayLabel}</span>`;
+    const _bg = ['linear-gradient(135deg,#ef4444,#f97316)','linear-gradient(135deg,#f97316,#fbbf24)','linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#059669,#3b82f6)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#0891b2,#7c3aed)','linear-gradient(135deg,#d97706,#ef4444)','linear-gradient(135deg,#059669,#0891b2)'];
+    const dayBadgeGrad = _bg[days] || _bg[0];
+    el('bento-next-label').innerHTML = `<span style="background:${dayBadgeGrad};color:#fff;padding:3px 10px;border-radius:99px;font-size:0.6rem;font-weight:900;letter-spacing:0.07em;display:inline-block;">${dayLabel}</span>`;
     el('bento-next-label').style.color = '';
     el('bento-next-title').textContent = next.title;
     const meta = [next.dateStart ? fmtDate(next.dateStart) : '', next.startTime ? fmtTime(next.startTime) : '', next.location].filter(Boolean).join(' · ');
@@ -2363,9 +2363,9 @@ function renderHome() {
     const color2 = getArtistColor(next2.artists);
     const dayLabel2 = days2 === 0 ? t('next_today') : days2 === 1 ? t('next_1day') : days2 !== null && days2 <= 30 ? t('next_days', days2) : t('next_event');
     const meta2 = [next2.dateStart ? fmtDate(next2.dateStart) : '', next2.startTime ? fmtTime(next2.startTime) : '', next2.location].filter(Boolean).join(' · ');
-    const dayBadgeColor2 = days2 === 0 ? '#ef4444' : days2 === 1 ? '#f97316' : color2;
-    const dayBadgeShadow2 = days2 === 0 ? 'rgba(239,68,68,0.5)' : days2 === 1 ? 'rgba(249,115,22,0.5)' : 'rgba(0,0,0,0.3)';
-    el('bento-next2-label').innerHTML = `<span style="background:${dayBadgeColor2};color:#fff;padding:3px 10px;border-radius:99px;font-size:0.6rem;font-weight:800;letter-spacing:0.07em;box-shadow:0 2px 8px ${dayBadgeShadow2};display:inline-block;">${dayLabel2}</span>`;
+    const _bg2 = ['linear-gradient(135deg,#ef4444,#f97316)','linear-gradient(135deg,#f97316,#fbbf24)','linear-gradient(135deg,#7c3aed,#ec4899)','linear-gradient(135deg,#059669,#3b82f6)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#0891b2,#7c3aed)','linear-gradient(135deg,#d97706,#ef4444)','linear-gradient(135deg,#059669,#0891b2)'];
+    const dayBadgeGrad2 = _bg2[days2] || _bg2[0];
+    el('bento-next2-label').innerHTML = `<span style="background:${dayBadgeGrad2};color:#fff;padding:3px 10px;border-radius:99px;font-size:0.6rem;font-weight:900;letter-spacing:0.07em;display:inline-block;">${dayLabel2}</span>`;
     el('bento-next2-label').style.color = '';
     el('bento-next2-label').style.display = 'block';
     el('bento-next2-title').textContent = next2.title;
