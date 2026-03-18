@@ -2190,6 +2190,20 @@ function fmtTime(timeStr) {
   return `${h12}:${m} ${ampm}`;
 }
 
+// Convert any time string to minutes since midnight (for sorting)
+function _timeToMinutes(timeStr) {
+  if (!timeStr) return 9999;
+  const clean = String(timeStr).trim().split('/')[0].trim(); // handle "7:00 PM / 8:00 PM"
+  const match = clean.match(/(\d{1,2})[:\.](\d{2})\s*(AM|PM|am|pm)?/);
+  if (!match) return 9999;
+  let h = parseInt(match[1]);
+  const m = parseInt(match[2]);
+  const period = (match[3] || '').toUpperCase();
+  if (period === 'PM' && h < 12) h += 12;
+  if (period === 'AM' && h === 12) h = 0;
+  return h * 60 + m;
+}
+
 function fmtDateRange(dateStart, dateEnd) {
   if (!dateStart) return '';
   const s = fmtDate(dateStart);
@@ -2428,7 +2442,7 @@ function processEvents(raw) {
     if (!a.dateStart) return 1;
     if (!b.dateStart) return -1;
     const cmp = a.dateStart.localeCompare(b.dateStart);
-    return cmp !== 0 ? cmp : (a.startTime || '').localeCompare(b.startTime || '');
+    return cmp !== 0 ? cmp : _timeToMinutes(a.startTime) - _timeToMinutes(b.startTime);
   });
   // Pre-compute past flag and days-until for each event (avoids recomputing every render frame)
   const todayStr = _todayInBKK();
@@ -2776,6 +2790,12 @@ function renderHome() {
       if (!haystack.includes(q)) return false;
     }
     return true;
+  }).sort((a, b) => {
+    if (!a.dateStart && !b.dateStart) return 0;
+    if (!a.dateStart) return 1;
+    if (!b.dateStart) return -1;
+    const cmp = a.dateStart.localeCompare(b.dateStart);
+    return cmp !== 0 ? cmp : _timeToMinutes(a.startTime) - _timeToMinutes(b.startTime);
   });
 
   // ── Hero background image from first event ──
@@ -2899,6 +2919,13 @@ function renderHome() {
   // ── Build flat item list for virtual infinite scroll ──
   const vsItems = [];
   dateMap.forEach(({ label, events: group }) => {
+    group.sort((a, b) => {
+      if (!a.dateStart && !b.dateStart) return 0;
+      if (!a.dateStart) return 1;
+      if (!b.dateStart) return -1;
+      const cmp = a.dateStart.localeCompare(b.dateStart);
+      return cmp !== 0 ? cmp : _timeToMinutes(a.startTime) - _timeToMinutes(b.startTime);
+    });
     vsItems.push({ type: 'month-header', label, key: label, total: group.length, mode: _viewMode });
     group.forEach(ev => {
       if (_viewMode === 'list') {
@@ -3096,7 +3123,10 @@ function renderPastEvents(grid) {
     }
     return true;
   });
-  pastEvs.sort((a,b) => (b.dateStart||'').localeCompare(a.dateStart||''));
+  pastEvs.sort((a,b) => {
+    const cmp = (b.dateStart||'').localeCompare(a.dateStart||'');
+    return cmp !== 0 ? cmp : _timeToMinutes(b.startTime) - _timeToMinutes(a.startTime);
+  });
   if (pastEvs.length === 0) return;
 
   // build list of months that have events
@@ -3915,6 +3945,13 @@ function renderCalendarCardGrid(monthEvents) {
       seen.add(ev.__backendId);
       eventsToShow.push(ev);
     });
+  });
+  eventsToShow.sort((a, b) => {
+    if (!a.dateStart && !b.dateStart) return 0;
+    if (!a.dateStart) return 1;
+    if (!b.dateStart) return -1;
+    const cmp = a.dateStart.localeCompare(b.dateStart);
+    return cmp !== 0 ? cmp : _timeToMinutes(a.startTime) - _timeToMinutes(b.startTime);
   });
 
   if (eventsToShow.length === 0) {
@@ -4887,6 +4924,10 @@ function buildTimelineView(events) {
     dateMap.get(key).events.push(ev);
   });
   dateMap.forEach(({ label, events: group }) => {
+    group.sort((a, b) => {
+      const cmp = (a.dateStart||'').localeCompare(b.dateStart||'');
+      return cmp !== 0 ? cmp : _timeToMinutes(a.startTime) - _timeToMinutes(b.startTime);
+    });
     const mhdr = document.createElement('div');
     mhdr.className = 'month-group-header';
     mhdr.innerHTML = `<div class="month-group-header-box"><div class="month-group-header-dots"><div class="month-group-header-dot" style="background:#f97316;"></div><div class="month-group-header-dot" style="background:#6b7280;"></div><div class="month-group-header-dot" style="background:#22c55e;"></div></div><span class="month-group-header-label">${label}</span><span class="month-group-header-count">${group.length} event${group.length!==1?'s':''}</span></div><span class="month-group-header-line"></span>`;
